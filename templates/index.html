@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steel Plant Transaction Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #3498db;
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+        }
+
+        .btn-success:hover {
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+        }
+
+        .btn-warning:hover {
+            box-shadow: 0 5px 15px rgba(243, 156, 18, 0.4);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+        }
+
+        .btn-info:hover {
+            box-shadow: 0 5px 15px rgba(23, 162, 184, 0.4);
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .result.info {
+            background: #cce7ff;
+            border: 1px solid #b3d9ff;
+            color: #004085;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .categorization-preview {
+            background: #e8f5e8;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        .categorization-preview h4 {
+            color: #155724;
+            margin-bottom: 10px;
+        }
+
+        .categorization-preview .category-item {
+            margin-bottom: 5px;
+            padding: 5px 10px;
+            background: white;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .category-item strong {
+            color: #2c3e50;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background: #f8f9fa;
+            border: none;
+            border-bottom: 2px solid transparent;
+            margin-right: 5px;
+            border-radius: 5px 5px 0 0;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: #3498db;
+            color: white;
+            border-bottom-color: #3498db;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-card h4 {
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+
+        .feature-card p {
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏭 Steel Plant Transaction Management</h1>
+            <p>Automated Transaction Processing & Categorization System</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Quick Fix Section -->
+            <div class="section" style="background: #fff3cd; border-left: 5px solid #856404;">
+                <h2 style="color: #856404;">🔧 Quick Fix Required</h2>
+                <p><strong>Issue:</strong> Previous transactions were added incorrectly (after closing balance).</p>
+                <p><strong>Solution:</strong> Click the button below to clean up bad transactions, then add new ones.</p>
+                <button class="btn" onclick="cleanupTransactions()" style="background: #dc3545; color: white;">🧹 Clean Up Bad Transactions</button>
+                <div style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                    <small><strong>What this does:</strong></small>
+                    <ul style="margin: 5px 0; padding-left: 20px;">
+                        <li>Removes transactions added after "CLOSE"</li>
+                        <li>Removes transactions without proper Transaction No</li>
+                        <li>Restores proper data structure</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Quick Categorization Test Section -->
+            <div class="section">
+                <h2>🎯 Quick Categorization Test</h2>
+                <div class="form-group">
+                    <label for="quickTestDesc">Enter Description to Test Auto-Categorization:</label>
+                    <input type="text" id="quickTestDesc" placeholder="e.g., Vendor Payment - Electricity Bills" />
+                </div>
+                <button class="btn" onclick="quickTest()">🔍 Test Categorization</button>
+                <button class="btn btn-success" onclick="testTransaction()">🧪 Test Transaction Addition</button>
+                <div id="quickTestResult"></div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('add-data')">➕ Add Data</button>
+                <button class="tab" onclick="showTab('file-operations')">📁 File Operations</button>
+                <button class="tab" onclick="showTab('processing')">⚙️ Processing</button>
+                <button class="tab" onclick="showTab('view-data')">📊 View Data</button>
+            </div>
+
+            <!-- Add Data Tab -->
+            <div id="add-data" class="tab-content active">
+                <div class="grid">
+                    <!-- Add Transaction -->
+                    <div class="card">
+                        <h3>💰 Add New Transaction</h3>
+                        <form id="transactionForm">
+                            <div class="form-group">
+                                <label for="transDesc">Description:</label>
+                                <input type="text" id="transDesc" placeholder="e.g., Vendor Payment - Utilities" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="transAmount">Amount:</label>
+                                <input type="number" id="transAmount" step="0.01" placeholder="0.00" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="transType">Type:</label>
+                                <select id="transType">
+                                    <option value="Outward">Outward (Expense)</option>
+                                    <option value="Inward">Inward (Income)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="transDate">Date:</label>
+                                <input type="date" id="transDate" />
+                            </div>
+                            <button type="submit" class="btn btn-success">💰 Add Transaction</button>
+                        </form>
+                    </div>
+
+                    <!-- Add AP/AR Entry -->
+                    <div class="card">
+                        <h3>📊 Add AP/AR Entry</h3>
+                        <form id="apArForm">
+                            <div class="form-group">
+                                <label for="apArDesc">Description:</label>
+                                <input type="text" id="apArDesc" placeholder="e.g., Machinery Spare Parts" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="apArAmount">Amount:</label>
+                                <input type="number" id="apArAmount" step="0.01" placeholder="0.00" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="apArType">Type:</label>
+                                <select id="apArType">
+                                    <option value="Accounts Payable">Accounts Payable</option>
+                                    <option value="Accounts Receivable">Accounts Receivable</option>
+                                    <option value="Revenue">Revenue</option>
+                                    <option value="Cost of Goods Sold">Cost of Goods Sold</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="apArStatus">Status:</label>
+                                <select id="apArStatus">
+                                    <option value="Pending">Pending</option>
+                                    <option value="Paid">Paid</option>
+                                    <option value="Partially Paid">Partially Paid</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-success">📋 Add AP/AR Entry</button>
+                        </form>
+                    </div>
+
+                    <!-- Add Bank Entry -->
+                    <div class="card">
+                        <h3>🏦 Add Bank Entry</h3>
+                        <form id="bankForm">
+                            <div class="form-group">
+                                <label for="bankDesc">Description:</label>
+                                <input type="text" id="bankDesc" placeholder="e.g., Utility Bill Payment" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="bankAmount">Amount:</label>
+                                <input type="number" id="bankAmount" step="0.01" placeholder="0.00" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="bankType">Type:</label>
+                                <select id="bankType">
+                                    <option value="Debit">Debit</option>
+                                    <option value="Credit">Credit</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="bankDate">Date:</label>
+                                <input type="date" id="bankDate" />
+                            </div>
+                            <button type="submit" class="btn btn-success">🏛️ Add Bank Entry</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- File Operations Tab -->
+            <div id="file-operations" class="tab-content">
+                <div class="section">
+                    <h2>📁 File Operations</h2>
+                    <div class="grid-2">
+                        <div class="card">
+                            <h3>🔍 Load & Filter Files</h3>
+                            <div class="form-group">
+                                <label for="fileSelect">Select File:</label>
+                                <select id="fileSelect">
+                                    <option value="transactions">Transactions</option>
+                                    <option value="cashflow">Cash Flow</option>
+                                    <option value="originmap">Origin Map</option>
+                                    <option value="unmatched_bank">Unmatched Bank</option>
+                                    <option value="unmatched_ap_ar">Unmatched AP/AR</option>
+                                    <option value="matched_exact">Matched Exact</option>
+                                    <option value="matched_fuzzy">Matched Fuzzy</option>
+                                    <option value="final_ap_ar">Final AP/AR</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="vendorFilter">Vendor Filter:</label>
+                                <select id="vendorFilter">
+                                    <option value="">-- Select Vendor --</option>
+                                    <option value="Vendor A">Vendor A (Transport)</option>
+                                    <option value="Vendor B">Vendor B (Utilities)</option>
+                                    <option value="Vendor C">Vendor C (Training)</option>
+                                    <option value="Vendor D">Vendor D (Security)</option>
+                                    <option value="Vendor E">Vendor E (Scrap Disposal)</option>
+                                    <option value="Vendor F">Vendor F (Office Supplies)</option>
+                                    <option value="Vendor G">Vendor G (Uniforms)</option>
+                                    <option value="Vendor H">Vendor H (Printing)</option>
+                                    <option value="Vendor I">Vendor I (Fuel)</option>
+                                    <option value="Vendor J">Vendor J (Spares)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="descFilter">Description Filter:</label>
+                                <input type="text" id="descFilter" placeholder="e.g., electricity, maintenance" />
+                            </div>
+                            <button class="btn" onclick="loadFile()">📂 Load File</button>
+                        </div>
+
+                        <div class="card">
+                            <h3>📥 Download Files</h3>
+                            <div class="feature-grid">
+                                <div class="feature-card">
+                                    <h4>📊 Cash Flow</h4>
+                                    <button class="btn btn-info" onclick="downloadFile('cashflow')">Download</button>
+                                </div>
+                                <div class="feature-card">
+                                    <h4>📋 Transactions</h4>
+                                    <button class="btn btn-info" onclick="downloadFile('transactions')">Download</button>
+                                </div>
+                                <div class="feature-card">
+                                    <h4>🔗 Origin Map</h4>
+                                    <button class="btn btn-info" onclick="downloadFile('originmap')">Download</button>
+                                </div>
+                                <div class="feature-card">
+                                    <h4>✅ Matched Exact</h4>
+                                    <button class="btn btn-info" onclick="downloadFile('matched_exact')">Download</button>
+                                </div>
+                                <div class="feature-card">
+                                    <h4>📘 Matched Fuzzy</h4>
+                                    <button class="btn btn-info" onclick="downloadFile('matched_fuzzy')">Download</button>
+                                </div>
+                                <div class="feature-card">
+                                    <h4>⚠️ Unmatched AP/AR</h4>
+                                    <button class="btn btn-info" onclick="downloadFile('unmatched_ap_ar')">Download</button>
+                                </div>
+                                <div class="feature-card">
+                                    <h4>🏦 Unmatched Bank</h4>
+                                    <button class="btn btn-info" onclick="downloadFile('unmatched_bank')">Download</button>
+                                </div>
+                                <div class="feature-card">
+                                    <h4>📊 Final AP/AR</h4>
+                                    <button class="btn btn-info" onclick="downloadFile('final_ap_ar')">Download</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Processing Tab -->
+            <div id="processing" class="tab-content">
+                <div class="section">
+                    <h2>⚙️ Processing Controls</h2>
+                    <div class="card">
+                        <h3>🔄 Full Processing Pipeline</h3>
+                        <p>Run the complete cashflow processing pipeline to generate all reports and reconciliation files.</p>
+                        <button class="btn btn-warning" onclick="processAll()">🔄 Run Full Processing</button>
+                        <button class="btn btn-info" onclick="checkStatus()">📊 Check System Status</button>
+                        <button class="btn" onclick="cleanupTransactions()" style="background: #dc3545; color: white;">🧹 Clean Up Bad Transactions</button>
+                        
+                        <div class="loading" id="loadingIndicator">
+                            <div class="spinner"></div>
+                            <p>Processing... Please wait.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View Data Tab -->
+            <div id="view-data" class="tab-content">
+                <div class="section">
+                    <h2>📊 View Data</h2>
+                    <div class="grid-2">
+                        <div class="card">
+                            <h3>📈 Cash Flow Statement</h3>
+                            <button class="btn" onclick="viewCashFlow()">📊 View Cash Flow</button>
+                        </div>
+                        <div class="card">
+                            <h3>📋 Processed Transactions</h3>
+                            <button class="btn" onclick="viewTransactions()">📋 View Transactions</button>
+                        </div>
+                        <div class="card">
+                            <h3>🔍 Unmatched Bank Records</h3>
+                            <button class="btn" onclick="viewUnmatchedBank()">🏦 View Unmatched Bank</button>
+                        </div>
+                        <div class="card">
+                            <h3>⚠️ Unmatched AP/AR</h3>
+                            <button class="btn" onclick="viewUnmatchedAPAR()">📊 View Unmatched AP/AR</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div class="section">
+                <h2>📈 Results & Output</h2>
+                <div id="resultsContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set today's date as default
+        document.getElementById('transDate').valueAsDate = new Date();
+        document.getElementById('bankDate').valueAsDate = new Date();
+
+        // Tab functionality
+        function showTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+
+        // Quick test categorization
+        async function quickTest() {
+            const description = document.getElementById('quickTestDesc').value;
+            if (!description.trim()) {
+                showResult('Please enter a description', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/categorize?description=${encodeURIComponent(description)}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    const resultDiv = document.getElementById('quickTestResult');
+                    resultDiv.innerHTML = `
+                        <div class="categorization-preview">
+                            <h4>🎯 Auto-Categorization Results:</h4>
+                            <div class="category-item"><strong>Cash Flow Category:</strong> ${data.cash_flow_category}</div>
+                            <div class="category-item"><strong>GL Account:</strong> ${data.gl_account || 'Not found'}</div>
+                            <div class="category-item"><strong>Account Type:</strong> ${data.account_type || 'Not found'}</div>
+                            <div class="category-item"><strong>Account Name:</strong> ${data.account_name || 'Not found'}</div>
+                            <div class="category-item"><strong>Cash Origin:</strong> ${data.cash_origin}</div>
+                            <div class="category-item"><strong>Vendor Category:</strong> ${data.vendor_category}</div>
+                        </div>
+                    `;
+                } else {
+                    showResult('Error: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showResult('Error: ' + error.message, 'error');
+            }
+        }
+
+        // Test transaction addition
+        async function testTransaction() {
+            const description = document.getElementById('quickTestDesc').value || 'Test Vendor Payment - Electricity Bills';
+            
+            const testData = {
+                description: description,
+                amount: 1000,
+                type: 'OUTWARD'
+            };
+
+            try {
+                showLoading(true);
+                const response = await fetch('/test-add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('🧪 Test successful!\n' + JSON.stringify(data, null, 2), 'success');
+                } else {
+                    showResult('❌ Test failed: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showResult('❌ Test error: ' + error.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Add transaction
+        document.getElementById('transactionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                description: document.getElementById('transDesc').value,
+                amount: parseFloat(document.getElementById('transAmount').value),
+                type: document.getElementById('transType').value,
+                date: document.getElementById('transDate').value
+            };
+
+            try {
+                showLoading(true);
+                const response = await fetch('/add-transaction', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('✅ Transaction added successfully!\n' + JSON.stringify(data, null, 2), 'success');
+                    document.getElementById('transactionForm').reset();
+                    document.getElementById('transDate').valueAsDate = new Date();
+                } else {
+                    showResult('❌ Error: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showResult('❌ Error: ' + error.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        });
+
+        // Add AP/AR entry
+        document.getElementById('apArForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                description: document.getElementById('apArDesc').value,
+                amount: parseFloat(document.getElementById('apArAmount').value),
+                type: document.getElementById('apArType').value,
+                status: document.getElementById('apArStatus').value
+            };
+
+            try {
+                showLoading(true);
+                const response = await fetch('/add-ap-ar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('✅ AP/AR entry added successfully!\n' + JSON.stringify(data, null, 2), 'success');
+                    document.getElementById('apArForm').reset();
+                } else {
+                    showResult('❌ Error: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showResult('❌ Error: ' + error.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        });
+
+        // Add bank entry
+        document.getElementById('bankForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                description: document.getElementById('bankDesc').value,
+                amount: parseFloat(document.getElementById('bankAmount').value),
+                type: document.getElementById('bankType').value,
+                date: document.getElementById('bankDate').value
+            };
+
+            try {
+                showLoading(true);
+                const response = await fetch('/add-bank-entry', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('✅ Bank entry added successfully!\n' + JSON.stringify(data, null, 2), 'success');
+                    document.getElementById('bankForm').reset();
+                    document.getElementById('bankDate').valueAsDate = new Date();
+                } else {
+                    showResult('❌ Error: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showResult('❌ Error: ' + error.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        });
+
+        // Load file with filters
+        async function loadFile() {
+            const fileKey = document.getElementById('fileSelect').value;
+            const vendor = document.getElementById('vendorFilter').value;
+            const description = document.getElementById('descFilter').value;
+            
+            let url = `/load-file?file=${fileKey}`;
+            if (vendor) url += `&vendor=${encodeURIComponent(vendor)}`;
+            if (description) url += `&description=${encodeURIComponent(description)}`;
+
+            try {
+                showLoading(true);
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    const content = typeof data.file_content === 'string' ? 
+                        data.file_content : 
+                        JSON.stringify(data.file_content, null, 2);
+                    showResult('📂 File loaded successfully:\n' + content, 'info');
+                } else {
+                    showResult('❌ Error: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showResult('❌ Error: ' + error.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Download file
+        async function downloadFile(fileKey) {
+            try {
+                const response = await fetch(`/download/${fileKey}`);
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = fileKey;
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    showResult('✅ File downloaded successfully!', 'success');
+                } else {
+                    const data = await response.json();
+                    showResult('❌ Error: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showResult('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        // Process all
+        async function processAll() {
+            try {
+                showLoading(true);
+                const response = await fetch('/process-all', { method: 'POST' });
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('✅ Processing completed successfully!\n' + JSON.stringify(data, null, 2), 'success');
+                } else {
+                    showResult('❌ Error: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showResult('❌ Error: ' + error.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Check status
+        async function checkStatus() {
+            try {
+                showLoading(true);
+                const response = await fetch('/status');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('📊 System Status:\n' + JSON.stringify(data, null, 2), 'info');
+                } else {
+                    showResult('❌ Error: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showResult('❌ Error: ' + error.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Clean up transactions
+        async function cleanupTransactions() {
+            if (!confirm('⚠️ This will remove incorrectly added transactions. Are you sure?')) {
+                return;
+            }
+            
+            try {
+                showLoading(true);
+                const response = await fetch('/cleanup-transactions', { method: 'POST' });
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('🧹 Transactions cleaned up successfully!\n' + JSON.stringify(data, null, 2), 'success');
+                } else {
+                    showResult('❌ Error: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showResult('❌ Error: ' + error.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // View functions
+        async function viewCashFlow() {
+            try {
+                showLoading(true);
+                const response = await fetch('/data/cashflow');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('📊 Cash Flow Statement:\n' + (data.text || JSON.stringify(data, null, 2)), 'info');
+                } else {
+                    showResult('❌ Error: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showResult('❌ Error: ' + error.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function viewTransactions() {
+            try {
+                showLoading(true);
+                const response = await fetch('/data/transactions');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    const content = Array.isArray(data) ? 
+                        JSON.stringify(data.slice(0, 10), null, 2) + '\n\n...(showing first 10 records)' :
+                        JSON.stringify(data, null, 2);
+                    showResult('📋 Processed Transactions:\n' + content, 'info');
+                } else {
+                    showResult('❌ Error: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showResult('❌ Error: ' + error.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function viewUnmatchedBank() {
+            try {
+                showLoading(true);
+                const response = await fetch('/data/unmatched_bank');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('🏦 Unmatched Bank Records:\n' + JSON.stringify(data, null, 2), 'info');
+                } else {
+                    showResult('❌ Error: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showResult('❌ Error: ' + error.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function viewUnmatchedAPAR() {
+            try {
+                showLoading(true);
+                const response = await fetch('/data/unmatched_ap_ar');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('📊 Unmatched AP/AR Records:\n' + JSON.stringify(data, null, 2), 'info');
+                } else {
+                    showResult('❌ Error: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showResult('❌ Error: ' + error.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Utility functions
+        function showResult(message, type) {
+            const container = document.getElementById('resultsContainer');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `result ${type}`;
+            resultDiv.textContent = message;
+            
+            // Add timestamp
+            const timestamp = new Date().toLocaleTimeString();
+            resultDiv.textContent = `[${timestamp}] ${message}`;
+            
+            container.appendChild(resultDiv);
+            
+            // Auto-scroll to result
+            resultDiv.scrollIntoView({ behavior: 'smooth' });
+            
+            // Remove old results (keep only last 10)
+            const results = container.querySelectorAll('.result');
+            if (results.length > 10) {
+                results[0].remove();
+            }
+        }
+
+        function showLoading(show) {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            if (show) {
+                loadingIndicator.classList.add('show');
+            } else {
+                loadingIndicator.classList.remove('show');
+            }
+        }
+
+        // Auto-categorize on input change
+        document.getElementById('quickTestDesc').addEventListener('input', debounce(quickTest, 1000));
+
+        // Debounce function
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            showResult('🚀 Steel Plant Transaction Management System Ready!', 'success');
+        });
+    </script>
+</body>
+</html>

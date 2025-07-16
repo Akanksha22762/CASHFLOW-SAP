@@ -1,0 +1,158 @@
+{
+    "Vendor A": {
+        "vendor_id": "VEND000",
+        "payment_description": "Vendor Payment - Transport",
+        "category": "Transport",
+        "payment_terms": "Net 60"
+    },
+    "Vendor B": {
+        "vendor_id": "VEND001",
+        "payment_description": "Vendor Payment - Utilities",
+        "category": "Utilities",
+        "payment_terms": "Net 45"
+    },
+    "Vendor C": {
+        "vendor_id": "VEND002",
+        "payment_description": "Vendor Payment - Training",
+        "category": "Training",
+        "payment_terms": "Net 45"
+    },
+    "Vendor D": {
+        "vendor_id": "VEND003",
+        "payment_description": "Vendor Payment - Security",
+        "category": "Security",
+        "payment_terms": "Net 45"
+    },
+    "Vendor E": {
+        "vendor_id": "VEND004",
+        "payment_description": "Vendor Payment - Scrap Disposal",
+        "category": "Disposal",
+        "payment_terms": "Net 60"
+    },
+    "Vendor F": {
+        "vendor_id": "VEND005",
+        "payment_description": "Vendor Payment - Office Supplies",
+        "category": "Office Supplies",
+        "payment_terms": "Net 30"
+    },
+    "Vendor G": {
+        "vendor_id": "VEND006",
+        "payment_description": "Vendor Payment - Uniforms",
+        "category": "Uniforms",
+        "payment_terms": "Net 45"
+    },
+    "Vendor H": {
+        "vendor_id": "VEND007",
+        "payment_description": "Vendor Payment - Printing",
+        "category": "Printing",
+        "payment_terms": "Net 30"
+    },
+    "Vendor I": {
+        "vendor_id": "VEND008",
+        "payment_description": "Vendor Payment - Fuel",
+        "category": "Fuel",
+        "payment_terms": "Net 30"
+    },
+    "Vendor J": {
+        "vendor_id": "VEND009",
+        "payment_description": "Vendor Payment - Spares",
+        "category": "Spares",
+        "payment_terms": "Net 60"
+    },
+    "Vendor K": {
+        "vendor_id": "VEND010",
+        "payment_description": "Vendor Payment - Tools",
+        "category": "Tools",
+        "payment_terms": "Net 30"
+    },
+    "Vendor L": {
+        "vendor_id": "VEND011",
+        "payment_description": "Vendor Payment - Maintenance",
+        "category": "Maintenance",
+        "payment_terms": "Net 45"
+    },
+    "Vendor M": {
+        "vendor_id": "VEND012",
+        "payment_description": "Vendor Payment - Chemicals",
+        "category": "Chemicals",
+        "payment_terms": "Net 45"
+    },
+    "Vendor N": {
+        "vendor_id": "VEND013",
+        "payment_description": "Vendor Payment - Insurance",
+        "category": "Insurance",
+        "payment_terms": "Net 30"
+    },
+    "Vendor O": {
+        "vendor_id": "VEND014",
+        "payment_description": "Vendor Payment - Consultancy",
+        "category": "Consultancy",
+        "payment_terms": "Net 60"
+    },
+    "Vendor P": {
+        "vendor_id": "VEND015",
+        "payment_description": "Vendor Payment - Packaging",
+        "category": "Packaging",
+        "payment_terms": "Net 45"
+    },
+    "Vendor Q": {
+        "vendor_id": "VEND016",
+        "payment_description": "Vendor Payment - Pest Control",
+        "category": "Pest Control",
+        "payment_terms": "Net 30"
+    },
+    "Vendor R": {
+        "vendor_id": "VEND017",
+        "payment_description": "Vendor Payment - Logistics",
+        "category": "Logistics",
+        "payment_terms": "Net 60"
+    },
+    "Vendor S": {
+        "vendor_id": "VEND018",
+        "payment_description": "Vendor Payment - Calibration",
+        "category": "Calibration",
+        "payment_terms": "Net 30"
+    },
+    "Vendor T": {
+        "vendor_id": "VEND019",
+        "payment_description": "Vendor Payment - Tools",
+        "category": "Tools",
+        "payment_terms": "Net 45"
+    },
+    "Vendor U": {
+        "vendor_id": "VEND020",
+        "payment_description": "Vendor Payment - Security",
+        "category": "Security",
+        "payment_terms": "Net 30"
+    },
+    "Vendor V": {
+        "vendor_id": "VEND021",
+        "payment_description": "Vendor Payment - Spare Parts",
+        "category": "Spare Parts",
+        "payment_terms": "Net 60"
+    },
+    "Vendor W": {
+        "vendor_id": "VEND022",
+        "payment_description": "Vendor Payment - Training",
+        "category": "Training",
+        "payment_terms": "Net 45"
+    },
+    "Vendor X": {
+        "vendor_id": "VEND023",
+        "payment_description": "Vendor Payment - Tools",
+        "category": "Tools",
+        "payment_terms": "Net 30"
+    },
+    "Vendor Y": {
+        "vendor_id": "VEND024",
+        "payment_description": "Vendor Payment - Spare Parts",
+        "category": "Spare Parts",
+        "payment_terms": "Net 60"
+    },
+    "Vendor Z": {
+        "vendor_id": "VEND025",
+        "payment_description": "Vendor Payment - Spare Parts",
+        "category": "Spare Parts",
+        "payment_terms": "Net 45"
+    }
+}

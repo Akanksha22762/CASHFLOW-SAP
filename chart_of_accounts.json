@@ -1,0 +1,50 @@
+{
+    "1000": {
+        "name": "Cash",
+        "type": "Asset"
+    },
+    "1100": {
+        "name": "Accounts Receivable",
+        "type": "Asset"
+    },
+    "1200": {
+        "name": "Inventory",
+        "type": "Asset"
+    },
+    "1300": {
+        "name": "Prepaid Expenses",
+        "type": "Asset"
+    },
+    "2000": {
+        "name": "Accounts Payable",
+        "type": "Liability"
+    },
+    "2100": {
+        "name": "Accrued Expenses",
+        "type": "Liability"
+    },
+    "3000": {
+        "name": "Revenue",
+        "type": "Income"
+    },
+    "3100": {
+        "name": "Scrap Sales",
+        "type": "Income"
+    },
+    "4000": {
+        "name": "Cost of Goods Sold",
+        "type": "Expense"
+    },
+    "4100": {
+        "name": "Utilities Expense",
+        "type": "Expense"
+    },
+    "4200": {
+        "name": "Maintenance Expense",
+        "type": "Expense"
+    },
+    "4300": {
+        "name": "Salaries Expense",
+        "type": "Expense"
+    }
+}

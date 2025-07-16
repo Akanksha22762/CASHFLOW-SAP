@@ -1,0 +1,95 @@
+DETAILED CASH FLOW STATEMENT
+================================================================================
+
+1. OPERATING ACTIVITIES
+--------------------------------------------------
+   Cash Inflows:
+     Advance from Client C                                   8,350,528.75 (29 txns)
+     Export Sale - Europe                                    7,972,810.62 (27 txns)
+     Sales Invoice - Client A                                7,152,723.04 (30 txns)
+     Scrap Sale                                              6,919,204.65 (30 txns)
+     Miscellaneous Income                                    6,432,015.98 (26 txns)
+     Commission Income                                       6,117,551.99 (17 txns)
+     Machinery Spare Parts                                   5,264,031.96 (29 txns)
+     Sales Invoice - Client B                                4,149,722.45 (18 txns)
+     IT Services Invoice                                     3,637,386.42 (25 txns)
+     loan received from bank                                 2,500,000.00 (5 txns)
+     Customer Payment - Invoice 1001                         1,500,000.00 (1 txns)
+     Customer Payment - Invoice 1003                           950,000.00 (1 txns)
+     Customer Advance                                          800,000.00 (1 txns)
+     Customer Payment - Invoice 1004                           700,000.00 (1 txns)
+     Customer Payment - Invoice 1005                           600,000.00 (1 txns)
+     Customer Payment - Invoice 1006                           400,000.00 (1 txns)
+     Customer Payment - Invoice 1007                           250,000.00 (1 txns)
+     Government Grant Received                                 200,000.00 (1 txns)
+     Export Incentive Received                                 100,000.00 (1 txns)
+     Statutory Refund                                           50,000.00 (1 txns)
+     Interest Credit                                            47,000.00 (2 txns)
+     Labor Welfare Fund                                         20,000.00 (1 txns)
+   Total Operating Inflows:             64,112,975.86
+
+   Cash Outflows:
+     Maintenance Service Charges                             -6,558,864.85 (33 txns)
+     Purchase Invoice - Vendor A                             -6,340,449.98 (38 txns)
+     Utility Bill Payment                                    -3,810,291.07 (24 txns)
+     Purchase Invoice - Vendor B                             -3,652,541.54 (22 txns)
+     Vendor Payment - Electricity Bills                      -3,559,400.00 (16 txns)
+     Transport Charges                                       -3,282,673.90 (25 txns)
+     Payroll Disbursement                                     -900,000.00 (1 txns)
+     Vendor Payment - Raw Materials                           -700,000.00 (1 txns)
+     loan emi paid                                            -300,000.00 (1 txns)
+     GST Payment                                              -250,000.00 (1 txns)
+     Loan Repayment                                           -250,000.00 (1 txns)
+     Provident Fund Payment                                   -200,000.00 (1 txns)
+     TDS Payment                                              -180,000.00 (1 txns)
+     Vendor Payment - Spares                                  -120,000.00 (1 txns)
+     Advance for Equipment Purchase                           -120,000.00 (1 txns)
+     Vendor Payment - Chemicals                               -110,000.00 (1 txns)
+     Electricity Bill Payment                                 -100,000.00 (1 txns)
+     Vendor Payment - Maintenance                              -90,000.00 (1 txns)
+     Vendor Payment - IT Services                              -80,000.00 (1 txns)
+     Vendor Payment - Fuel                                     -70,000.00 (1 txns)
+     Vendor Payment - Consultancy                              -60,000.00 (1 txns)
+     Vendor Payment - Packaging                                -60,000.00 (1 txns)
+     Vendor Payment - Logistics                                -50,000.00 (1 txns)
+     ESI Payment                                               -50,000.00 (1 txns)
+     Vendor Payment - Transport                                -50,000.00 (1 txns)
+     Vendor Payment - Insurance                                -50,000.00 (1 txns)
+     Vendor Payment - Tools                                    -40,000.00 (1 txns)
+     Vendor Payment - Security                                 -40,000.00 (1 txns)
+     Vendor Payment - Safety                                   -35,000.00 (1 txns)
+     Vendor Payment - Scrap Disposal                           -30,000.00 (1 txns)
+     Vendor Payment - Training                                 -30,000.00 (1 txns)
+     Water Bill Payment                                        -30,000.00 (1 txns)
+     Vendor Payment - Cleaning Services                        -27,000.00 (2 txns)
+     Royalty Payment                                           -25,000.00 (1 txns)
+     Vendor Payment - Spare Parts                              -25,000.00 (1 txns)
+     Vendor Payment - Canteen                                  -20,000.00 (1 txns)
+     Vendor Payment - Office Supplies                          -20,000.00 (1 txns)
+     Vendor Payment - Lubricants                               -15,000.00 (1 txns)
+     Vendor Payment - Customer Payment                         -15,000.00 (1 txns)
+     Office Rent Payment                                       -12,000.00 (1 txns)
+     Vendor Payment - Calibration                              -10,000.00 (1 txns)
+     Vendor Payment - Uniforms                                  -8,000.00 (1 txns)
+     Vendor Payment - Printing                                  -5,000.00 (1 txns)
+     Vendor Payment - Courier                                   -4,000.00 (1 txns)
+     Vendor Payment - Pest Control                              -3,000.00 (1 txns)
+   Total Operating Outflows:           -31,388,221.34
+
+--------------------------------------------------------------------------------
+   NET OPERATING CASH FLOW:                            32,724,754.52
+
+4. CASH FLOW SUMMARY
+================================================================================
+Operating Activities:                              32,724,754.52
+Investing Activities:                                       0.00
+Financing Activities:                                       0.00
+--------------------------------------------------------------------------------
+NET CHANGE IN CASH:                                32,724,754.52
+================================================================================
+
+TRANSACTION SUMMARY:
+Operating Transactions: 448
+Investing Transactions: 0
+Financing Transactions: 0
+Total Transactions: 448

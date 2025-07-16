@@ -1,0 +1,29 @@
+keyword,category,gl_account,cash_origin,vendor_category
+salary,Operating,4300,PAYROLL,Payroll
+bonus payout,Operating,4300,PAYROLL,Payroll
+vendor payment,Operating,2000,SUPPLIER_PAYMENT,Maintenance
+spares purchase,Operating,2000,SUPPLIER_PAYMENT,Spares
+fuel charges,Operating,4200,FUEL,Fuel
+electricity bill,Operating,4100,UTILITIES,Utilities
+water bill,Operating,4100,UTILITIES,Utilities
+internet bill,Operating,4100,UTILITIES,Utilities
+loan repayment,Financing,2100,LOAN,Financing
+interest payment,Financing,2100,LOAN,Financing
+purchase of machinery,Investing,1200,,Capex
+asset acquisition,Investing,1200,,Capex
+gst payment,Financing,2100,TAX,Tax
+tax payment,Financing,2100,TAX,Tax
+scrap sale,Operating,3100,MATERIAL_SALES,Scrap
+consultancy charges,Operating,4200,SERVICES,Consultancy
+legal services,Operating,4200,SERVICES,Legal
+training fees,Operating,4200,SERVICES,Training
+insurance premium,Operating,4200,SERVICES,Insurance
+canteen services,Operating,4200,SERVICES,Canteen
+printing invoice,Operating,4200,PRINTING,Printing
+stationery purchase,Operating,4200,OFFICE,Office Supplies
+tools purchase,Operating,2000,SUPPLIER_PAYMENT,Tools
+packaging materials,Operating,4200,SUPPLIER_PAYMENT,Packaging
+calibration services,Operating,4200,SERVICES,Calibration
+pest control,Operating,4200,SERVICES,Pest Control
+logistics support,Operating,4200,SUPPLIER_PAYMENT,Logistics
+uniform expense,Operating,4200,SUPPLIER_PAYMENT,Uniforms

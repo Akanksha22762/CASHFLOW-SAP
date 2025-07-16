@@ -1,0 +1,40 @@
+Description,Category
+Fuel purchase for backup generator,Maintenance
+Repair of hydraulic pump,Maintenance
+Annual maintenance contract for HVAC,Maintenance
+Spare parts replacement in machinery,Maintenance
+Oil and lubricants for machine upkeep,Maintenance
+Printing of tax forms,Services
+Consultancy for ISO certification,Services
+Safety training for production staff,Services
+Monthly canteen services,Services
+Insurance payment for company assets,Services
+Uniforms and ID cards for factory workers,Services
+Protective gear procurement for workshop,Services
+Scrap metal sale,Scrap
+Revenue from disposal of used parts,Scrap
+Loan EMI to HDFC bank,Financing
+Interest payout for equipment loan,Financing
+Payment of principal loan amount,Financing
+Disbursement of June salaries,Payroll
+Wages paid to part-time staff,Payroll
+Employee provident fund contribution,Payroll
+ESI contribution for the month,Payroll
+Advance received for export shipment,Sales
+Customer payment for finished goods,Sales
+Commission earned on sales,Sales
+Freight charges for incoming materials,Logistics
+Courier cost for document delivery,Logistics
+Logistics service for finished product dispatch,Logistics
+Electricity charges for April,Utilities
+Monthly water bill,Utilities
+Payment for internet and phone,Utilities
+GST paid for quarter ending March,Tax
+TDS on contractor payment,Tax
+Professional tax for employees,Tax
+Purchase of new CNC machine,Capex
+Installation of automation line,Capex
+Acquisition of forklift for warehouse,Capex
+Miscellaneous office expense,Other
+Unexpected refund received,Other
+Bank charges,Other

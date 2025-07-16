@@ -1,0 +1,147 @@
+
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f7f6;
+  color: #333;
+  padding: 20px;
+  line-height: 1.6;
+}
+
+h1, h2 {
+  color: #4CAF50;
+  text-align: center;
+}
+
+h2 {
+  margin-top: 20px;
+}
+
+/* Form Styles */
+form {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin: 0 auto;
+}
+
+label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: bold;
+  color: #555;
+}
+
+input[type="text"], select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+input[type="text"]:focus, select:focus {
+  border-color: #4CAF50;
+  outline: none;
+}
+
+button[type="button"] {
+  background-color: #4CAF50;
+  color: #fff;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+button[type="button"]:hover {
+  background-color: #45a049;
+}
+
+/* Table Style */
+#filePreviewTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+#filePreviewTable th, #filePreviewTable td {
+    padding: 8px;
+    border: 1px solid #ccc;
+    text-align: left;
+    font-family: Arial, sans-serif;
+}
+
+#filePreviewTable th {
+    background-color: #f2f2f2;
+    color: #333;
+    font-weight: bold;
+}
+
+#filePreviewTable tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+#filePreviewTable tr:hover {
+    background-color: #eaeaea;
+}
+
+
+/* Result Display */
+pre {
+  background-color: #f0f0f0;
+  padding: 15px;
+  border-radius: 4px;
+  margin-top: 20px;
+  white-space: pre-wrap; /* Ensure text wraps correctly */
+  word-wrap: break-word;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+}
+
+#filePreview, #operatingActivities, #investingActivities, #financingActivities, #cashFlowSummary {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  form {
+    padding: 15px;
+  }
+
+  input[type="text"], select, button[type="button"] {
+    font-size: 14px;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+
+  h2 {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 10px;
+  }
+
+  form {
+    padding: 10px;
+  }
+
+  input[type="text"], select, button[type="button"] {
+    font-size: 12px;
+  }
+
+  h1 {
+    font-size: 20px;
+  }
+
+  h2 {
+    font-size: 16px;
+  }
+}

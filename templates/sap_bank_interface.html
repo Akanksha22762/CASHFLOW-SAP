@@ -1,0 +1,2881 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise SAP-Bank Reconciliation Platform</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1e3a8a;
+            --primary-light: #3b82f6;
+            --primary-dark: #1e293b;
+            --secondary-color: #059669;
+            --secondary-light: #10b981;
+            --accent-color: #dc2626;
+            --accent-light: #ef4444;
+            --warning-color: #d97706;
+            --warning-light: #f59e0b;
+            --success-color: #059669;
+            --success-light: #10b981;
+            --error-color: #dc2626;
+            --error-light: #ef4444;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --text-light: #9ca3af;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --border-color: #e5e7eb;
+            --border-light: #f3f4f6;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --gradient-primary: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            --gradient-secondary: linear-gradient(135deg, var(--secondary-color) 0%, var(--secondary-light) 100%);
+            --border-radius: 8px;
+            --border-radius-lg: 12px;
+            --border-radius-xl: 16px;
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Header & Navigation */
+        .header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 2rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.5;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-icon {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.75rem;
+            border-radius: var(--border-radius-lg);
+            backdrop-filter: blur(10px);
+        }
+
+        .header p {
+            font-size: 1.125rem;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Cards & Sections */
+        .section-card {
+            background: var(--bg-primary);
+            border-radius: var(--border-radius-xl);
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 2rem;
+            overflow: hidden;
+            border: 1px solid var(--border-light);
+            transition: var(--transition);
+        }
+
+        .section-card:hover {
+            box-shadow: var(--shadow-xl);
+            transform: translateY(-2px);
+        }
+
+        .section-header {
+            padding: 1.5rem 2rem;
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-number {
+            background: var(--gradient-primary);
+            color: white;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        .section-title {
+            flex: 1;
+        }
+
+        .section-title h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .section-title p {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .section-content {
+            padding: 2rem;
+        }
+
+        /* Grid Layout */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .grid-sm {
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        /* Upload Areas */
+        .upload-card {
+            background: var(--bg-primary);
+            border: 2px dashed var(--border-color);
+            border-radius: var(--border-radius-lg);
+            padding: 2rem;
+            text-align: center;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 40%, rgba(59, 130, 246, 0.05) 50%, transparent 60%);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+
+        .upload-card:hover::before {
+            transform: translateX(100%);
+        }
+
+        .upload-card:hover {
+            border-color: var(--primary-light);
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.02) 0%, rgba(59, 130, 246, 0.05) 100%);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .upload-card.dragover {
+            border-color: var(--success-color);
+            background: linear-gradient(135deg, rgba(5, 150, 105, 0.05) 0%, rgba(5, 150, 105, 0.1) 100%);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--primary-light);
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .upload-card h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-card p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-secondary {
+            background: var(--gradient-secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning-color) 0%, var(--warning-light) 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--error-color) 0%, var(--error-light) 100%);
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: var(--shadow-sm) !important;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+
+        /* File Info */
+        .file-info {
+            background: linear-gradient(135deg, rgba(5, 150, 105, 0.1) 0%, rgba(5, 150, 105, 0.05) 100%);
+            border: 1px solid rgba(5, 150, 105, 0.2);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .file-info.show {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .file-info h4 {
+            color: var(--success-color);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin: 1.5rem 0;
+            display: none;
+        }
+
+        .progress-container.show {
+            display: block;
+        }
+
+        .progress {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--gradient-primary);
+            width: 0%;
+            transition: width 0.3s ease;
+            position: relative;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(45deg, rgba(255,255,255,0.2) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.2) 75%, transparent 75%);
+            background-size: 20px 20px;
+            animation: progress-stripe 1s linear infinite;
+        }
+
+        @keyframes progress-stripe {
+            0% { background-position: 0 0; }
+            100% { background-position: 20px 0; }
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .stat-card {
+            background: var(--bg-primary);
+            padding: 1.5rem;
+            border-radius: var(--border-radius-lg);
+            text-align: center;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-light);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .stat-icon {
+            font-size: 1.5rem;
+            color: var(--primary-light);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Loading Spinner */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            width: 3rem;
+            height: 3rem;
+            border: 3px solid var(--border-color);
+            border-top: 3px solid var(--primary-light);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading p {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* Results & Tables */
+        .results-section {
+            display: none;
+            margin-top: 2rem;
+        }
+
+        .results-section.show {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            background: var(--bg-primary);
+            border-radius: var(--border-radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+        }
+
+        .data-table th {
+            background: var(--bg-tertiary);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .data-table tr:hover {
+            background: var(--bg-secondary);
+        }
+
+        .amount-positive {
+            color: var(--success-color);
+            font-weight: 600;
+        }
+
+        .amount-negative {
+            color: var(--error-color);
+            font-weight: 600;
+        }
+
+        .match-score {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Alerts & Messages */
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: var(--border-radius);
+            margin: 1rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, rgba(5, 150, 105, 0.1) 0%, rgba(5, 150, 105, 0.05) 100%);
+            border: 1px solid rgba(5, 150, 105, 0.2);
+            color: var(--success-color);
+        }
+
+        .alert-error {
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.1) 0%, rgba(220, 38, 38, 0.05) 100%);
+            border: 1px solid rgba(220, 38, 38, 0.2);
+            color: var(--error-color);
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            color: var(--primary-light);
+        }
+
+        .alert-warning {
+            background: linear-gradient(135deg, rgba(217, 119, 6, 0.1) 0%, rgba(217, 119, 6, 0.05) 100%);
+            border: 1px solid rgba(217, 119, 6, 0.2);
+            color: var(--warning-color);
+        }
+
+        /* Tabs */
+        .tab-container {
+            margin: 2rem 0;
+        }
+
+        .tab-nav {
+            display: flex;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+        }
+
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-secondary);
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .tab-button.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+            background: linear-gradient(to bottom, transparent, rgba(59, 130, 246, 0.05));
+        }
+
+        .tab-button:hover {
+            color: var(--primary-light);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-content {
+                padding: 1.5rem;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .tab-nav {
+                flex-direction: column;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+        }
+
+        /* Utility Classes */
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .mt-1 { margin-top: 0.25rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mt-3 { margin-top: 0.75rem; }
+        .mt-4 { margin-top: 1rem; }
+        .mb-1 { margin-bottom: 0.25rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-3 { margin-bottom: 0.75rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .hidden { display: none; }
+        .block { display: block; }
+        .flex { display: flex; }
+        .items-center { align-items: center; }
+        .justify-center { justify-content: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-4 { gap: 1rem; }
+        .w-full { width: 100%; }
+        .font-semibold { font-weight: 600; }
+        .font-bold { font-weight: 700; }
+        .text-sm { font-size: 0.875rem; }
+        .text-lg { font-size: 1.125rem; }
+        .text-xl { font-size: 1.25rem; }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <h1>
+                <div class="header-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                Enterprise SAP-Bank Reconciliation Platform
+            </h1>
+            <p>Advanced financial reconciliation with AI-powered categorization and comprehensive analytics</p>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Step 1: File Upload -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-number">1</div>
+                <div class="section-title">
+                    <h2>Data Import & Validation</h2>
+                    <p>Upload your financial data files for processing and reconciliation</p>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="grid">
+                    <!-- Bank Statement Upload -->
+                    <div class="upload-card" id="bankUploadArea">
+                        <input type="file" id="bankFile" class="hidden" accept=".xlsx,.xls,.csv">
+                        <i class="fas fa-university upload-icon"></i>
+                        <h3>Bank Statement Data</h3>
+                        <p>Upload your bank statement file with transaction details (Required)</p>
+                        <button class="btn btn-primary" onclick="document.getElementById('bankFile').click()">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            Choose Bank File
+                        </button>
+                        <div id="bankFileInfo" class="file-info">
+                            <h4><i class="fas fa-check-circle"></i> File Selected:</h4>
+                            <p id="bankFileName"></p>
+                        </div>
+                    </div>
+
+                    <!-- SAP Data Upload -->
+                    <div class="upload-card" id="sapUploadArea">
+                        <input type="file" id="sapFile" class="hidden" accept=".xlsx,.xls,.csv">
+                        <i class="fas fa-database upload-icon"></i>
+                        <h3>SAP Transaction Data</h3>
+                        <p>Upload SAP file for full reconciliation (Optional for bank-only analysis)</p>
+                        <button class="btn btn-outline" onclick="document.getElementById('sapFile').click()">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            Choose SAP File
+                        </button>
+                        <div id="sapFileInfo" class="file-info">
+                            <h4><i class="fas fa-check-circle"></i> File Selected:</h4>
+                            <p id="sapFileName"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <button class="btn btn-primary" id="uploadBtn" onclick="uploadFiles()" disabled>
+                        <i class="fas fa-upload"></i>
+                        Upload & Process Files
+                    </button>
+                </div>
+
+                <div class="progress-container" id="uploadProgress">
+                    <div class="progress">
+                        <div class="progress-bar" id="uploadProgressBar"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: Reconciliation Process -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-number">2</div>
+                <div class="section-title">
+                    <h2>Reconciliation Engine</h2>
+                    <p>Advanced matching algorithms with AI-powered categorization</p>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="btn-group text-center">
+                    <button class="btn btn-secondary" id="reconcileBtn" onclick="reconcileData()" disabled>
+                        <i class="fas fa-cogs"></i>
+                        Start Reconciliation
+                    </button>
+                    <button class="btn btn-outline" onclick="checkStatus()">
+                        <i class="fas fa-info-circle"></i>
+                        System Status
+                    </button>
+                </div>
+
+                <div class="loading" id="loadingIndicator">
+                    <div class="spinner"></div>
+                    <p>Processing reconciliation with AI categorization...</p>
+                </div>
+
+                <!-- Summary Dashboard -->
+                <div id="summaryDashboard" class="hidden">
+                    <h3 class="mb-3">
+                        <i class="fas fa-chart-pie"></i>
+                        Reconciliation Summary
+                    </h3>
+                    <div class="stats-grid" id="summaryStats"></div>
+                    <div id="validationStatus"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Analysis & Results -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-number">3</div>
+                <div class="section-title">
+                    <h2>Advanced Analytics & Reports</h2>
+                    <p>Comprehensive analysis with category breakdown and cash flow insights</p>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="grid grid-sm">
+                    <!-- Exact Matches -->
+                    <div class="stat-card">
+                        <i class="fas fa-check-double stat-icon"></i>
+                        <h3 class="font-semibold mb-2">High Confidence Matches</h3>
+                        <p class="text-sm text-secondary mb-3">Exact matches with 85%+ confidence</p>
+                        <div class="btn-group">
+                            <button class="btn btn-primary btn-sm" onclick="viewCategoryData('matched_exact')">
+                                <i class="fas fa-eye"></i>
+                                View Analysis
+                            </button>
+                            <button class="btn btn-outline btn-sm" onclick="downloadFile('matched_exact')">
+                                <i class="fas fa-download"></i>
+                                Export
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Fuzzy Matches -->
+                    <div class="stat-card">
+                        <i class="fas fa-search stat-icon"></i>
+                        <h3 class="font-semibold mb-2">Partial Matches</h3>
+                        <p class="text-sm text-secondary mb-3">Fuzzy matches with 60-85% confidence</p>
+                        <div class="btn-group">
+                            <button class="btn btn-primary btn-sm" onclick="viewCategoryData('matched_fuzzy')">
+                                <i class="fas fa-eye"></i>
+                                View Analysis
+                            </button>
+                            <button class="btn btn-outline btn-sm" onclick="downloadFile('matched_fuzzy')">
+                                <i class="fas fa-download"></i>
+                                Export
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Unmatched SAP -->
+                    <div class="stat-card">
+                        <i class="fas fa-database stat-icon"></i>
+                        <h3 class="font-semibold mb-2">Unmatched SAP Transactions</h3>
+                        <p class="text-sm text-secondary mb-3">SAP entries without bank matches</p>
+                        <div class="btn-group">
+                            <button class="btn btn-warning btn-sm" onclick="viewCategoryData('unmatched_sap')">
+                                <i class="fas fa-eye"></i>
+                                View by Category
+                            </button>
+                            <button class="btn btn-outline btn-sm" onclick="downloadFile('unmatched_sap')">
+                                <i class="fas fa-download"></i>
+                                Export
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Unmatched Bank -->
+                    <div class="stat-card">
+                        <i class="fas fa-university stat-icon"></i>
+                        <h3 class="font-semibold mb-2">Unmatched Bank Transactions</h3>
+                        <p class="text-sm text-secondary mb-3">Bank entries without SAP matches</p>
+                        <div class="btn-group">
+                            <button class="btn btn-warning btn-sm" onclick="viewCategoryData('unmatched_bank')">
+                                <i class="fas fa-eye"></i>
+                                View by Category
+                            </button>
+                            <button class="btn btn-outline btn-sm" onclick="downloadFile('unmatched_bank')">
+                                <i class="fas fa-download"></i>
+                                Export
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Cash Flow Analysis -->
+                    <div class="stat-card">
+                        <i class="fas fa-chart-line stat-icon"></i>
+                        <h3 class="font-semibold mb-2">Cash Flow Statement</h3>
+                        <p class="text-sm text-secondary mb-3">Complete cash flow with categorization</p>
+                        <div class="btn-group">
+                            <button class="btn btn-secondary btn-sm" onclick="viewCategoryData('cash_flow')">
+                                <i class="fas fa-eye"></i>
+                                View Analysis
+                            </button>
+                            <button class="btn btn-outline btn-sm" onclick="downloadFile('cash_flow')">
+                                <i class="fas fa-download"></i>
+                                Export
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 4: AP/AR Management -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-number">4</div>
+                <div class="section-title">
+                    <h2>Accounts Payable & Receivable Management</h2>
+                    <p>Comprehensive AP/AR analysis with aging and cash flow impact</p>
+                </div>
+            </div>
+            <div class="section-content">
+                <!-- AP/AR Dashboard Summary -->
+                <div id="apArDashboard" class="hidden">
+                    <h3 class="mb-3">
+                        <i class="fas fa-tachometer-alt"></i>
+                        AP/AR Dashboard Overview
+                    </h3>
+                    <div class="stats-grid" id="apArSummaryStats"></div>
+                    <div id="apArValidation"></div>
+                </div>
+
+                <div class="grid">
+                    <!-- AP/AR Dashboard -->
+                    <div class="stat-card">
+                        <i class="fas fa-tachometer-alt stat-icon"></i>
+                        <h3 class="font-semibold mb-2">AP/AR Dashboard</h3>
+                        <p class="text-sm text-secondary mb-3">Complete overview with key metrics</p>
+                        <div class="btn-group">
+                            <button class="btn btn-primary btn-sm" onclick="loadAPARDashboard()">
+                                <i class="fas fa-chart-pie"></i>
+                                View Dashboard
+                            </button>
+                            <button class="btn btn-outline btn-sm" onclick="downloadAPAR('combined_dashboard')">
+                                <i class="fas fa-download"></i>
+                                Export Report
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Accounts Payable -->
+                    <div class="stat-card">
+                        <i class="fas fa-credit-card stat-icon"></i>
+                        <h3 class="font-semibold mb-2">Accounts Payable</h3>
+                        <p class="text-sm text-secondary mb-3">Vendor payments and aging analysis</p>
+                        <div class="btn-group">
+                            <button class="btn btn-danger btn-sm" onclick="loadAPAnalysis()">
+                                <i class="fas fa-eye"></i>
+                                View AP Analysis
+                            </button>
+                            <button class="btn btn-outline btn-sm" onclick="downloadAPAR('ap_analysis')">
+                                <i class="fas fa-download"></i>
+                                Export AP
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Accounts Receivable -->
+                    <div class="stat-card">
+                        <i class="fas fa-money-check-alt stat-icon"></i>
+                        <h3 class="font-semibold mb-2">Accounts Receivable</h3>
+                        <p class="text-sm text-secondary mb-3">Customer payments and collection analysis</p>
+                        <div class="btn-group">
+                            <button class="btn btn-secondary btn-sm" onclick="loadARAnalysis()">
+                                <i class="fas fa-eye"></i>
+                                View AR Analysis
+                            </button>
+                            <button class="btn btn-outline btn-sm" onclick="downloadAPAR('ar_analysis')">
+                                <i class="fas fa-download"></i>
+                                Export AR
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 5: Invoice-Payment Matching -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-number">5</div>
+                <div class="section-title">
+                    <h2>Invoice-to-Payment Tracking</h2>
+                    <p>Automated invoice matching with payment efficiency analysis</p>
+                </div>
+            </div>
+            <div class="section-content">
+                <!-- Invoice-Payment Dashboard -->
+                <div id="invoicePaymentDashboard" class="hidden">
+                    <h3 class="mb-3">
+                        <i class="fas fa-link"></i>
+                        Invoice-Payment Matching Summary
+                    </h3>
+                    <div class="stats-grid" id="invoicePaymentSummaryStats"></div>
+                    <div id="invoicePaymentValidation"></div>
+                </div>
+
+                <div class="grid">
+                    <!-- Run Matching -->
+                    <div class="stat-card">
+                        <i class="fas fa-sync-alt stat-icon"></i>
+                        <h3 class="font-semibold mb-2">Invoice-Payment Matching</h3>
+                        <p class="text-sm text-secondary mb-3">Automated matching using AI algorithms</p>
+                        <div class="btn-group">
+                            <button class="btn btn-primary btn-sm" onclick="runInvoicePaymentMatching()">
+                                <i class="fas fa-play"></i>
+                                Start Matching
+                            </button>
+                            <button class="btn btn-outline btn-sm" onclick="debugInvoiceMatching()">
+                                <i class="fas fa-bug"></i>
+                                Debug Analysis
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Matched Pairs -->
+                    <div class="stat-card">
+                        <i class="fas fa-link stat-icon"></i>
+                        <h3 class="font-semibold mb-2">Matched Invoice-Payment Pairs</h3>
+                        <p class="text-sm text-secondary mb-3">Successfully linked transactions</p>
+                        <div class="btn-group">
+                            <button class="btn btn-secondary btn-sm" onclick="viewInvoicePayments('matched_pairs')">
+                                <i class="fas fa-eye"></i>
+                                View Matches
+                            </button>
+                            <button class="btn btn-outline btn-sm" onclick="downloadInvoicePayments('matched_pairs')">
+                                <i class="fas fa-download"></i>
+                                Export
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Outstanding Invoices -->
+                    <div class="stat-card">
+                        <i class="fas fa-exclamation-triangle stat-icon"></i>
+                        <h3 class="font-semibold mb-2">Outstanding Invoices</h3>
+                        <p class="text-sm text-secondary mb-3">Invoices awaiting payment</p>
+                        <div class="btn-group">
+                            <button class="btn btn-warning btn-sm" onclick="viewInvoicePayments('unmatched_invoices')">
+                                <i class="fas fa-eye"></i>
+                                View Outstanding
+                            </button>
+                            <button class="btn btn-outline btn-sm" onclick="downloadInvoicePayments('unmatched_invoices')">
+                                <i class="fas fa-download"></i>
+                                Export
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Orphaned Payments -->
+                    <div class="stat-card">
+                        <i class="fas fa-question-circle stat-icon"></i>
+                        <h3 class="font-semibold mb-2">Orphaned Payments</h3>
+                        <p class="text-sm text-secondary mb-3">Payments without matching invoices</p>
+                        <div class="btn-group">
+                            <button class="btn btn-warning btn-sm" onclick="viewInvoicePayments('unmatched_payments')">
+                                <i class="fas fa-eye"></i>
+                                View Orphaned
+                            </button>
+                            <!-- Add this button in the orphaned payments section -->
+                            <button onclick="downloadOrphanedPayments()" class="btn btn-success btn-sm">
+                                <i class="fas fa-download"></i> Download Orphaned Analysis
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Payment Efficiency -->
+                    <div class="stat-card">
+                        <i class="fas fa-chart-line stat-icon"></i>
+                        <h3 class="font-semibold mb-2">Payment Efficiency</h3>
+                        <p class="text-sm text-secondary mb-3">Timing analysis and KPIs</p>
+                        <div class="btn-group">
+                            <button class="btn btn-secondary btn-sm" onclick="viewInvoicePayments('efficiency_dashboard')">
+                                <i class="fas fa-tachometer-alt"></i>
+                                View Dashboard
+                            </button>
+                            <button class="btn btn-outline btn-sm" onclick="downloadInvoicePayments('complete_analysis')">
+                                <i class="fas fa-download"></i>
+                                Full Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Display Section -->
+        <div class="section-card results-section" id="resultsSection">
+            <div class="section-header">
+                <div class="section-number">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <div class="section-title">
+                    <h2>Analysis Results</h2>
+                    <p>Detailed breakdown and insights from your data</p>
+                </div>
+            </div>
+            <div class="section-content" id="resultsContainer">
+                <!-- Dynamic content will be inserted here -->
+            </div>
+        </div>
+
+        <!-- AP/AR Results Section -->
+        <div class="section-card results-section" id="apArResultsSection">
+            <div class="section-header">
+                <div class="section-number">
+                    <i class="fas fa-balance-scale"></i>
+                </div>
+                <div class="section-title">
+                    <h2>AP/AR Analysis Results</h2>
+                    <p>Accounts payable and receivable detailed analysis</p>
+                </div>
+            </div>
+            <div class="section-content" id="apArResultsContainer">
+                <!-- Dynamic content will be inserted here -->
+            </div>
+        </div>
+
+        <!-- Invoice-Payment Results Section -->
+        <div class="section-card results-section" id="invoicePaymentResultsSection">
+            <div class="section-header">
+                <div class="section-number">
+                    <i class="fas fa-receipt"></i>
+                </div>
+                <div class="section-title">
+                    <h2>Invoice-Payment Matching Results</h2>
+                    <p>Invoice and payment tracking analysis</p>
+                </div>
+            </div>
+            <div class="section-content" id="invoicePaymentResultsContainer">
+                <!-- Dynamic content will be inserted here -->
+            </div>
+        </div>
+
+        <!-- System Messages -->
+        <div id="messageContainer">
+            <!-- Alert messages will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <script>
+        // Global Variables
+        let sapFileUploaded = false;
+        let bankFileUploaded = false;
+        let filesProcessed = false;
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeEventListeners();
+            showWelcomeMessage();
+        });
+
+        function initializeEventListeners() {
+            // File input change listeners
+            document.getElementById('sapFile').addEventListener('change', function(e) {
+                handleFileSelect(e, 'sap');
+            });
+
+            document.getElementById('bankFile').addEventListener('change', function(e) {
+                handleFileSelect(e, 'bank');
+            });
+
+            // Drag and drop functionality
+            setupDragAndDrop();
+        }
+
+        function setupDragAndDrop() {
+            ['sapUploadArea', 'bankUploadArea'].forEach(id => {
+                const area = document.getElementById(id);
+                
+                area.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    area.classList.add('dragover');
+                });
+
+                area.addEventListener('dragleave', function(e) {
+                    e.preventDefault();
+                    area.classList.remove('dragover');
+                });
+
+                area.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    area.classList.remove('dragover');
+                    
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        const fileType = id.includes('sap') ? 'sap' : 'bank';
+                        const fileInput = document.getElementById(fileType + 'File');
+                        fileInput.files = files;
+                        handleFileSelect({target: fileInput}, fileType);
+                    }
+                });
+            });
+        }
+
+        function handleFileSelect(event, type) {
+            const file = event.target.files[0];
+            if (!file) {
+                // File was deselected
+                if (type === 'sap') {
+                    sapFileUploaded = false;
+                    document.getElementById('sapFileInfo').classList.remove('show');
+                } else {
+                    bankFileUploaded = false;
+                    document.getElementById('bankFileInfo').classList.remove('show');
+                }
+                updateUploadButton();
+                return;
+            }
+
+            const allowedTypes = ['.xlsx', '.xls', '.csv'];
+            const fileExt = '.' + file.name.split('.').pop().toLowerCase();
+            if (!allowedTypes.includes(fileExt)) {
+                showAlert('Please select a valid Excel (.xlsx, .xls) or CSV file', 'error');
+                return;
+            }
+
+            // Update upload status and show file info
+            if (type === 'sap') {
+                sapFileUploaded = true;
+                document.getElementById('sapFileName').textContent = `${file.name} (${formatFileSize(file.size)})`;
+                document.getElementById('sapFileInfo').classList.add('show');
+            } else {
+                bankFileUploaded = true;
+                document.getElementById('bankFileName').textContent = `${file.name} (${formatFileSize(file.size)})`;
+                document.getElementById('bankFileInfo').classList.add('show');
+            }
+            updateUploadButton();
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function updateUploadButton() {
+            const uploadBtn = document.getElementById('uploadBtn');
+            uploadBtn.disabled = !bankFileUploaded; // Only bank file is required
+        }
+        
+        async function uploadFiles() {
+            const sapFile = document.getElementById('sapFile').files[0];
+            const bankFile = document.getElementById('bankFile').files[0];
+            
+            if (!bankFile) {
+                showAlert('Please select a Bank file', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            if (sapFile) {
+                formData.append('sap_file', sapFile);
+            }
+            formData.append('bank_file', bankFile);
+
+            try {
+                showProgress('upload', true);
+                updateProgressBar('upload', 30);
+
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                updateProgressBar('upload', 70);
+                const data = await response.json();
+                updateProgressBar('upload', 100);
+
+                if (response.ok) {
+                    const mode = data.mode || 'unknown';
+                    const modeText = mode === 'full_reconciliation' ? 'Full SAP-Bank Reconciliation' : 'Bank-Only Analysis';
+                    
+                    showAlert(`Files uploaded successfully! Mode: ${modeText}. SAP Transactions: ${data.sap_transactions}, Bank Transactions: ${data.bank_transactions}`, 'success');
+                    
+                    filesProcessed = false;
+                    document.getElementById('reconcileBtn').disabled = false;
+                } else {
+                    showAlert(`Upload Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showAlert(`Upload Error: ${error.message}`, 'error');
+            } finally {
+                showProgress('upload', false);
+            }
+        }
+
+        async function reconcileData() {
+            try {
+                showLoading(true);
+                
+                const response = await fetch('/reconcile', {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showAlert('Reconciliation completed successfully with AI categorization!', 'success');
+                    filesProcessed = true;
+                    displaySummaryDashboard(data.summary);
+                } else {
+                    showAlert(`Reconciliation Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showAlert(`Reconciliation Error: ${error.message}`, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+        function downloadOrphanedPayments() {
+            console.log("Starting orphaned payments download...");
+            const resultsDiv = document.getElementById('orphanedPaymentsResults');
+            if (resultsDiv) {
+                resultsDiv.innerHTML = '<div class="alert alert-info">Preparing download...</div>';
+            }
+            fetch('/download_orphaned_payments', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => {
+                console.log("Response status:", response.status);
+                if (!response.ok) {
+                    return response.json().then(errorData => {
+                        throw new Error(errorData.error || 'Download failed');
+                    });
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                console.log("Blob received, size:", blob.size);
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Orphaned_Payments_Analysis_${new Date().toISOString().slice(0, 10)}.xlsx`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                if (resultsDiv) {
+                    resultsDiv.innerHTML = '<div class="alert alert-success">Download completed successfully!</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Download error:', error);
+                if (resultsDiv) {
+                    resultsDiv.innerHTML = `<div class="alert alert-danger">Download failed: ${error.message}</div>`;
+                }
+            });
+        }
+        function displaySummaryDashboard(summary) {
+            const dashboard = document.getElementById('summaryDashboard');
+            const statsContainer = document.getElementById('summaryStats');
+            
+            statsContainer.innerHTML = `
+                <div class="stat-card">
+                    <i class="fas fa-database stat-icon"></i>
+                    <span class="stat-number">${summary.sap_transactions}</span>
+                    <span class="stat-label">SAP Transactions</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-university stat-icon"></i>
+                    <span class="stat-number">${summary.bank_transactions}</span>
+                    <span class="stat-label">Bank Transactions</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-check-double stat-icon"></i>
+                    <span class="stat-number">${summary.exact_matches}</span>
+                    <span class="stat-label">Exact Matches</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-search stat-icon"></i>
+                    <span class="stat-number">${summary.fuzzy_matches}</span>
+                    <span class="stat-label">Fuzzy Matches</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-percentage stat-icon"></i>
+                    <span class="stat-number">${summary.match_rate}%</span>
+                    <span class="stat-label">Match Rate</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-robot stat-icon"></i>
+                    <span class="stat-number">${summary.ai_usage_stats?.ai_categorized || 0}</span>
+                    <span class="stat-label">AI Categorized</span>
+                </div>
+            `;
+            
+            dashboard.classList.remove('hidden');
+        }
+
+        // Utility Functions
+        function showAlert(message, type) {
+            const messageContainer = document.getElementById('messageContainer');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            
+            const icon = type === 'success' ? 'check-circle' : 
+                        type === 'error' ? 'exclamation-triangle' : 
+                        type === 'warning' ? 'exclamation-triangle' : 'info-circle';
+            
+            alertDiv.innerHTML = `
+                <i class="fas fa-${icon}"></i>
+                <span>${message}</span>
+            `;
+            
+            messageContainer.appendChild(alertDiv);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+            
+            // Scroll to message
+            alertDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showLoading(show) {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            if (show) {
+                loadingIndicator.classList.add('show');
+            } else {
+                loadingIndicator.classList.remove('show');
+            }
+        }
+
+        function showProgress(type, show) {
+            const progressElement = document.getElementById(type + 'Progress');
+            if (show) {
+                progressElement.classList.add('show');
+            } else {
+                progressElement.classList.remove('show');
+                updateProgressBar(type, 0);
+            }
+        }
+
+        function updateProgressBar(type, percentage) {
+            const progressBar = document.getElementById(type + 'ProgressBar');
+            progressBar.style.width = percentage + '%';
+        }
+
+        function showWelcomeMessage() {
+            showAlert('Enterprise SAP-Bank Reconciliation Platform Ready! Upload your bank statement to begin analysis.', 'info');
+        }
+
+        // Original working functions restored
+        async function viewCategoryData(dataType) {
+            try {
+                showLoading(true);
+                
+                const response = await fetch(`/view/${dataType}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayCategoryBreakdown(data, dataType);
+                } else {
+                    showAlert(`Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showAlert(`Error: ${error.message}`, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function displayCategoryBreakdown(data, dataType) {
+            const resultsSection = document.getElementById('resultsSection');
+            const resultsContainer = document.getElementById('resultsContainer');
+            
+            let content = '';
+            
+            if (data.type === 'category_breakdown') {
+                content = generateCategoryBreakdownHTML(data, dataType);
+            } else if (data.type === 'cash_flow_breakdown') {
+                content = generateCashFlowBreakdownHTML(data);
+            }
+            
+            resultsContainer.innerHTML = content;
+            resultsSection.classList.add('show');
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+            
+            // Initialize category tabs
+            initializeCategoryTabs();
+        }
+
+        function generateCategoryBreakdownHTML(data, dataType) {
+            const title = dataType.replace('_', ' ').toUpperCase();
+            const breakdown = data.breakdown;
+            
+            let html = `
+                <div class="tab-container">
+                    <h3>📊 ${title} - Complete Category Breakdown</h3>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <div>
+                            <h4>📈 Summary Statistics</h4>
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <span class="stat-number">${data.summary.total_transactions}</span>
+                                    <span class="stat-label">Total Transactions</span>
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-number">${data.summary.operating_count}</span>
+                                    <span class="stat-label">Operating</span>
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-number">${data.summary.investing_count}</span>
+                                    <span class="stat-label">Investing</span>
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-number">${data.summary.financing_count}</span>
+                                    <span class="stat-label">Financing</span>
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-number">${formatAmount(data.summary.total_amount)}</span>
+                                    <span class="stat-label">Total Amount</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-nav">
+                        <button class="tab-button active" data-category="Operating Activities">
+                            💼 Operating Activities (${breakdown['Operating Activities'].count})
+                        </button>
+                        <button class="tab-button" data-category="Investing Activities">
+                            🏭 Investing Activities (${breakdown['Investing Activities'].count})
+                        </button>
+                        <button class="tab-button" data-category="Financing Activities">
+                            💰 Financing Activities (${breakdown['Financing Activities'].count})
+                        </button>
+                    </div>
+            `;
+            
+            // Generate content for each category
+            Object.keys(breakdown).forEach((category, index) => {
+                const categoryData = breakdown[category];
+                const isActive = index === 0 ? 'active' : '';
+                
+                html += `
+                    <div class="tab-content ${isActive}" data-category="${category}">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <span class="stat-number">${categoryData.count}</span>
+                                <span class="stat-label">Transactions</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-number">${formatAmount(categoryData.total)}</span>
+                                <span class="stat-label">Net Amount</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-number">${formatAmount(categoryData.inflows)}</span>
+                                <span class="stat-label">Inflows</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-number">${formatAmount(categoryData.outflows)}</span>
+                                <span class="stat-label">Outflows</span>
+                            </div>
+                        </div>
+                        
+                        ${generateTransactionTable(categoryData.transactions, dataType)}
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            return html;
+        }
+
+        function generateCashFlowBreakdownHTML(data) {
+            const breakdown = data.breakdown;
+            
+            let html = `
+                <div class="tab-container">
+                    <h3>💰 Perfect Cash Flow Statement - Category Breakdown</h3>
+                    <div class="alert alert-success">
+                        <i class="fas fa-chart-line"></i>
+                        <div>
+                            <h4>📈 Cash Flow Summary</h4>
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <span class="stat-number">${data.summary.total_transactions}</span>
+                                    <span class="stat-label">Total Transactions</span>
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-number">${formatAmount(data.summary.operating_total)}</span>
+                                    <span class="stat-label">Operating Cash Flow</span>
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-number">${formatAmount(data.summary.investing_total)}</span>
+                                    <span class="stat-label">Investing Cash Flow</span>
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-number">${formatAmount(data.summary.financing_total)}</span>
+                                    <span class="stat-label">Financing Cash Flow</span>
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-number">${formatAmount(data.summary.net_cash_flow)}</span>
+                                    <span class="stat-label">Net Cash Flow</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-nav">
+                        <button class="tab-button active" data-category="Operating Activities">
+                            💼 Operating Activities (${breakdown['Operating Activities'].count})
+                        </button>
+                        <button class="tab-button" data-category="Investing Activities">
+                            🏭 Investing Activities (${breakdown['Investing Activities'].count})
+                        </button>
+                        <button class="tab-button" data-category="Financing Activities">
+                            💰 Financing Activities (${breakdown['Financing Activities'].count})
+                        </button>
+                    </div>
+            `;
+            
+            // Generate content for each category
+            Object.keys(breakdown).forEach((category, index) => {
+                const categoryData = breakdown[category];
+                const isActive = index === 0 ? 'active' : '';
+                
+                html += `
+                    <div class="tab-content ${isActive}" data-category="${category}">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <span class="stat-number">${categoryData.count}</span>
+                                <span class="stat-label">Transactions</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-number">${formatAmount(categoryData.total)}</span>
+                                <span class="stat-label">Net Cash Flow</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-number">${formatAmount(categoryData.inflows)}</span>
+                                <span class="stat-label">Cash Inflows</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-number">${formatAmount(categoryData.outflows)}</span>
+                                <span class="stat-label">Cash Outflows</span>
+                            </div>
+                        </div>
+                        
+                        ${generateTransactionTable(categoryData.transactions, 'cash_flow')}
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            return html;
+        }
+
+        function generateTransactionTable(transactions, dataType) {
+            if (!transactions || transactions.length === 0) {
+                return '<div class="alert alert-info"><i class="fas fa-info-circle"></i>No transactions found in this category.</div>';
+            }
+            
+            let tableHtml = '<table class="data-table"><thead><tr>';
+            
+            // Generate headers based on data type
+            if (dataType === 'matched_exact' || dataType === 'matched_fuzzy') {
+                tableHtml += `
+                    <th>SAP Description</th>
+                    <th>SAP Amount</th>
+                    <th>Bank Description</th>
+                    <th>Bank Amount</th>
+                    <th>Match Score</th>
+                    <th>Category</th>
+                `;
+            } else if (dataType === 'unmatched_sap' || dataType === 'unmatched_bank') {
+                tableHtml += `
+                    <th>Description</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Reason</th>
+                `;
+            } else {
+                tableHtml += `
+                    <th>Description</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Category</th>
+                `;
+            }
+            
+            tableHtml += '</tr></thead><tbody>';
+            
+            // Generate rows - showing ALL transactions
+            transactions.forEach(transaction => {
+                tableHtml += '<tr>';
+                
+                if (dataType === 'matched_exact' || dataType === 'matched_fuzzy') {
+                    tableHtml += `
+                        <td>${transaction.SAP_Description || transaction.Description || ''}</td>
+                        <td class="${transaction.SAP_Amount >= 0 ? 'amount-positive' : 'amount-negative'}">${formatAmount(transaction.SAP_Amount || transaction.Amount || 0)}</td>
+                        <td>${transaction.Bank_Description || ''}</td>
+                        <td class="${transaction.Bank_Amount >= 0 ? 'amount-positive' : 'amount-negative'}">${formatAmount(transaction.Bank_Amount || 0)}</td>
+                        <td><span class="match-score">${(transaction.Match_Score || 0).toFixed(3)}</span></td>
+                        <td>${formatCategoryWithAI(transaction.Category || '')}</td>
+                    `;
+                } else if (dataType === 'unmatched_sap' || dataType === 'unmatched_bank') {
+                    tableHtml += `
+                        <td>${transaction.Description || ''}</td>
+                        <td class="${transaction.Amount >= 0 ? 'amount-positive' : 'amount-negative'}">${formatAmount(transaction.Amount || 0)}</td>
+                        <td>${transaction.Date || ''}</td>
+                        <td>${formatCategoryWithAI(transaction.Category || '')}</td>
+                        <td>${transaction.Reason || ''}</td>
+                    `;
+                } else {
+                    tableHtml += `
+                        <td>${transaction.Description || ''}</td>
+                        <td class="${transaction.Amount >= 0 ? 'amount-positive' : 'amount-negative'}">${formatAmount(transaction.Amount || 0)}</td>
+                        <td>${transaction.Date || ''}</td>
+                        <td>${formatCategoryWithAI(transaction.Category || '')}</td>
+                    `;
+                }
+                
+                tableHtml += '</tr>';
+            });
+            
+            tableHtml += '</tbody></table>';
+            tableHtml += `<p style="margin-top: 10px; font-style: italic; color: #666;">Showing all ${transactions.length} transactions in this category</p>`;
+            
+            return tableHtml;
+        }
+
+        function formatCategoryWithAI(category) {
+            if (category.includes('(AI)')) {
+                const baseCategory = category.replace(' (AI)', '');
+                return `${baseCategory} <span style="background: #9b59b6; color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.7em; font-weight: bold;">🤖 AI</span>`;
+            }
+            return `${category} <span style="background: #17a2b8; color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.7em; font-weight: bold;">📋 RULE</span>`;
+        }
+
+        function initializeCategoryTabs() {
+            const tabs = document.querySelectorAll('.tab-button');
+            const contents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const targetCategory = this.dataset.category;
+                    
+                    // Remove active class from all tabs and contents
+                    tabs.forEach(t => t.classList.remove('active'));
+                    contents.forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked tab
+                    this.classList.add('active');
+                    
+                    // Show corresponding content
+                    const targetContent = document.querySelector(`[data-category="${targetCategory}"].tab-content`);
+                    if (targetContent) {
+                        targetContent.classList.add('active');
+                    }
+                });
+            });
+        }
+
+        function formatAmount(amount) {
+            if (amount === null || amount === undefined) return '0.00';
+            const num = parseFloat(amount);
+            return num.toLocaleString('en-US', { 
+                minimumFractionDigits: 2, 
+                maximumFractionDigits: 2 
+            });
+        }
+
+        async function downloadFile(fileType) {
+            try {
+                const response = await fetch(`/download/${fileType}`);
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${fileType}_category_breakdown_${new Date().toISOString().split('T')[0]}.xlsx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    
+                    showAlert('Category breakdown file downloaded successfully!', 'success');
+                } else {
+                    const data = await response.json();
+                    showAlert(`Download Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showAlert(`Download Error: ${error.message}`, 'error');
+            }
+        }
+
+        // AP/AR Functions
+        async function loadAPARDashboard() {
+            try {
+                showLoading(true);
+                
+                const response = await fetch('/ap_ar_dashboard');
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayAPARDashboard(data);
+                } else {
+                    showAlert(`Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showAlert(`Error: ${error.message}`, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function loadAPAnalysis() {
+            try {
+                showLoading(true);
+                
+                const response = await fetch('/ap_analysis');
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayAPAnalysis(data.ap_analysis);
+                } else {
+                    showAlert(`Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showAlert(`Error: ${error.message}`, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function loadARAnalysis() {
+            try {
+                showLoading(true);
+                
+                const response = await fetch('/ar_analysis');
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayARAnalysis(data.ar_analysis);
+                } else {
+                    showAlert(`Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showAlert(`Error: ${error.message}`, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function displayAPARDashboard(data) {
+            const resultsSection = document.getElementById('apArResultsSection');
+            const resultsContainer = document.getElementById('apArResultsContainer');
+            const dashboardSection = document.getElementById('apArDashboard');
+            const summaryStats = document.getElementById('apArSummaryStats');
+            
+            // Display dashboard summary stats
+            summaryStats.innerHTML = `
+                <div class="stat-card">
+                    <i class="fas fa-credit-card stat-icon"></i>
+                    <span class="stat-number">${formatAmount(data.dashboard_summary.ap_summary.outstanding)}</span>
+                    <span class="stat-label">Outstanding AP</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-money-check-alt stat-icon"></i>
+                    <span class="stat-number">${formatAmount(data.dashboard_summary.ar_summary.outstanding)}</span>
+                    <span class="stat-label">Outstanding AR</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-calculator stat-icon"></i>
+                    <span class="stat-number">${formatAmount(data.dashboard_summary.critical_metrics.total_outstanding)}</span>
+                    <span class="stat-label">Total Outstanding</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-percentage stat-icon"></i>
+                    <span class="stat-number">${data.dashboard_summary.critical_metrics.collection_efficiency.toFixed(1)}%</span>
+                    <span class="stat-label">Collection Efficiency</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-percentage stat-icon"></i>
+                    <span class="stat-number">${data.dashboard_summary.critical_metrics.payment_efficiency.toFixed(1)}%</span>
+                    <span class="stat-label">Payment Efficiency</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-exclamation-triangle stat-icon"></i>
+                    <span class="stat-number">${formatAmount(data.dashboard_summary.critical_metrics.total_overdue_90plus)}</span>
+                    <span class="stat-label">90+ Days Overdue</span>
+                </div>
+            `;
+            
+            dashboardSection.classList.remove('hidden');
+            
+            // Generate detailed dashboard content
+            let content = generateAPARDashboardHTML(data);
+            
+            resultsContainer.innerHTML = content;
+            resultsSection.classList.add('show');
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+            
+            // Initialize tabs after content is loaded
+            initializeAPARTabs();
+        }
+
+        function displayAPAnalysis(apData) {
+            const resultsSection = document.getElementById('apArResultsSection');
+            const resultsContainer = document.getElementById('apArResultsContainer');
+            
+            let content = generateAPAnalysisHTML(apData);
+            
+            resultsContainer.innerHTML = content;
+            resultsSection.classList.add('show');
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+            
+            // Initialize tabs after content is loaded
+            initializeAPARTabs();
+        }
+
+        function displayARAnalysis(arData) {
+            const resultsSection = document.getElementById('apArResultsSection');
+            const resultsContainer = document.getElementById('apArResultsContainer');
+            
+            let content = generateARAnalysisHTML(arData);
+            
+            resultsContainer.innerHTML = content;
+            resultsSection.classList.add('show');
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+            
+            // Initialize tabs after content is loaded
+            initializeAPARTabs();
+        }
+
+        async function downloadAPAR(analysisType) {
+            try {
+                const response = await fetch(`/download_ap_ar/${analysisType}`);
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `ap_ar_${analysisType}_${new Date().toISOString().split('T')[0]}.xlsx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    
+                    showAlert('AP/AR analysis downloaded successfully!', 'success');
+                } else {
+                    const data = await response.json();
+                    showAlert(`Download Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showAlert(`Download Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Invoice-Payment Functions
+        async function runInvoicePaymentMatching() {
+            try {
+                showLoading(true);
+                
+                const response = await fetch('/invoice_payment_matching', {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayInvoicePaymentDashboard(data);
+                    showAlert(`Invoice-payment matching completed successfully! Matched ${data.summary.matched_pairs} invoice-payment pairs.`, 'success');
+                } else {
+                    showAlert(`Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showAlert(`Error: ${error.message}`, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function viewInvoicePayments(matchType) {
+            try {
+                showLoading(true);
+                
+                const response = await fetch(`/view_invoice_payments/${matchType}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayInvoicePaymentResults(data, matchType);
+                } else {
+                    showAlert(`Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showAlert(`Error: ${error.message}`, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function downloadInvoicePayments(matchType) {
+            try {
+                const response = await fetch(`/download_invoice_payments/${matchType}`);
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `invoice_payment_${matchType}_${new Date().toISOString().split('T')[0]}.xlsx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    
+                    showAlert('Invoice-payment analysis downloaded successfully!', 'success');
+                } else {
+                    const data = await response.json();
+                    showAlert(`Download Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showAlert(`Download Error: ${error.message}`, 'error');
+            }
+        }
+
+        function displayInvoicePaymentDashboard(data) {
+            const dashboardSection = document.getElementById('invoicePaymentDashboard');
+            const summaryStats = document.getElementById('invoicePaymentSummaryStats');
+            
+            summaryStats.innerHTML = `
+                <div class="stat-card">
+                    <i class="fas fa-link stat-icon"></i>
+                    <span class="stat-number">${data.summary.matched_pairs}</span>
+                    <span class="stat-label">Matched Pairs</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-exclamation-triangle stat-icon"></i>
+                    <span class="stat-number">${data.summary.unmatched_invoices}</span>
+                    <span class="stat-label">Outstanding Invoices</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-question-circle stat-icon"></i>
+                    <span class="stat-number">${data.summary.unmatched_payments}</span>
+                    <span class="stat-label">Orphaned Payments</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-percentage stat-icon"></i>
+                    <span class="stat-number">${data.summary.efficiency_percentage}%</span>
+                    <span class="stat-label">Payment Efficiency</span>
+                </div>
+            `;
+            
+            dashboardSection.classList.remove('hidden');
+        }
+
+        function displayInvoicePaymentResults(data, matchType) {
+            const resultsSection = document.getElementById('invoicePaymentResultsSection');
+            const resultsContainer = document.getElementById('invoicePaymentResultsContainer');
+            
+            let content = `<div class="alert alert-success"><i class="fas fa-check-circle"></i>Invoice-payment ${matchType} analysis completed successfully.</div>`;
+            
+            resultsContainer.innerHTML = content;
+            resultsSection.classList.add('show');
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function debugInvoiceMatching() {
+            try {
+                showLoading(true);
+                
+                const response = await fetch('/debug_invoice_matching');
+                const data = await response.json();
+
+                if (response.ok) {
+                    showAlert('Debug analysis completed. Check console for detailed information.', 'info');
+                    console.log('Debug Info:', data);
+                } else {
+                    showAlert(`Debug Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showAlert(`Debug Error: ${error.message}`, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function analyzeOrphanedPayments() {
+            try {
+                showLoading(true);
+                
+                const response = await fetch('/analyze_orphaned_payments');
+                const data = await response.json();
+
+                if (response.ok) {
+                    showAlert('Orphaned payments analysis completed successfully.', 'success');
+                    console.log('Analysis Results:', data);
+                } else {
+                    showAlert(`Analysis Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showAlert(`Analysis Error: ${error.message}`, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Add all the missing HTML generation functions from your original code
+        function generateAPARDashboardHTML(data) {
+            return `
+                <div class="tab-container">
+                    <h3>📊 Complete AP/AR Dashboard</h3>
+                    
+                    <!-- Critical Metrics Overview -->
+                    <div class="alert alert-info">
+                        <i class="fas fa-chart-pie"></i>
+                        <div>
+                            <h4>🎯 Critical Business Metrics</h4>
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <span class="stat-number">${formatAmount(data.dashboard_summary.critical_metrics.total_outstanding)}</span>
+                                    <span class="stat-label">Total Outstanding</span>
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-number">${data.dashboard_summary.critical_metrics.collection_efficiency.toFixed(1)}%</span>
+                                    <span class="stat-label">Collection Rate</span>
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-number">${data.dashboard_summary.critical_metrics.payment_efficiency.toFixed(1)}%</span>
+                                    <span class="stat-label">Payment Rate</span>
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-number">${formatAmount(data.dashboard_summary.critical_metrics.total_overdue_90plus)}</span>
+                                    <span class="stat-label">90+ Days Overdue</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AP/AR Tabs -->
+                    <div class="tab-nav">
+                        <button class="tab-button active" data-category="ap_overview">
+                            💳 AP Overview (${data.ap_analysis.outstanding_transactions} Outstanding)
+                        </button>
+                        <button class="tab-button" data-category="ar_overview">
+                            💰 AR Overview (${data.ar_analysis.outstanding_transactions} Outstanding)
+                        </button>
+                        <button class="tab-button" data-category="aging_analysis">
+                            📅 Aging Analysis
+                        </button>
+                        <button class="tab-button" data-category="cash_flow_impact">
+                            💹 Cash Flow Impact
+                        </button>
+                    </div>
+
+                    <!-- AP Overview -->
+                    <div class="tab-content active" data-category="ap_overview">
+                        <h4>💳 Accounts Payable Overview</h4>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <span class="stat-number">${formatAmount(data.ap_analysis.total_ap)}</span>
+                                <span class="stat-label">Total AP</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-number">${formatAmount(data.ap_analysis.outstanding_ap)}</span>
+                                <span class="stat-label">Outstanding AP</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-number">${formatAmount(data.ap_analysis.paid_ap)}</span>
+                                <span class="stat-label">Paid AP</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-number">${data.ap_analysis.outstanding_transactions}</span>
+                                <span class="stat-label">Outstanding Count</span>
+                            </div>
+                        </div>
+                        ${generateVendorBreakdownTable(data.ap_analysis.vendor_breakdown, 'Vendor Category')}
+                    </div>
+
+                    <!-- AR Overview -->
+                    <div class="tab-content" data-category="ar_overview">
+                        <h4>💰 Accounts Receivable Overview</h4>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <span class="stat-number">${formatAmount(data.ar_analysis.total_ar)}</span>
+                                <span class="stat-label">Total AR</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-number">${formatAmount(data.ar_analysis.outstanding_ar)}</span>
+                                <span class="stat-label">Outstanding AR</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-number">${formatAmount(data.ar_analysis.received_ar)}</span>
+                                <span class="stat-label">Received AR</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-number">${data.ar_analysis.outstanding_transactions}</span>
+                                <span class="stat-label">Outstanding Count</span>
+                            </div>
+                        </div>
+                        ${generateVendorBreakdownTable(data.ar_analysis.customer_breakdown, 'Customer Category')}
+                    </div>
+
+                    <!-- Aging Analysis -->
+                    <div class="tab-content" data-category="aging_analysis">
+                        <h4>📅 Combined Aging Analysis</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div>
+                                <h5>💳 AP Aging</h5>
+                                ${generateAgingTable(data.ap_analysis.aging_analysis)}
+                            </div>
+                            <div>
+                                <h5>💰 AR Aging</h5>
+                                ${generateAgingTable(data.ar_analysis.aging_analysis)}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cash Flow Impact -->
+                    <div class="tab-content" data-category="cash_flow_impact">
+                        <h4>💹 Cash Flow Impact Analysis</h4>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <span class="stat-number">${formatAmount(data.ap_ar_cash_flow.ap_net_flow)}</span>
+                                <span class="stat-label">AP Net Cash Flow</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-number">${formatAmount(data.ap_ar_cash_flow.ar_net_flow)}</span>
+                                <span class="stat-label">AR Net Cash Flow</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-number">${formatAmount(data.ap_ar_cash_flow.combined_net_flow)}</span>
+                                <span class="stat-label">Combined Net Flow</span>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <div>
+                                <h4>📈 Cash Flow Insights</h4>
+                                <ul>
+                                    <li><strong>AP Impact:</strong> ${data.ap_ar_cash_flow.ap_net_flow < 0 ? 'Cash outflow' : 'Cash inflow'} of ${formatAmount(Math.abs(data.ap_ar_cash_flow.ap_net_flow))}</li>
+                                    <li><strong>AR Impact:</strong> ${data.ap_ar_cash_flow.ar_net_flow < 0 ? 'Cash outflow' : 'Cash inflow'} of ${formatAmount(Math.abs(data.ap_ar_cash_flow.ar_net_flow))}</li>
+                                    <li><strong>Net Effect:</strong> ${data.ap_ar_cash_flow.combined_net_flow < 0 ? 'Negative' : 'Positive'} cash flow of ${formatAmount(Math.abs(data.ap_ar_cash_flow.combined_net_flow))}</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateAPAnalysisHTML(apData) {
+            return `
+                <div class="tab-container">
+                    <h3>💳 Accounts Payable Analysis</h3>
+                    
+                    <div class="alert alert-success">
+                        <i class="fas fa-chart-bar"></i>
+                        <div>
+                            <h4>📊 AP Summary</h4>
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <span class="stat-number">${formatAmount(apData.total_ap)}</span>
+                                    <span class="stat-label">Total AP</span>
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-number">${formatAmount(apData.outstanding_ap)}</span>
+                                    <span class="stat-label">Outstanding</span>
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-number">${formatAmount(apData.paid_ap)}</span>
+                                    <span class="stat-label">Paid</span>
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-number">${apData.outstanding_transactions}</span>
+                                    <span class="stat-label">Outstanding Count</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-nav">
+                        <button class="tab-button active" data-category="ap_aging">📅 Aging Analysis</button>
+                        <button class="tab-button" data-category="ap_vendors">🏢 Vendor Breakdown</button>
+                        <button class="tab-button" data-category="ap_status">📋 Status Breakdown</button>
+                    </div>
+
+                    <div class="tab-content active" data-category="ap_aging">
+                        ${generateAgingTable(apData.aging_analysis)}
+                    </div>
+
+                    <div class="tab-content" data-category="ap_vendors">
+                        ${generateVendorBreakdownTable(apData.vendor_breakdown, 'Vendor Category')}
+                    </div>
+
+                    <div class="tab-content" data-category="ap_status">
+                        ${generateStatusBreakdownTable(apData.status_breakdown)}
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateARAnalysisHTML(arData) {
+            return `
+                <div class="tab-container">
+                    <h3>💰 Accounts Receivable Analysis</h3>
+                    
+                    <div class="alert alert-success">
+                        <i class="fas fa-chart-line"></i>
+                        <div>
+                            <h4>📊 AR Summary</h4>
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <span class="stat-number">${formatAmount(arData.total_ar)}</span>
+                                    <span class="stat-label">Total AR</span>
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-number">${formatAmount(arData.outstanding_ar)}</span>
+                                    <span class="stat-label">Outstanding</span>
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-number">${formatAmount(arData.received_ar)}</span>
+                                    <span class="stat-label">Received</span>
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-number">${arData.outstanding_transactions}</span>
+                                    <span class="stat-label">Outstanding Count</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-nav">
+                        <button class="tab-button active" data-category="ar_aging">📅 Aging Analysis</button>
+                        <button class="tab-button" data-category="ar_customers">👥 Customer Breakdown</button>
+                        <button class="tab-button" data-category="ar_status">📋 Status Breakdown</button>
+                    </div>
+
+                    <div class="tab-content active" data-category="ar_aging">
+                        ${generateAgingTable(arData.aging_analysis)}
+                    </div>
+
+                    <div class="tab-content" data-category="ar_customers">
+                        ${generateVendorBreakdownTable(arData.customer_breakdown, 'Customer Category')}
+                    </div>
+
+                    <div class="tab-content" data-category="ar_status">
+                        ${generateStatusBreakdownTable(arData.status_breakdown)}
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateAgingTable(agingData) {
+            let tableHtml = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Age Period</th>
+                            <th>Count</th>
+                            <th>Amount</th>
+                            <th>Percentage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            const totalAmount = Object.values(agingData).reduce((sum, period) => sum + period.amount, 0);
+            
+            Object.entries(agingData).forEach(([period, data]) => {
+                const percentage = totalAmount > 0 ? (data.amount / totalAmount * 100).toFixed(1) : 0;
+                tableHtml += `
+                    <tr>
+                        <td>${period} days</td>
+                        <td>${data.count}</td>
+                        <td class="amount-${data.amount >= 0 ? 'positive' : 'negative'}">${formatAmount(data.amount)}</td>
+                        <td>${percentage}%</td>
+                    </tr>
+                `;
+            });
+            
+            tableHtml += '</tbody></table>';
+            return tableHtml;
+        }
+
+        function generateVendorBreakdownTable(vendorData, headerName) {
+            let tableHtml = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>${headerName}</th>
+                            <th>Total Amount</th>
+                            <th>Outstanding</th>
+                            <th>Paid/Received</th>
+                            <th>Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            Object.entries(vendorData).forEach(([vendor, data]) => {
+                tableHtml += `
+                    <tr>
+                        <td>${vendor}</td>
+                        <td class="amount-positive">${formatAmount(data.total_amount)}</td>
+                        <td class="amount-negative">${formatAmount(data.outstanding_amount)}</td>
+                        <td class="amount-positive">${formatAmount(data.paid_amount || data.received_amount)}</td>
+                        <td>${data.transaction_count}</td>
+                    </tr>
+                `;
+            });
+            
+            tableHtml += '</tbody></table>';
+            return tableHtml;
+        }
+
+        function generateStatusBreakdownTable(statusData) {
+            let tableHtml = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Count</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            Object.entries(statusData).forEach(([status, data]) => {
+                tableHtml += `
+                    <tr>
+                        <td>${status}</td>
+                        <td>${data.count}</td>
+                        <td class="amount-${data.amount >= 0 ? 'positive' : 'negative'}">${formatAmount(data.amount)}</td>
+                    </tr>
+                `;
+            });
+            
+            tableHtml += '</tbody></table>';
+            return tableHtml;
+        }
+        
+        // Initialize AP/AR tabs functionality
+        function initializeAPARTabs() {
+            const tabs = document.querySelectorAll('.tab-button');
+            const contents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const targetCategory = this.dataset.category;
+                    const parentContainer = this.closest('.tab-container');
+                    
+                    if (parentContainer) {
+                        // Remove active class from all tabs and contents in this container
+                        parentContainer.querySelectorAll('.tab-button').forEach(t => t.classList.remove('active'));
+                        parentContainer.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                        
+                        // Add active class to clicked tab
+                        this.classList.add('active');
+                        
+                        // Show corresponding content
+                        const targetContent = parentContainer.querySelector(`[data-category="${targetCategory}"].tab-content`);
+                        if (targetContent) {
+                            targetContent.classList.add('active');
+                        }
+                    }
+                });
+            });
+        }
+
+        // Add these functions right after initializeAPARTabs() function
+
+function displayInvoicePaymentResults(data, matchType) {
+    const resultsSection = document.getElementById('invoicePaymentResultsSection');
+    const resultsContainer = document.getElementById('invoicePaymentResultsContainer');
+    
+    let content = '';
+    
+    if (data.type === 'invoice_payment_breakdown') {
+        content = generateInvoicePaymentBreakdownHTML(data, matchType);
+    } else if (data.type === 'unmatched_invoices_breakdown') {
+        content = generateUnmatchedInvoicesHTML(data);
+    } else if (data.type === 'unmatched_payments_breakdown') {
+        content = generateUnmatchedPaymentsHTML(data);
+    } else if (data.type === 'efficiency_dashboard') {
+        content = generateEfficiencyDashboardHTML(data);
+    }
+    
+    resultsContainer.innerHTML = content;
+    resultsSection.classList.add('show');
+    resultsSection.scrollIntoView({ behavior: 'smooth' });
+    
+    // Initialize tabs
+    initializeInvoicePaymentTabs();
+}
+
+function generateInvoicePaymentBreakdownHTML(data, matchType) {
+    const breakdown = data.breakdown;
+    
+    return `
+        <div class="tab-container">
+            <h3>📋💰 Invoice-Payment Matched Pairs - Complete Breakdown</h3>
+            
+            <div class="alert alert-success">
+                <i class="fas fa-link"></i>
+                <div>
+                    <h4>📈 Matching Summary</h4>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <span class="stat-number">${data.summary.total_matched_pairs}</span>
+                            <span class="stat-label">Total Matched Pairs</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number">${formatAmount(data.summary.total_amount)}</span>
+                            <span class="stat-label">Total Amount</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number">${data.summary.average_delay.toFixed(1)}</span>
+                            <span class="stat-label">Avg Delay (Days)</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number">${data.summary.operating_count}</span>
+                            <span class="stat-label">Operating</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number">${data.summary.investing_count}</span>
+                            <span class="stat-label">Investing</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number">${data.summary.financing_count}</span>
+                            <span class="stat-label">Financing</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-nav">
+                <button class="tab-button active" data-category="Operating Activities">
+                    💼 Operating Activities (${breakdown['Operating Activities'].count})
+                </button>
+                <button class="tab-button" data-category="Investing Activities">
+                    🏭 Investing Activities (${breakdown['Investing Activities'].count})
+                </button>
+                <button class="tab-button" data-category="Financing Activities">
+                    💰 Financing Activities (${breakdown['Financing Activities'].count})
+                </button>
+            </div>
+
+            ${Object.keys(breakdown).map((category, index) => {
+                const categoryData = breakdown[category];
+                const isActive = index === 0 ? 'active' : '';
+                
+                return `
+                    <div class="tab-content ${isActive}" data-category="${category}">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <span class="stat-number">${categoryData.count}</span>
+                                <span class="stat-label">Matched Pairs</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-number">${formatAmount(categoryData.total_amount)}</span>
+                                <span class="stat-label">Total Amount</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-number">${categoryData.average_delay.toFixed(1)}</span>
+                                <span class="stat-label">Avg Delay (Days)</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-number">${categoryData.on_time_count}</span>
+                                <span class="stat-label">On-Time Payments</span>
+                            </div>
+                        </div>
+                        
+                        ${generateInvoicePaymentTable(categoryData.transactions)}
+                    </div>
+                `;
+            }).join('')}
+        </div>
+    `;
+}
+
+function generateUnmatchedInvoicesHTML(data) {
+    const breakdown = data.breakdown;
+    
+    return `
+        <div class="tab-container">
+            <h3>📋❌ Outstanding Invoices - No Payment Found</h3>
+            
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>
+                    <h4>📈 Outstanding Summary</h4>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <span class="stat-number">${data.summary.total_unmatched_invoices}</span>
+                            <span class="stat-label">Outstanding Invoices</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number">${formatAmount(data.summary.total_outstanding_amount)}</span>
+                            <span class="stat-label">Total Outstanding Amount</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number">${data.summary.average_outstanding_days.toFixed(1)}</span>
+                            <span class="stat-label">Avg Outstanding Days</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-nav">
+                <button class="tab-button active" data-category="Operating Activities">
+                    💼 Operating Activities (${breakdown['Operating Activities'].count})
+                </button>
+                <button class="tab-button" data-category="Investing Activities">
+                    🏭 Investing Activities (${breakdown['Investing Activities'].count})
+                </button>
+                <button class="tab-button" data-category="Financing Activities">
+                    💰 Financing Activities (${breakdown['Financing Activities'].count})
+                </button>
+            </div>
+
+            ${Object.keys(breakdown).map((category, index) => {
+                const categoryData = breakdown[category];
+                const isActive = index === 0 ? 'active' : '';
+                
+                return `
+                    <div class="tab-content ${isActive}" data-category="${category}">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <span class="stat-number">${categoryData.count}</span>
+                                <span class="stat-label">Outstanding Invoices</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-number">${formatAmount(categoryData.total_amount)}</span>
+                                <span class="stat-label">Total Amount</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-number">${categoryData.average_outstanding_days.toFixed(1)}</span>
+                                <span class="stat-label">Avg Outstanding Days</span>
+                            </div>
+                        </div>
+                        
+                        ${generateInvoicePaymentTable(categoryData.transactions)}
+                    </div>
+                `;
+            }).join('')}
+        </div>
+    `;
+}
+
+function generateUnmatchedPaymentsHTML(data) {
+    const transactions = data.transactions;
+    
+    return `
+        <div class="tab-container">
+            <h3>💰❌ Orphaned Payments - No Invoice Found</h3>
+            
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>
+                    <h4>📈 Orphaned Summary</h4>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <span class="stat-number">${data.summary.total_unmatched_payments}</span>
+                            <span class="stat-label">Orphaned Payments</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number">${formatAmount(data.summary.total_amount)}</span>
+                            <span class="stat-label">Total Amount</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number">${data.summary.bank_payments}</span>
+                            <span class="stat-label">Bank Payments</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number">${data.summary.sap_payments}</span>
+                            <span class="stat-label">SAP Payments</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            ${generateInvoicePaymentTable(transactions)}
+        </div>
+    `;
+}
+
+function generateEfficiencyDashboardHTML(data) {
+    const metrics = data.metrics;
+    
+    return `
+        <div class="tab-container">
+            <h3>📊 Payment Efficiency Dashboard</h3>
+            
+            <div class="alert alert-info">
+                <i class="fas fa-chart-line"></i>
+                <div>
+                    <h4>⚡ Efficiency Metrics</h4>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <span class="stat-number">${metrics.efficiency_percentage.toFixed(1)}%</span>
+                            <span class="stat-label">Payment Efficiency</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number">${metrics.average_payment_delay.toFixed(1)}</span>
+                            <span class="stat-label">Avg Payment Delay</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number">${metrics.on_time_payments}</span>
+                            <span class="stat-label">On-Time Payments</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number">${metrics.late_payments}</span>
+                            <span class="stat-label">Late Payments</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number">${metrics.very_late_payments}</span>
+                            <span class="stat-label">Very Late (60+ days)</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number">${formatAmount(metrics.total_amount_matched)}</span>
+                            <span class="stat-label">Total Amount Matched</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <h4>📈 Payment Delay Distribution</h4>
+            <div class="stats-grid">
+                ${Object.entries(metrics.delay_distribution).map(([period, count]) => `
+                    <div class="stat-card">
+                        <span class="stat-number">${count}</span>
+                        <span class="stat-label">${period}</span>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+}
+
+function generateInvoicePaymentTable(transactions) {
+    if (!transactions || transactions.length === 0) {
+        return '<div class="alert alert-info"><i class="fas fa-info-circle"></i>No transactions found in this category.</div>';
+    }
+    
+    let tableHtml = '<table class="data-table"><thead><tr>';
+    
+    // Check if this is invoice-payment data or other data
+    if (transactions[0].hasOwnProperty('Invoice_Description')) {
+        // Invoice-payment matched data
+        tableHtml += `
+            <th>Invoice Description</th>
+            <th>Invoice Amount</th>
+            <th>Payment Description</th>
+            <th>Payment Amount</th>
+            <th>Payment Delay</th>
+            <th>Match Score</th>
+            <th>Payment Source</th>
+        `;
+    } else if (transactions[0].hasOwnProperty('Payment_Description')) {
+        // Unmatched payments
+        tableHtml += `
+            <th>Payment Description</th>
+            <th>Payment Amount</th>
+            <th>Payment Date</th>
+            <th>Payment Source</th>
+            <th>Reason</th>
+        `;
+    } else {
+        // Unmatched invoices or general data
+        tableHtml += `
+            <th>Description</th>
+            <th>Amount</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Reason</th>
+        `;
+    }
+    
+    tableHtml += '</tr></thead><tbody>';
+    
+    // Generate rows
+    transactions.forEach(transaction => {
+        tableHtml += '<tr>';
+        
+        if (transaction.hasOwnProperty('Invoice_Description')) {
+            // Invoice-payment matched data
+            tableHtml += `
+                <td>${transaction.Invoice_Description || ''}</td>
+                <td class="${transaction.Invoice_Amount >= 0 ? 'amount-positive' : 'amount-negative'}">${formatAmount(transaction.Invoice_Amount || 0)}</td>
+                <td>${transaction.Payment_Description || ''}</td>
+                <td class="${transaction.Payment_Amount >= 0 ? 'amount-positive' : 'amount-negative'}">${formatAmount(transaction.Payment_Amount || 0)}</td>
+                <td>${transaction.Payment_Delay_Days || 0} days</td>
+                <td><span class="match-score">${(transaction.Match_Score || 0).toFixed(3)}</span></td>
+                <td>${transaction.Payment_Source || 'Unknown'}</td>
+            `;
+        } else if (transaction.hasOwnProperty('Payment_Description')) {
+            // Unmatched payments
+            tableHtml += `
+                <td>${transaction.Payment_Description || ''}</td>
+                <td class="${transaction.Payment_Amount >= 0 ? 'amount-positive' : 'amount-negative'}">${formatAmount(transaction.Payment_Amount || 0)}</td>
+                <td>${transaction.Payment_Date || ''}</td>
+                <td>${transaction.Payment_Source || 'Unknown'}</td>
+                <td>${transaction.Reason || ''}</td>
+            `;
+        } else {
+            // Unmatched invoices or general data
+            tableHtml += `
+                <td>${transaction.Invoice_Description || transaction.Description || ''}</td>
+                <td class="${(transaction.Invoice_Amount || transaction.Amount || 0) >= 0 ? 'amount-positive' : 'amount-negative'}">${formatAmount(transaction.Invoice_Amount || transaction.Amount || 0)}</td>
+                <td>${transaction.Invoice_Date || transaction.Date || ''}</td>
+                <td>${transaction.Invoice_Status || transaction.Status || ''}</td>
+                <td>${transaction.Reason || ''}</td>
+            `;
+        }
+        
+        tableHtml += '</tr>';
+    });
+    
+    tableHtml += '</tbody></table>';
+    tableHtml += `<p style="margin-top: 10px; font-style: italic; color: #666;">Showing all ${transactions.length} transactions</p>`;
+    
+    return tableHtml;
+}
+
+function initializeInvoicePaymentTabs() {
+    const tabs = document.querySelectorAll('.tab-button');
+    const contents = document.querySelectorAll('.tab-content');
+    
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const targetCategory = this.dataset.category;
+            const parentContainer = this.closest('.tab-container');
+            
+            if (parentContainer) {
+                // Remove active class from all tabs and contents in this container
+                parentContainer.querySelectorAll('.tab-button').forEach(t => t.classList.remove('active'));
+                parentContainer.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                this.classList.add('active');
+                
+                // Show corresponding content
+                const targetContent = parentContainer.querySelector(`[data-category="${targetCategory}"].tab-content`);
+                if (targetContent) {
+                    targetContent.classList.add('active');
+                }
+            }
+        });
+    });
+}
+
+async function checkStatus() {
+    try {
+        const response = await fetch('/status');
+        const data = await response.json();
+        
+        if (response.ok) {
+            console.log('System Status:', data);
+            showAlert('System status checked successfully. See console for details.', 'info');
+        } else {
+            showAlert('Error checking system status', 'error');
+        }
+    } catch (error) {
+        showAlert(`Status Error: ${error.message}`, 'error');
+    }
+}
+    </script>
+</body>
+</html>
+
