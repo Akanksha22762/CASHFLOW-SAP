@@ -2852,15 +2852,19 @@ def reconcile_data():
         print(f"Error during reconciliation: {str(e)}")
         print("Traceback:\n", traceback.format_exc())
         return jsonify({'error': f'Error during reconciliation: {str(e)}'}), 500
+# Replace the existing download_orphaned_payments endpoint in app1.py with this fixed version:
+
 @app.route('/download_orphaned_payments', methods=['GET'])
 def download_orphaned_payments():
     """Download detailed orphaned payments analysis with complete breakdown"""
     global reconciliation_data
     
-    if 'invoice_payment_data' not in reconciliation_data:
-        return jsonify({'error': 'No invoice-payment matching data found. Please run matching first.'}), 400
-    
     try:
+        # Check if invoice-payment data exists
+        if 'invoice_payment_data' not in reconciliation_data:
+            return jsonify({'error': 'No invoice-payment matching data found. Please run invoice-payment matching first.'}), 400
+        
+        # Get orphaned payments data
         orphaned_df = reconciliation_data['invoice_payment_data'].get('unmatched_payments', pd.DataFrame())
         
         if orphaned_df.empty:
@@ -2875,18 +2879,161 @@ def download_orphaned_payments():
         with pd.ExcelWriter(filepath, engine='openpyxl') as writer:
             
             # 1. EXECUTIVE SUMMARY
+            total_amount = float(orphaned_df['Payment_Amount'].sum()) if 'Payment_Amount' in orphaned_df.columns else 0
+            
             summary_data = [{
                 'Metric': 'Total Orphaned Payments',
                 'Value': len(orphaned_df),
-                'Amount': float(orphaned_df['Payment_Amount'].sum()),
+                'Amount': total_amount,
                 'Details': 'Payments without matching invoices'
+            }, {
+                'Metric': 'Total Amount',
+                'Value': f'${total_amount:,.2f}',
+                'Amount': total_amount,
+                'Details': 'Total value of orphaned payments'
+            }, {
+                'Metric': 'Average Payment Amount',
+                'Value': f'${total_amount/len(orphaned_df):,.2f}' if len(orphaned_df) > 0 else '$0.00',
+                'Amount': total_amount/len(orphaned_df) if len(orphaned_df) > 0 else 0,
+                'Details': 'Average amount per orphaned payment'
             }]
             
-            pd.DataFrame(summary_data).to_excel(writer, sheet_name='ORPHANED_SUMMARY', index=False)
+            # Add source breakdown if available
+            if 'Payment_Source' in orphaned_df.columns:
+                source_counts = orphaned_df['Payment_Source'].value_counts()
+                for source, count in source_counts.items():
+                    summary_data.append({
+                        'Metric': f'{source} Payments',
+                        'Value': count,
+                        'Amount': float(orphaned_df[orphaned_df['Payment_Source'] == source]['Payment_Amount'].sum()),
+                        'Details': f'Orphaned payments from {source}'
+                    })
+            
+            pd.DataFrame(summary_data).to_excel(writer, sheet_name='📊_EXECUTIVE_SUMMARY', index=False)
             
             # 2. ALL ORPHANED PAYMENTS
-            orphaned_df.to_excel(writer, sheet_name='ALL_ORPHANED_PAYMENTS', index=False)
+            # Clean the dataframe for export
+            export_df = orphaned_df.copy()
+            
+            # Ensure all columns are properly formatted
+            if 'Payment_Amount' in export_df.columns:
+                export_df['Payment_Amount'] = pd.to_numeric(export_df['Payment_Amount'], errors='coerce').fillna(0)
+            
+            # Add analysis columns
+            if 'Payment_Amount' in export_df.columns:
+                export_df['Amount_Category'] = export_df['Payment_Amount'].apply(
+                    lambda x: 'Large (>$10K)' if abs(x) > 10000 else 'Medium ($1K-$10K)' if abs(x) > 1000 else 'Small (<$1K)'
+                )
+                
+                export_df['Investigation_Priority'] = export_df['Payment_Amount'].apply(
+                    lambda x: 'High' if abs(x) > 10000 else 'Medium' if abs(x) > 1000 else 'Low'
+                )
+            
+            # Categorize payments by description patterns
+            def categorize_orphaned_payment(description):
+                if pd.isna(description):
+                    return 'Unknown'
+                
+                desc_lower = str(description).lower()
+                
+                # Define categories with patterns
+                categories = {
+                    'Payroll & Benefits': ['salary', 'wage', 'payroll', 'bonus', 'pension', 'insurance', 'benefit'],
+                    'Utilities & Services': ['electricity', 'water', 'gas', 'telephone', 'internet', 'utility', 'service'],
+                    'Tax & Statutory': ['tax', 'gst', 'vat', 'tds', 'duty', 'statutory', 'government'],
+                    'Loan & Finance': ['loan', 'emi', 'interest', 'finance', 'mortgage', 'credit'],
+                    'Vendor Payments': ['vendor', 'supplier', 'purchase', 'material', 'inventory', 'goods'],
+                    'Bank Charges': ['bank charge', 'service charge', 'fee', 'commission', 'penalty'],
+                    'Internal Transfers': ['transfer', 'internal', 'inter', 'fund transfer', 'account'],
+                    'Rent & Facilities': ['rent', 'lease', 'maintenance', 'repair', 'facility'],
+                    'Advance Payments': ['advance', 'prepaid', 'deposit', 'security', 'token'],
+                    'Miscellaneous': []  # Default category
+                }
+                
+                for category, patterns in categories.items():
+                    if category != 'Miscellaneous' and any(pattern in desc_lower for pattern in patterns):
+                        return category
+                
+                return 'Miscellaneous'
+            
+            if 'Payment_Description' in export_df.columns:
+                export_df['Payment_Category'] = export_df['Payment_Description'].apply(categorize_orphaned_payment)
+            
+            # Export all orphaned payments
+            export_df.to_excel(writer, sheet_name='💸_ALL_ORPHANED_PAYMENTS', index=False)
+            
+            # 3. CATEGORY-WISE BREAKDOWN
+            if 'Payment_Category' in export_df.columns:
+                category_summary = []
+                
+                for category in export_df['Payment_Category'].unique():
+                    if pd.notna(category):
+                        category_df = export_df[export_df['Payment_Category'] == category]
+                        
+                        category_summary.append({
+                            'Payment_Category': category,
+                            'Count': len(category_df),
+                            'Total_Amount': float(category_df['Payment_Amount'].sum()) if 'Payment_Amount' in category_df.columns else 0,
+                            'Average_Amount': float(category_df['Payment_Amount'].mean()) if 'Payment_Amount' in category_df.columns and len(category_df) > 0 else 0,
+                            'Percentage_of_Total': round(len(category_df)/len(export_df)*100, 2) if len(export_df) > 0 else 0
+                        })
+                        
+                        # Create detailed sheet for each category
+                        if not category_df.empty:
+                            sheet_name = f"CAT_{category.replace(' ', '_').replace('&', 'AND')}"[:25]
+                            category_df.to_excel(writer, sheet_name=sheet_name, index=False)
+                
+                # Sort by count descending
+                category_summary.sort(key=lambda x: x['Count'], reverse=True)
+                pd.DataFrame(category_summary).to_excel(writer, sheet_name='📂_CATEGORY_BREAKDOWN', index=False)
+            
+            # 4. HIGH-VALUE PAYMENTS (if applicable)
+            if 'Payment_Amount' in export_df.columns:
+                high_value_df = export_df[export_df['Payment_Amount'].abs() > 5000]  # Payments over $5K
+                
+                if not high_value_df.empty:
+                    high_value_df_sorted = high_value_df.sort_values('Payment_Amount', key=abs, ascending=False)
+                    high_value_df_sorted.to_excel(writer, sheet_name='🚨_HIGH_VALUE_PAYMENTS', index=False)
+            
+            # 5. RECOMMENDATIONS SHEET
+            recommendations_data = [
+                {
+                    'Category': 'Process Improvement',
+                    'Recommendation': 'Implement better invoice documentation to reduce orphaned payments',
+                    'Priority': 'High',
+                    'Impact': 'Reduces unmatched payments by improving traceability'
+                },
+                {
+                    'Category': 'Data Quality',
+                    'Recommendation': 'Standardize payment descriptions to include invoice references',
+                    'Priority': 'High',
+                    'Impact': 'Improves automatic matching accuracy'
+                },
+                {
+                    'Category': 'Monitoring',
+                    'Recommendation': 'Set up alerts for payments above $10,000 without invoice matches',
+                    'Priority': 'Medium',
+                    'Impact': 'Prevents large amounts from going untracked'
+                },
+                {
+                    'Category': 'Training',
+                    'Recommendation': 'Train staff on proper payment documentation procedures',
+                    'Priority': 'Medium',
+                    'Impact': 'Reduces manual effort in payment reconciliation'
+                }
+            ]
+            
+            if len(orphaned_df) > 50:
+                recommendations_data.append({
+                    'Category': 'Urgent Action',
+                    'Recommendation': f'Large number of orphaned payments ({len(orphaned_df)}) requires immediate attention',
+                    'Priority': 'Critical',
+                    'Impact': 'High volume indicates systematic issues'
+                })
+            
+            pd.DataFrame(recommendations_data).to_excel(writer, sheet_name='💡_RECOMMENDATIONS', index=False)
         
+        # Send file
         return send_file(
             filepath,
             as_attachment=True,
@@ -2895,7 +3042,9 @@ def download_orphaned_payments():
         )
         
     except Exception as e:
-        print(f"Download error: {str(e)}")
+        print(f"❌ Orphaned payments download error: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': f'Download failed: {str(e)}'}), 500    
 @app.route('/debug_data_structure', methods=['GET'])
 def debug_data_structure():
@@ -3678,165 +3827,351 @@ def get_ap_ar_dashboard():
             'details': 'Check server logs for full error trace'
         }), 500
 
+
+# Replace the existing download_ap_ar_analysis function in app1.py with this fixed version:
+
 @app.route('/download_ap_ar/<analysis_type>', methods=['GET'])
 def download_ap_ar_analysis(analysis_type):
-    """Enhanced AP/AR analysis downloads with complete breakdown"""
+    """Enhanced AP/AR analysis downloads with complete breakdown - FIXED VERSION"""
     try:
+        print(f"🔧 Starting AP/AR download for: {analysis_type}")
+        
         sap_path = os.path.join(DATA_FOLDER, 'sap_data_processed.xlsx')
         if not os.path.exists(sap_path):
             return jsonify({'error': 'SAP data not found. Please upload files first.'}), 400
         
         sap_df = pd.read_excel(sap_path)
+        print(f"📊 Loaded SAP data: {len(sap_df)} rows")
         
         # Create temporary file
         temp_dir = tempfile.gettempdir()
         filename = f"AP_AR_{analysis_type}_COMPLETE_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
         filepath = os.path.join(temp_dir, filename)
         
+        # Flag to track if we have any data to write
+        has_data = False
+        
         with pd.ExcelWriter(filepath, engine='openpyxl') as writer:
             
             if analysis_type == 'ap_analysis':
+                print("📋 Processing AP Analysis...")
                 ap_analysis = generate_ap_analysis(sap_df)
                 
-                # 1. AP EXECUTIVE SUMMARY
+                # 1. AP EXECUTIVE SUMMARY - Always create this
                 ap_summary_data = [{
                     'Metric': 'Total Accounts Payable',
-                    'Amount': ap_analysis['total_ap'],
-                    'Count': ap_analysis['total_transactions'],
+                    'Amount': ap_analysis.get('total_ap', 0),
+                    'Count': ap_analysis.get('total_transactions', 0),
                     'Percentage': 100.0
                 }, {
                     'Metric': 'Outstanding AP',
-                    'Amount': ap_analysis['outstanding_ap'],
-                    'Count': ap_analysis['outstanding_transactions'],
-                    'Percentage': round((ap_analysis['outstanding_ap']/ap_analysis['total_ap']*100) if ap_analysis['total_ap'] > 0 else 0, 2)
+                    'Amount': ap_analysis.get('outstanding_ap', 0),
+                    'Count': ap_analysis.get('outstanding_transactions', 0),
+                    'Percentage': round((ap_analysis.get('outstanding_ap', 0)/ap_analysis.get('total_ap', 1)*100) if ap_analysis.get('total_ap', 0) > 0 else 0, 2)
                 }, {
                     'Metric': 'Paid AP',
-                    'Amount': ap_analysis['paid_ap'],
-                    'Count': ap_analysis['paid_transactions'],
-                    'Percentage': round((ap_analysis['paid_ap']/ap_analysis['total_ap']*100) if ap_analysis['total_ap'] > 0 else 0, 2)
+                    'Amount': ap_analysis.get('paid_ap', 0),
+                    'Count': ap_analysis.get('paid_transactions', 0),
+                    'Percentage': round((ap_analysis.get('paid_ap', 0)/ap_analysis.get('total_ap', 1)*100) if ap_analysis.get('total_ap', 0) > 0 else 0, 2)
                 }]
                 
                 pd.DataFrame(ap_summary_data).to_excel(writer, sheet_name='📊_AP_EXECUTIVE_SUMMARY', index=False)
+                has_data = True
+                print("✅ Created AP Executive Summary")
                 
-                # 2. DETAILED AGING ANALYSIS
+                # 2. AGING ANALYSIS - Always create even if empty
+                aging_analysis = ap_analysis.get('aging_analysis', {})
                 aging_data = []
-                total_aging_amount = sum(data['amount'] for data in ap_analysis['aging_analysis'].values())
+                total_aging_amount = sum(data.get('amount', 0) for data in aging_analysis.values())
                 
-                for period, data in ap_analysis['aging_analysis'].items():
+                for period in ['0-30', '31-60', '61-90', '90+']:
+                    data = aging_analysis.get(period, {'count': 0, 'amount': 0, 'transactions': []})
                     aging_data.append({
                         'Age_Period': period + ' days',
-                        'Transaction_Count': data['count'],
-                        'Total_Amount': data['amount'],
-                        'Percentage_of_Outstanding': round((data['amount']/total_aging_amount*100) if total_aging_amount > 0 else 0, 2),
+                        'Transaction_Count': data.get('count', 0),
+                        'Total_Amount': data.get('amount', 0),
+                        'Percentage_of_Outstanding': round((data.get('amount', 0)/total_aging_amount*100) if total_aging_amount > 0 else 0, 2),
                         'Risk_Level': 'Low' if period == '0-30' else 'Medium' if period in ['31-60'] else 'High',
                         'Action_Required': 'Monitor' if period == '0-30' else 'Follow up' if period == '31-60' else 'Urgent action needed'
                     })
                     
-                    # Create detailed transaction list for each aging period
-                    if data['transactions']:
-                        period_df = pd.DataFrame(data['transactions'])
-                        period_sheet = f"AP_AGING_{period.replace('-', '_')}_DAYS"
-                        period_df.to_excel(writer, sheet_name=period_sheet, index=False)
+                    # Create detailed transaction list for each aging period if data exists
+                    if data.get('transactions'):
+                        try:
+                            period_df = pd.DataFrame(data['transactions'])
+                            period_sheet = f"AP_AGING_{period.replace('-', '_')}_DAYS"
+                            period_df.to_excel(writer, sheet_name=period_sheet, index=False)
+                            print(f"✅ Created {period_sheet}")
+                        except Exception as e:
+                            print(f"⚠️ Could not create aging sheet for {period}: {e}")
                 
                 pd.DataFrame(aging_data).to_excel(writer, sheet_name='📅_AP_AGING_ANALYSIS', index=False)
+                print("✅ Created AP Aging Analysis")
                 
-                # 3. VENDOR BREAKDOWN WITH DETAILS
+                # 3. VENDOR BREAKDOWN - Always create even if empty
+                vendor_breakdown = ap_analysis.get('vendor_breakdown', {})
                 vendor_summary = []
-                for vendor, data in ap_analysis['vendor_breakdown'].items():
+                
+                if vendor_breakdown:
+                    for vendor, data in vendor_breakdown.items():
+                        vendor_summary.append({
+                            'Vendor_Category': vendor,
+                            'Total_Amount': data.get('total_amount', 0),
+                            'Outstanding_Amount': data.get('outstanding_amount', 0),
+                            'Paid_Amount': data.get('paid_amount', 0),
+                            'Transaction_Count': data.get('transaction_count', 0),
+                            'Outstanding_Percentage': round((data.get('outstanding_amount', 0)/data.get('total_amount', 1)*100) if data.get('total_amount', 0) > 0 else 0, 2),
+                            'Payment_Completion': round((data.get('paid_amount', 0)/data.get('total_amount', 1)*100) if data.get('total_amount', 0) > 0 else 0, 2)
+                        })
+                        
+                        # Create detailed vendor transaction sheet if data exists
+                        if data.get('transactions'):
+                            try:
+                                vendor_df = pd.DataFrame(data['transactions'])
+                                vendor_sheet = f"AP_VENDOR_{vendor.replace(' ', '_')}"[:25]
+                                vendor_df.to_excel(writer, sheet_name=vendor_sheet, index=False)
+                                print(f"✅ Created {vendor_sheet}")
+                            except Exception as e:
+                                print(f"⚠️ Could not create vendor sheet for {vendor}: {e}")
+                else:
+                    # Create empty vendor summary
                     vendor_summary.append({
-                        'Vendor_Category': vendor,
-                        'Total_Amount': data['total_amount'],
-                        'Outstanding_Amount': data['outstanding_amount'],
-                        'Paid_Amount': data['paid_amount'],
-                        'Transaction_Count': data['transaction_count'],
-                        'Outstanding_Percentage': round((data['outstanding_amount']/data['total_amount']*100) if data['total_amount'] > 0 else 0, 2),
-                        'Payment_Completion': round((data['paid_amount']/data['total_amount']*100) if data['total_amount'] > 0 else 0, 2)
+                        'Vendor_Category': 'No AP data found',
+                        'Total_Amount': 0,
+                        'Outstanding_Amount': 0,
+                        'Paid_Amount': 0,
+                        'Transaction_Count': 0,
+                        'Outstanding_Percentage': 0,
+                        'Payment_Completion': 0
                     })
-                    
-                    # Create detailed vendor transaction sheet
-                    if data['transactions']:
-                        vendor_df = pd.DataFrame(data['transactions'])
-                        vendor_sheet = f"AP_VENDOR_{vendor.replace(' ', '_')}"[:25]
-                        vendor_df.to_excel(writer, sheet_name=vendor_sheet, index=False)
                 
                 pd.DataFrame(vendor_summary).to_excel(writer, sheet_name='🏢_AP_VENDOR_BREAKDOWN', index=False)
+                print("✅ Created AP Vendor Breakdown")
                 
-                # 4. STATUS BREAKDOWN
+                # 4. STATUS BREAKDOWN - Always create even if empty
+                status_breakdown = ap_analysis.get('status_breakdown', {})
                 status_data = []
-                for status, data in ap_analysis['status_breakdown'].items():
+                
+                if status_breakdown:
+                    for status, data in status_breakdown.items():
+                        status_data.append({
+                            'Payment_Status': status,
+                            'Transaction_Count': data.get('count', 0),
+                            'Total_Amount': data.get('amount', 0),
+                            'Percentage': round((data.get('count', 0)/ap_analysis.get('total_transactions', 1)*100) if ap_analysis.get('total_transactions', 0) > 0 else 0, 2)
+                        })
+                        
+                        # Create detailed status transaction sheet if data exists
+                        if data.get('transactions'):
+                            try:
+                                status_df = pd.DataFrame(data['transactions'])
+                                status_sheet = f"AP_STATUS_{status.replace(' ', '_')}"[:25]
+                                status_df.to_excel(writer, sheet_name=status_sheet, index=False)
+                                print(f"✅ Created {status_sheet}")
+                            except Exception as e:
+                                print(f"⚠️ Could not create status sheet for {status}: {e}")
+                else:
+                    # Create empty status summary
                     status_data.append({
-                        'Payment_Status': status,
-                        'Transaction_Count': data['count'],
-                        'Total_Amount': data['amount'],
-                        'Percentage': round((data['count']/ap_analysis['total_transactions']*100) if ap_analysis['total_transactions'] > 0 else 0, 2)
+                        'Payment_Status': 'No AP data found',
+                        'Transaction_Count': 0,
+                        'Total_Amount': 0,
+                        'Percentage': 0
                     })
-                    
-                    # Create detailed status transaction sheet
-                    if data['transactions']:
-                        status_df = pd.DataFrame(data['transactions'])
-                        status_sheet = f"AP_STATUS_{status.replace(' ', '_')}"[:25]
-                        status_df.to_excel(writer, sheet_name=status_sheet, index=False)
                 
                 pd.DataFrame(status_data).to_excel(writer, sheet_name='📋_AP_STATUS_BREAKDOWN', index=False)
+                print("✅ Created AP Status Breakdown")
             
             elif analysis_type == 'ar_analysis':
+                print("📋 Processing AR Analysis...")
                 ar_analysis = generate_ar_analysis(sap_df)
                 
-                # Similar comprehensive structure for AR analysis
-                # [Similar code structure as AP but for AR data]
-                
-                # 1. AR EXECUTIVE SUMMARY
+                # 1. AR EXECUTIVE SUMMARY - Always create this
                 ar_summary_data = [{
                     'Metric': 'Total Accounts Receivable',
-                    'Amount': ar_analysis['total_ar'],
-                    'Count': ar_analysis['total_transactions'],
+                    'Amount': ar_analysis.get('total_ar', 0),
+                    'Count': ar_analysis.get('total_transactions', 0),
                     'Percentage': 100.0
                 }, {
                     'Metric': 'Outstanding AR',
-                    'Amount': ar_analysis['outstanding_ar'],
-                    'Count': ar_analysis['outstanding_transactions'],
-                    'Percentage': round((ar_analysis['outstanding_ar']/ar_analysis['total_ar']*100) if ar_analysis['total_ar'] > 0 else 0, 2)
+                    'Amount': ar_analysis.get('outstanding_ar', 0),
+                    'Count': ar_analysis.get('outstanding_transactions', 0),
+                    'Percentage': round((ar_analysis.get('outstanding_ar', 0)/ar_analysis.get('total_ar', 1)*100) if ar_analysis.get('total_ar', 0) > 0 else 0, 2)
                 }, {
                     'Metric': 'Received AR',
-                    'Amount': ar_analysis['received_ar'],
-                    'Count': ar_analysis['received_transactions'],
-                    'Percentage': round((ar_analysis['received_ar']/ar_analysis['total_ar']*100) if ar_analysis['total_ar'] > 0 else 0, 2)
+                    'Amount': ar_analysis.get('received_ar', 0),
+                    'Count': ar_analysis.get('received_transactions', 0),
+                    'Percentage': round((ar_analysis.get('received_ar', 0)/ar_analysis.get('total_ar', 1)*100) if ar_analysis.get('total_ar', 0) > 0 else 0, 2)
                 }]
                 
                 pd.DataFrame(ar_summary_data).to_excel(writer, sheet_name='📊_AR_EXECUTIVE_SUMMARY', index=False)
+                has_data = True
+                print("✅ Created AR Executive Summary")
                 
-                # Continue with similar comprehensive AR analysis sheets...
+                # 2. AR AGING ANALYSIS - Always create even if empty
+                aging_analysis = ar_analysis.get('aging_analysis', {})
+                aging_data = []
+                total_aging_amount = sum(data.get('amount', 0) for data in aging_analysis.values())
+                
+                for period in ['0-30', '31-60', '61-90', '90+']:
+                    data = aging_analysis.get(period, {'count': 0, 'amount': 0, 'transactions': []})
+                    aging_data.append({
+                        'Age_Period': period + ' days',
+                        'Transaction_Count': data.get('count', 0),
+                        'Total_Amount': data.get('amount', 0),
+                        'Percentage_of_Outstanding': round((data.get('amount', 0)/total_aging_amount*100) if total_aging_amount > 0 else 0, 2),
+                        'Risk_Level': 'Low' if period == '0-30' else 'Medium' if period in ['31-60'] else 'High',
+                        'Action_Required': 'Monitor' if period == '0-30' else 'Follow up' if period == '31-60' else 'Urgent action needed'
+                    })
+                
+                pd.DataFrame(aging_data).to_excel(writer, sheet_name='📅_AR_AGING_ANALYSIS', index=False)
+                print("✅ Created AR Aging Analysis")
+                
+                # 3. CUSTOMER BREAKDOWN - Always create even if empty
+                customer_breakdown = ar_analysis.get('customer_breakdown', {})
+                customer_summary = []
+                
+                if customer_breakdown:
+                    for customer, data in customer_breakdown.items():
+                        customer_summary.append({
+                            'Customer_Category': customer,
+                            'Total_Amount': data.get('total_amount', 0),
+                            'Outstanding_Amount': data.get('outstanding_amount', 0),
+                            'Received_Amount': data.get('received_amount', 0),
+                            'Transaction_Count': data.get('transaction_count', 0),
+                            'Outstanding_Percentage': round((data.get('outstanding_amount', 0)/data.get('total_amount', 1)*100) if data.get('total_amount', 0) > 0 else 0, 2),
+                            'Collection_Rate': round((data.get('received_amount', 0)/data.get('total_amount', 1)*100) if data.get('total_amount', 0) > 0 else 0, 2)
+                        })
+                else:
+                    # Create empty customer summary
+                    customer_summary.append({
+                        'Customer_Category': 'No AR data found',
+                        'Total_Amount': 0,
+                        'Outstanding_Amount': 0,
+                        'Received_Amount': 0,
+                        'Transaction_Count': 0,
+                        'Outstanding_Percentage': 0,
+                        'Collection_Rate': 0
+                    })
+                
+                pd.DataFrame(customer_summary).to_excel(writer, sheet_name='👥_AR_CUSTOMER_BREAKDOWN', index=False)
+                print("✅ Created AR Customer Breakdown")
+                
+                # 4. AR STATUS BREAKDOWN - Always create even if empty
+                status_breakdown = ar_analysis.get('status_breakdown', {})
+                status_data = []
+                
+                if status_breakdown:
+                    for status, data in status_breakdown.items():
+                        status_data.append({
+                            'Collection_Status': status,
+                            'Transaction_Count': data.get('count', 0),
+                            'Total_Amount': data.get('amount', 0),
+                            'Percentage': round((data.get('count', 0)/ar_analysis.get('total_transactions', 1)*100) if ar_analysis.get('total_transactions', 0) > 0 else 0, 2)
+                        })
+                else:
+                    # Create empty status summary
+                    status_data.append({
+                        'Collection_Status': 'No AR data found',
+                        'Transaction_Count': 0,
+                        'Total_Amount': 0,
+                        'Percentage': 0
+                    })
+                
+                pd.DataFrame(status_data).to_excel(writer, sheet_name='📋_AR_STATUS_BREAKDOWN', index=False)
+                print("✅ Created AR Status Breakdown")
                 
             elif analysis_type == 'combined_dashboard':
+                print("📋 Processing Combined Dashboard...")
+                
+                # Get all analyses
                 ap_analysis = generate_ap_analysis(sap_df)
                 ar_analysis = generate_ar_analysis(sap_df)
                 ap_ar_cash_flow = generate_ap_ar_cash_flow(sap_df)
                 
-                # Combined comprehensive dashboard
+                # 1. COMBINED DASHBOARD SUMMARY - Always create this
                 dashboard_data = [{
                     'Category': 'Accounts Payable',
-                    'Total_Amount': ap_analysis['total_ap'],
-                    'Outstanding_Amount': ap_analysis['outstanding_ap'],
-                    'Paid_Received_Amount': ap_analysis['paid_ap'],
-                    'Outstanding_Count': ap_analysis['outstanding_transactions'],
-                    'Total_Count': ap_analysis['total_transactions'],
-                    'Cash_Flow_Impact': ap_ar_cash_flow['ap_net_flow'],
-                    'Efficiency_Rate': round((ap_analysis['paid_ap']/ap_analysis['total_ap']*100) if ap_analysis['total_ap'] > 0 else 0, 2)
+                    'Total_Amount': ap_analysis.get('total_ap', 0),
+                    'Outstanding_Amount': ap_analysis.get('outstanding_ap', 0),
+                    'Paid_Received_Amount': ap_analysis.get('paid_ap', 0),
+                    'Outstanding_Count': ap_analysis.get('outstanding_transactions', 0),
+                    'Total_Count': ap_analysis.get('total_transactions', 0),
+                    'Cash_Flow_Impact': ap_ar_cash_flow.get('ap_net_flow', 0),
+                    'Efficiency_Rate': round((ap_analysis.get('paid_ap', 0)/ap_analysis.get('total_ap', 1)*100) if ap_analysis.get('total_ap', 0) > 0 else 0, 2)
                 }, {
                     'Category': 'Accounts Receivable',
-                    'Total_Amount': ar_analysis['total_ar'],
-                    'Outstanding_Amount': ar_analysis['outstanding_ar'],
-                    'Paid_Received_Amount': ar_analysis['received_ar'],
-                    'Outstanding_Count': ar_analysis['outstanding_transactions'],
-                    'Total_Count': ar_analysis['total_transactions'],
-                    'Cash_Flow_Impact': ap_ar_cash_flow['ar_net_flow'],
-                    'Efficiency_Rate': round((ar_analysis['received_ar']/ar_analysis['total_ar']*100) if ar_analysis['total_ar'] > 0 else 0, 2)
+                    'Total_Amount': ar_analysis.get('total_ar', 0),
+                    'Outstanding_Amount': ar_analysis.get('outstanding_ar', 0),
+                    'Paid_Received_Amount': ar_analysis.get('received_ar', 0),
+                    'Outstanding_Count': ar_analysis.get('outstanding_transactions', 0),
+                    'Total_Count': ar_analysis.get('total_transactions', 0),
+                    'Cash_Flow_Impact': ap_ar_cash_flow.get('ar_net_flow', 0),
+                    'Efficiency_Rate': round((ar_analysis.get('received_ar', 0)/ar_analysis.get('total_ar', 1)*100) if ar_analysis.get('total_ar', 0) > 0 else 0, 2)
                 }]
                 
                 pd.DataFrame(dashboard_data).to_excel(writer, sheet_name='📊_COMBINED_AP_AR_DASHBOARD', index=False)
+                has_data = True
+                print("✅ Created Combined Dashboard")
                 
-                # Add both AP and AR detailed sheets to combined download
-                # [Include all the detailed sheets from both AP and AR analysis]
+                # 2. KEY METRICS SUMMARY
+                key_metrics = [{
+                    'Metric': 'Total Outstanding (AP + AR)',
+                    'Value': ap_analysis.get('outstanding_ap', 0) + ar_analysis.get('outstanding_ar', 0),
+                    'Details': 'Combined outstanding amounts'
+                }, {
+                    'Metric': 'Net Cash Flow Impact',
+                    'Value': ap_ar_cash_flow.get('combined_net_flow', 0),
+                    'Details': 'Combined AP/AR cash flow impact'
+                }, {
+                    'Metric': 'AP Payment Efficiency',
+                    'Value': round((ap_analysis.get('paid_ap', 0)/ap_analysis.get('total_ap', 1)*100) if ap_analysis.get('total_ap', 0) > 0 else 0, 2),
+                    'Details': 'Percentage of AP paid'
+                }, {
+                    'Metric': 'AR Collection Efficiency',
+                    'Value': round((ar_analysis.get('received_ar', 0)/ar_analysis.get('total_ar', 1)*100) if ar_analysis.get('total_ar', 0) > 0 else 0, 2),
+                    'Details': 'Percentage of AR collected'
+                }]
+                
+                pd.DataFrame(key_metrics).to_excel(writer, sheet_name='📈_KEY_METRICS', index=False)
+                print("✅ Created Key Metrics")
+                
+                # 3. RECOMMENDATIONS
+                recommendations = [{
+                    'Category': 'AP Management',
+                    'Recommendation': 'Monitor payment schedules to optimize cash flow',
+                    'Priority': 'Medium',
+                    'Impact': 'Improved cash flow management'
+                }, {
+                    'Category': 'AR Management',
+                    'Recommendation': 'Implement collection follow-up procedures',
+                    'Priority': 'High',
+                    'Impact': 'Reduced outstanding receivables'
+                }, {
+                    'Category': 'Cash Flow',
+                    'Recommendation': 'Balance AP payments with AR collections',
+                    'Priority': 'High',
+                    'Impact': 'Optimized working capital'
+                }]
+                
+                pd.DataFrame(recommendations).to_excel(writer, sheet_name='💡_RECOMMENDATIONS', index=False)
+                print("✅ Created Recommendations")
+            
+            # Safety check - if no data was written, create a default sheet
+            if not has_data:
+                print("⚠️ No data found, creating default sheet...")
+                default_data = [{
+                    'Message': 'No AP/AR data found in the uploaded file',
+                    'Suggestion': 'Please ensure your data contains AP/AR transactions',
+                    'Help': 'Contact support if you need assistance'
+                }]
+                pd.DataFrame(default_data).to_excel(writer, sheet_name='📋_NO_DATA_FOUND', index=False)
+                has_data = True
+        
+        if not has_data:
+            return jsonify({'error': 'No data could be processed. Please check your data format.'}), 400
+        
+        print(f"✅ Successfully created Excel file: {filename}")
         
         return send_file(
             filepath,
@@ -3846,6 +4181,9 @@ def download_ap_ar_analysis(analysis_type):
         )
         
     except Exception as e:
+        print(f"❌ Download error: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': f'Download failed: {str(e)}'}), 500
 @app.route('/debug_invoice_matching', methods=['GET'])
 def debug_invoice_matching():
