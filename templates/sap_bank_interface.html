@@ -6,9 +6,9 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #1e3a8a;
+            --primary-color: #2563eb;
+            --primary-dark: #1d4ed8;
             --primary-light: #3b82f6;
-            --primary-dark: #1e293b;
             --secondary-color: #059669;
             --secondary-light: #10b981;
             --accent-color: #dc2626;
@@ -27,17 +27,17 @@
             --bg-tertiary: #f1f5f9;
             --border-color: #e5e7eb;
             --border-light: #f3f4f6;
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
             --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
             --gradient-primary: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
             --gradient-secondary: linear-gradient(135deg, var(--secondary-color) 0%, var(--secondary-light) 100%);
-            --border-radius: 8px;
-            --border-radius-lg: 12px;
-            --border-radius-xl: 16px;
+            --border-radius: 6px;
+            --border-radius-lg: 8px;
+            --border-radius-xl: 12px;
             --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
 
         * {
@@ -48,7 +48,7 @@
 
         body {
             font-family: var(--font-family);
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            background: #f8fafc;
             color: var(--text-primary);
             line-height: 1.6;
             min-height: 100vh;
@@ -56,52 +56,76 @@
 
         /* Header & Navigation */
         .header {
-            background: var(--gradient-primary);
-            color: white;
-            padding: 2rem 0;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .header::before {
-            content: '';
-            position: absolute;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem 0;
+            position: sticky;
             top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
-            opacity: 0.5;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
         }
 
         .header-content {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 0 2rem;
-            position: relative;
-            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
-        .header h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
+        .header-left {
             display: flex;
             align-items: center;
             gap: 1rem;
         }
 
         .header-icon {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 0.75rem;
+            background: var(--gradient-primary);
+            color: white;
+            width: 3rem;
+            height: 3rem;
             border-radius: var(--border-radius-lg);
-            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            box-shadow: var(--shadow-md);
         }
 
-        .header p {
-            font-size: 1.125rem;
-            opacity: 0.9;
-            font-weight: 400;
+        .header-text h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .header-text p {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .header-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-secondary);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success-color);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
 
         /* Main Container */
@@ -115,21 +139,15 @@
         .section-card {
             background: var(--bg-primary);
             border-radius: var(--border-radius-xl);
-            box-shadow: var(--shadow-lg);
+            box-shadow: var(--shadow-sm);
             margin-bottom: 2rem;
-            overflow: hidden;
             border: 1px solid var(--border-light);
-            transition: var(--transition);
-        }
-
-        .section-card:hover {
-            box-shadow: var(--shadow-xl);
-            transform: translateY(-2px);
+            overflow: hidden;
         }
 
         .section-header {
             padding: 1.5rem 2rem;
-            background: var(--bg-tertiary);
+            background: var(--bg-secondary);
             border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: center;
@@ -139,23 +157,19 @@
         .section-number {
             background: var(--gradient-primary);
             color: white;
-            width: 3rem;
-            height: 3rem;
+            width: 2.5rem;
+            height: 2.5rem;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 700;
-            font-size: 1.25rem;
-            box-shadow: var(--shadow-md);
-        }
-
-        .section-title {
-            flex: 1;
+            font-weight: 600;
+            font-size: 1rem;
+            box-shadow: var(--shadow-sm);
         }
 
         .section-title h2 {
-            font-size: 1.5rem;
+            font-size: 1.25rem;
             font-weight: 600;
             color: var(--text-primary);
             margin-bottom: 0.25rem;
@@ -173,12 +187,12 @@
         /* Grid Layout */
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
             gap: 1.5rem;
         }
 
         .grid-sm {
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 1rem;
         }
 
@@ -191,42 +205,24 @@
             text-align: center;
             transition: var(--transition);
             position: relative;
-            overflow: hidden;
-        }
-
-        .upload-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(45deg, transparent 40%, rgba(59, 130, 246, 0.05) 50%, transparent 60%);
-            transform: translateX(-100%);
-            transition: transform 0.6s;
-        }
-
-        .upload-card:hover::before {
-            transform: translateX(100%);
         }
 
         .upload-card:hover {
             border-color: var(--primary-light);
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.02) 0%, rgba(59, 130, 246, 0.05) 100%);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
+            background: var(--bg-secondary);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
         }
 
         .upload-card.dragover {
             border-color: var(--success-color);
-            background: linear-gradient(135deg, rgba(5, 150, 105, 0.05) 0%, rgba(5, 150, 105, 0.1) 100%);
+            background: rgba(5, 150, 105, 0.05);
         }
 
         .upload-icon {
-            font-size: 3rem;
+            font-size: 2.5rem;
             color: var(--primary-light);
             margin-bottom: 1rem;
-            display: block;
         }
 
         .upload-card h3 {
@@ -250,29 +246,12 @@
             padding: 0.75rem 1.5rem;
             border: none;
             border-radius: var(--border-radius);
-            font-weight: 600;
+            font-weight: 500;
             font-size: 0.875rem;
             text-decoration: none;
             cursor: pointer;
             transition: var(--transition);
-            position: relative;
-            overflow: hidden;
             box-shadow: var(--shadow-sm);
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
-        }
-
-        .btn:hover::before {
-            left: 100%;
         }
 
         .btn-primary {
@@ -281,8 +260,8 @@
         }
 
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
         }
 
         .btn-secondary {
@@ -291,14 +270,14 @@
         }
 
         .btn-secondary:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
         }
 
         .btn-outline {
             background: transparent;
             color: var(--primary-color);
-            border: 2px solid var(--primary-color);
+            border: 1px solid var(--primary-color);
         }
 
         .btn-outline:hover {
@@ -320,7 +299,6 @@
             opacity: 0.6;
             cursor: not-allowed;
             transform: none !important;
-            box-shadow: var(--shadow-sm) !important;
         }
 
         .btn-group {
@@ -332,8 +310,8 @@
 
         /* File Info */
         .file-info {
-            background: linear-gradient(135deg, rgba(5, 150, 105, 0.1) 0%, rgba(5, 150, 105, 0.05) 100%);
-            border: 1px solid rgba(5, 150, 105, 0.2);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
             border-radius: var(--border-radius);
             padding: 1rem;
             margin-top: 1rem;
@@ -377,11 +355,10 @@
 
         .progress {
             width: 100%;
-            height: 8px;
+            height: 6px;
             background: var(--bg-tertiary);
-            border-radius: 4px;
+            border-radius: 3px;
             overflow: hidden;
-            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
         }
 
         .progress-bar {
@@ -389,24 +366,6 @@
             background: var(--gradient-primary);
             width: 0%;
             transition: width 0.3s ease;
-            position: relative;
-        }
-
-        .progress-bar::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            right: 0;
-            background: linear-gradient(45deg, rgba(255,255,255,0.2) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.2) 75%, transparent 75%);
-            background-size: 20px 20px;
-            animation: progress-stripe 1s linear infinite;
-        }
-
-        @keyframes progress-stripe {
-            0% { background-position: 0 0; }
-            100% { background-position: 20px 0; }
         }
 
         /* Stats Cards */
@@ -417,35 +376,55 @@
             margin: 1.5rem 0;
         }
 
+        /* Horizontal Stats Grid for Dashboard */
+        .stats-grid-horizontal {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            justify-content: space-between;
+            align-items: stretch;
+            width: 100%;
+        }
+
+        .stats-grid-horizontal .stat-card {
+            flex: 1 !important;
+            min-width: 0 !important;
+            max-width: none !important;
+            margin-bottom: 0 !important;
+            width: auto !important;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid-horizontal {
+                flex-direction: column !important;
+                flex-wrap: wrap;
+            }
+            
+            .stats-grid-horizontal .stat-card {
+                min-width: 100% !important;
+                max-width: 100% !important;
+            }
+        }
+
         .stat-card {
             background: var(--bg-primary);
             padding: 1.5rem;
             border-radius: var(--border-radius-lg);
             text-align: center;
-            box-shadow: var(--shadow-md);
+            box-shadow: var(--shadow-sm);
             border: 1px solid var(--border-light);
             transition: var(--transition);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--gradient-primary);
         }
 
         .stat-card:hover {
             transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
+            box-shadow: var(--shadow-md);
         }
 
         .stat-number {
-            font-size: 2rem;
+            font-size: 1.75rem;
             font-weight: 700;
             color: var(--text-primary);
             display: block;
@@ -476,8 +455,8 @@
         }
 
         .spinner {
-            width: 3rem;
-            height: 3rem;
+            width: 2.5rem;
+            height: 2.5rem;
             border: 3px solid var(--border-color);
             border-top: 3px solid var(--primary-light);
             border-radius: 50%;
@@ -518,21 +497,24 @@
             background: var(--bg-primary);
             border-radius: var(--border-radius-lg);
             overflow: hidden;
-            box-shadow: var(--shadow-md);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
         }
 
         .data-table th {
-            background: var(--bg-tertiary);
+            background: var(--bg-secondary);
             padding: 1rem;
             text-align: left;
             font-weight: 600;
             color: var(--text-primary);
             border-bottom: 1px solid var(--border-color);
+            font-size: 0.875rem;
         }
 
         .data-table td {
             padding: 0.75rem 1rem;
             border-bottom: 1px solid var(--border-light);
+            font-size: 0.875rem;
         }
 
         .data-table tr:hover {
@@ -552,7 +534,7 @@
         .match-score {
             background: var(--gradient-primary);
             color: white;
-            padding: 0.25rem 0.75rem;
+            padding: 0.25rem 0.5rem;
             border-radius: 1rem;
             font-size: 0.75rem;
             font-weight: 600;
@@ -567,29 +549,30 @@
             align-items: center;
             gap: 0.75rem;
             font-weight: 500;
+            border: 1px solid;
         }
 
         .alert-success {
-            background: linear-gradient(135deg, rgba(5, 150, 105, 0.1) 0%, rgba(5, 150, 105, 0.05) 100%);
-            border: 1px solid rgba(5, 150, 105, 0.2);
+            background: rgba(5, 150, 105, 0.1);
+            border-color: rgba(5, 150, 105, 0.2);
             color: var(--success-color);
         }
 
         .alert-error {
-            background: linear-gradient(135deg, rgba(220, 38, 38, 0.1) 0%, rgba(220, 38, 38, 0.05) 100%);
-            border: 1px solid rgba(220, 38, 38, 0.2);
+            background: rgba(220, 38, 38, 0.1);
+            border-color: rgba(220, 38, 38, 0.2);
             color: var(--error-color);
         }
 
         .alert-info {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
-            border: 1px solid rgba(59, 130, 246, 0.2);
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.2);
             color: var(--primary-light);
         }
 
         .alert-warning {
-            background: linear-gradient(135deg, rgba(217, 119, 6, 0.1) 0%, rgba(217, 119, 6, 0.05) 100%);
-            border: 1px solid rgba(217, 119, 6, 0.2);
+            background: rgba(217, 119, 6, 0.1);
+            border-color: rgba(217, 119, 6, 0.2);
             color: var(--warning-color);
         }
 
@@ -600,7 +583,7 @@
 
         .tab-nav {
             display: flex;
-            border-bottom: 2px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
             margin-bottom: 1.5rem;
             overflow-x: auto;
         }
@@ -609,18 +592,19 @@
             padding: 0.75rem 1.5rem;
             background: transparent;
             border: none;
-            border-bottom: 3px solid transparent;
+            border-bottom: 2px solid transparent;
             cursor: pointer;
-            font-weight: 600;
+            font-weight: 500;
             color: var(--text-secondary);
             transition: var(--transition);
             white-space: nowrap;
+            font-size: 0.875rem;
         }
 
         .tab-button.active {
             color: var(--primary-color);
             border-bottom-color: var(--primary-color);
-            background: linear-gradient(to bottom, transparent, rgba(59, 130, 246, 0.05));
+            background: rgba(59, 130, 246, 0.05);
         }
 
         .tab-button:hover {
@@ -642,8 +626,10 @@
                 padding: 1rem;
             }
 
-            .header h1 {
-                font-size: 2rem;
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
             }
 
             .grid {
@@ -698,13 +684,19 @@
     <!-- Header -->
     <header class="header">
         <div class="header-content">
-            <h1>
+            <div class="header-left">
                 <div class="header-icon">
                     <i class="fas fa-chart-line"></i>
                 </div>
-                Enterprise SAP-Bank Reconciliation Platform
-            </h1>
-            <p>Advanced financial reconciliation with AI-powered categorization and comprehensive analytics</p>
+                <div class="header-text">
+                    <h1>Enterprise SAP-Bank Reconciliation Platform</h1>
+                    <p>Advanced financial reconciliation with AI-powered categorization</p>
+                </div>
+            </div>
+            <div class="header-status">
+                <div class="status-indicator"></div>
+                <span>System Online</span>
+            </div>
         </div>
     </header>
 
@@ -716,7 +708,7 @@
                 <div class="section-number">1</div>
                 <div class="section-title">
                     <h2>Data Import & Validation</h2>
-                    <p>Upload your financial data files for processing and reconciliation</p>
+                    <p>Upload financial data files for processing and reconciliation</p>
                 </div>
             </div>
             <div class="section-content">
@@ -726,7 +718,7 @@
                         <input type="file" id="bankFile" class="hidden" accept=".xlsx,.xls,.csv">
                         <i class="fas fa-university upload-icon"></i>
                         <h3>Bank Statement Data</h3>
-                        <p>Upload your bank statement file with transaction details (Required)</p>
+                        <p>Upload bank statement file with transaction details (Required)</p>
                         <button class="btn btn-primary" onclick="document.getElementById('bankFile').click()">
                             <i class="fas fa-cloud-upload-alt"></i>
                             Choose Bank File
@@ -742,7 +734,7 @@
                         <input type="file" id="sapFile" class="hidden" accept=".xlsx,.xls,.csv">
                         <i class="fas fa-database upload-icon"></i>
                         <h3>SAP Transaction Data</h3>
-                        <p>Upload SAP file for full reconciliation (Optional for bank-only analysis)</p>
+                        <p>Upload SAP file for full reconciliation (Optional)</p>
                         <button class="btn btn-outline" onclick="document.getElementById('sapFile').click()">
                             <i class="fas fa-cloud-upload-alt"></i>
                             Choose SAP File
@@ -775,7 +767,7 @@
                 <div class="section-number">2</div>
                 <div class="section-title">
                     <h2>Reconciliation Engine</h2>
-                    <p>Advanced matching algorithms with AI-powered categorization</p>
+                    <p>AI-powered matching algorithms and categorization</p>
                 </div>
             </div>
             <div class="section-content">
@@ -801,7 +793,7 @@
                         <i class="fas fa-chart-pie"></i>
                         Reconciliation Summary
                     </h3>
-                    <div class="stats-grid" id="summaryStats"></div>
+                    <div class="stats-grid-horizontal" id="summaryStats"></div>
                     <div id="validationStatus"></div>
                 </div>
             </div>
@@ -812,8 +804,8 @@
             <div class="section-header">
                 <div class="section-number">3</div>
                 <div class="section-title">
-                    <h2>Advanced Analytics & Reports</h2>
-                    <p>Comprehensive analysis with category breakdown and cash flow insights</p>
+                    <h2>Analytics & Reports</h2>
+                    <p>Comprehensive analysis with category breakdown and insights</p>
                 </div>
             </div>
             <div class="section-content">
@@ -911,8 +903,8 @@
             <div class="section-header">
                 <div class="section-number">4</div>
                 <div class="section-title">
-                    <h2>Accounts Payable & Receivable Management</h2>
-                    <p>Comprehensive AP/AR analysis with aging and cash flow impact</p>
+                    <h2>AP/AR Management</h2>
+                    <p>Comprehensive accounts payable and receivable analysis</p>
                 </div>
             </div>
             <div class="section-content">
@@ -922,7 +914,7 @@
                         <i class="fas fa-tachometer-alt"></i>
                         AP/AR Dashboard Overview
                     </h3>
-                    <div class="stats-grid" id="apArSummaryStats"></div>
+                    <div class="stats-grid-horizontal" id="apArSummaryStats"></div>
                     <div id="apArValidation"></div>
                 </div>
 
@@ -986,8 +978,8 @@
             <div class="section-header">
                 <div class="section-number">5</div>
                 <div class="section-title">
-                    <h2>Invoice-to-Payment Tracking</h2>
-                    <p>Automated invoice matching with payment efficiency analysis</p>
+                    <h2>Invoice-Payment Tracking</h2>
+                    <p>Automated invoice matching and payment analysis</p>
                 </div>
             </div>
             <div class="section-content">
@@ -997,7 +989,7 @@
                         <i class="fas fa-link"></i>
                         Invoice-Payment Matching Summary
                     </h3>
-                    <div class="stats-grid" id="invoicePaymentSummaryStats"></div>
+                    <div class="stats-grid-horizontal" id="invoicePaymentSummaryStats"></div>
                     <div id="invoicePaymentValidation"></div>
                 </div>
 
@@ -1006,7 +998,7 @@
                     <div class="stat-card">
                         <i class="fas fa-sync-alt stat-icon"></i>
                         <h3 class="font-semibold mb-2">Invoice-Payment Matching</h3>
-                        <p class="text-sm text-secondary mb-3">Automated matching using AI algorithms</p>
+                        <p class="text-sm text-secondary mb-3">AI-powered automated matching</p>
                         <div class="btn-group">
                             <button class="btn btn-primary btn-sm" onclick="runInvoicePaymentMatching()">
                                 <i class="fas fa-play"></i>
@@ -1063,9 +1055,9 @@
                                 <i class="fas fa-eye"></i>
                                 View Orphaned
                             </button>
-                            <!-- Add this button in the orphaned payments section -->
-                            <button onclick="downloadOrphanedPayments()" class="btn btn-success btn-sm">
-                                <i class="fas fa-download"></i> Download Orphaned Analysis
+                            <button class="btn btn-success btn-sm" onclick="downloadOrphanedPaymentsEnhanced()">
+                                <i class="fas fa-download"></i>
+                                Export
                             </button>
                         </div>
                     </div>
@@ -1098,7 +1090,7 @@
                 </div>
                 <div class="section-title">
                     <h2>Analysis Results</h2>
-                    <p>Detailed breakdown and insights from your data</p>
+                    <p>Detailed breakdown and insights from data analysis</p>
                 </div>
             </div>
             <div class="section-content" id="resultsContainer">
@@ -1114,7 +1106,7 @@
                 </div>
                 <div class="section-title">
                     <h2>AP/AR Analysis Results</h2>
-                    <p>Accounts payable and receivable detailed analysis</p>
+                    <p>Accounts payable and receivable analysis</p>
                 </div>
             </div>
             <div class="section-content" id="apArResultsContainer">
@@ -1137,7 +1129,20 @@
                 <!-- Dynamic content will be inserted here -->
             </div>
         </div>
-
+        <div id="orphanedPaymentsResults" class="section-card results-section hidden">
+            <div class="section-header">
+                <div class="section-number">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="section-title">
+                    <h2>Orphaned Payments Analysis</h2>
+                    <p>Analysis of payments without matching invoices</p>
+                </div>
+            </div>
+            <div class="section-content" id="orphanedPaymentsContainer">
+                <!-- Orphaned payments analysis results will be displayed here -->
+            </div>
+        </div>
         <!-- System Messages -->
         <div id="messageContainer">
             <!-- Alert messages will be dynamically inserted here -->
@@ -1316,48 +1321,119 @@
                 showLoading(false);
             }
         }
-        function downloadOrphanedPayments() {
-            console.log("Starting orphaned payments download...");
-            const resultsDiv = document.getElementById('orphanedPaymentsResults');
-            if (resultsDiv) {
-                resultsDiv.innerHTML = '<div class="alert alert-info">Preparing download...</div>';
-            }
-            fetch('/download_orphaned_payments', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            })
-            .then(response => {
-                console.log("Response status:", response.status);
-                if (!response.ok) {
-                    return response.json().then(errorData => {
-                        throw new Error(errorData.error || 'Download failed');
-                    });
-                }
-                return response.blob();
-            })
-            .then(blob => {
-                console.log("Blob received, size:", blob.size);
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `Orphaned_Payments_Analysis_${new Date().toISOString().slice(0, 10)}.xlsx`;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-                if (resultsDiv) {
-                    resultsDiv.innerHTML = '<div class="alert alert-success">Download completed successfully!</div>';
-                }
-            })
-            .catch(error => {
-                console.error('Download error:', error);
-                if (resultsDiv) {
-                    resultsDiv.innerHTML = `<div class="alert alert-danger">Download failed: ${error.message}</div>`;
-                }
+        // Replace the existing downloadOrphanedPayments function in your HTML with this fixed version:
+
+function downloadOrphanedPayments() {
+    console.log("Starting orphaned payments download...");
+    
+    // Show loading message
+    showAlert('Preparing orphaned payments download...', 'info');
+    
+    // Create a temporary status indicator
+    const statusDiv = document.createElement('div');
+    statusDiv.id = 'orphanedDownloadStatus';
+    statusDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin"></i> Preparing download...</div>';
+    document.getElementById('messageContainer').appendChild(statusDiv);
+    
+    fetch('/download_orphaned_payments', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => {
+        console.log("Response status:", response.status);
+        console.log("Response headers:", response.headers);
+        
+        if (!response.ok) {
+            return response.json().then(errorData => {
+                throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
             });
         }
+        
+        // Check if response is actually a blob
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) {
+            throw new Error('Invalid response format. Expected Excel file.');
+        }
+        
+        return response.blob();
+    })
+    .then(blob => {
+        console.log("Blob received, size:", blob.size);
+        
+        if (blob.size === 0) {
+            throw new Error('Downloaded file is empty');
+        }
+        
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Orphaned_Payments_Analysis_${new Date().toISOString().slice(0, 10)}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        // Update status
+        statusDiv.innerHTML = '<div class="alert alert-success"><i class="fas fa-check-circle"></i> Download completed successfully!</div>';
+        showAlert('Orphaned payments analysis downloaded successfully!', 'success');
+        
+        // Remove status after 3 seconds
+        setTimeout(() => {
+            statusDiv.remove();
+        }, 3000);
+    })
+    .catch(error => {
+        console.error('Download error:', error);
+        
+        // Update status with error
+        statusDiv.innerHTML = `<div class="alert alert-error"><i class="fas fa-exclamation-triangle"></i> Download failed: ${error.message}</div>`;
+        showAlert(`Download failed: ${error.message}`, 'error');
+        
+        // Remove status after 5 seconds
+        setTimeout(() => {
+            statusDiv.remove();
+        }, 5000);
+    });
+}
+
+// Also add this helper function to check if invoice-payment data exists before downloading
+async function checkInvoicePaymentData() {
+    try {
+        const response = await fetch('/status');
+        const data = await response.json();
+        
+        if (response.ok) {
+            if (data.invoice_payment_matching_available) {
+                return true;
+            } else {
+                showAlert('Please run invoice-payment matching first before downloading orphaned payments.', 'warning');
+                return false;
+            }
+        } else {
+            showAlert('Error checking system status', 'error');
+            return false;
+        }
+    } catch (error) {
+        showAlert(`Status check error: ${error.message}`, 'error');
+        return false;
+    }
+}
+
+// Enhanced downloadOrphanedPayments with data check
+async function downloadOrphanedPaymentsEnhanced() {
+    // First check if invoice-payment data exists
+    const dataExists = await checkInvoicePaymentData();
+    
+    if (!dataExists) {
+        return;
+    }
+    
+    // Proceed with download
+    downloadOrphanedPayments();
+}
         function displaySummaryDashboard(summary) {
             const dashboard = document.getElementById('summaryDashboard');
             const statsContainer = document.getElementById('summaryStats');
@@ -1449,7 +1525,7 @@
         }
 
         function showWelcomeMessage() {
-            showAlert('Enterprise SAP-Bank Reconciliation Platform Ready! Upload your bank statement to begin analysis.', 'info');
+            showAlert('Enterprise SAP-Bank Reconciliation Platform Ready! Upload bank statement to begin analysis.', 'info');
         }
 
         // Original working functions restored

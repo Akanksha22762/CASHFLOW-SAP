@@ -100,8 +100,6 @@ def categorize_with_openai(description, amount=0):
         from openai import OpenAI
         client = OpenAI(api_key=api_key)
         
-        # 🚀 ULTRA-OPTIMIZED PROMPT
-        
         
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
