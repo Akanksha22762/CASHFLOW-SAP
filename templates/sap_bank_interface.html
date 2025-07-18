@@ -824,6 +824,7 @@
                                 <i class="fas fa-download"></i>
                                 Export
                             </button>
+
                         </div>
                     </div>
 
@@ -1081,7 +1082,71 @@
                 </div>
             </div>
         </div>
+        <!-- Step 6: Vendor Cash Flow Analysis -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-number">6</div>
+                <div class="section-title">
+                    <h2>Vendor Cash Flow Analysis</h2>
+                    <p>AI-powered vendor-wise cash flow breakdown and analysis</p>
+                </div>
+            </div>
+            <div class="section-content">
+                <!-- Vendor Cash Flow Dashboard -->
+                <div id="vendorCashFlowDashboard" class="hidden">
+                    <h3 class="mb-3">
+                        <i class="fas fa-industry"></i>
+                        Vendor Cash Flow Summary
+                    </h3>
+                    <div class="stats-grid-horizontal" id="vendorCashFlowSummaryStats"></div>
+                    <div id="vendorCashFlowValidation"></div>
+                </div>
 
+                <div class="grid">
+                    <!-- Run Vendor Analysis -->
+                    <div class="stat-card">
+                        <i class="fas fa-play-circle stat-icon"></i>
+                        <h3 class="font-semibold mb-2">Run Vendor Analysis</h3>
+                        <p class="text-sm text-secondary mb-3">AI-powered vendor cash flow analysis</p>
+                        <div class="btn-group">
+                            <button class="btn btn-primary btn-sm" onclick="runVendorAnalysis()">
+                                <i class="fas fa-play"></i>
+                                Start Analysis
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- All Vendors Cash Flow -->
+                    <div class="stat-card">
+                        <i class="fas fa-chart-line stat-icon"></i>
+                        <h3 class="font-semibold mb-2">All Vendors Cash Flow</h3>
+                        <p class="text-sm text-secondary mb-3">Combined vendor cash flow analysis</p>
+                        <div class="btn-group">
+                            <button class="btn btn-secondary btn-sm" onclick="viewCategoryData('vendor_cashflow_all')" id="viewAllVendorsBtn" disabled>
+                                <i class="fas fa-eye"></i>
+                                View Analysis
+                            </button>
+                            <button class="btn btn-outline btn-sm" onclick="downloadFile('vendor_cashflow_all')" id="downloadAllVendorsBtn" disabled>
+                                <i class="fas fa-download"></i>
+                                Export
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Individual Vendor Selection -->
+                    <div class="stat-card">
+                        <i class="fas fa-user-tie stat-icon"></i>
+                        <h3 class="font-semibold mb-2">Individual Vendor Analysis</h3>
+                        <p class="text-sm text-secondary mb-3">Select specific vendor for detailed analysis</p>
+                        <div class="btn-group">
+                            <select id="vendorSelect" onchange="viewIndividualVendor()" class="btn btn-outline btn-sm" style="width: 100%; margin-bottom: 10px;" disabled>
+                                <option value="">Choose a vendor...</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- Results Display Section -->
         <div class="section-card results-section" id="resultsSection">
             <div class="section-header">
@@ -1528,14 +1593,11 @@ async function downloadOrphanedPaymentsEnhanced() {
             showAlert('Enterprise SAP-Bank Reconciliation Platform Ready! Upload bank statement to begin analysis.', 'info');
         }
 
-        // Original working functions restored
         async function viewCategoryData(dataType) {
             try {
                 showLoading(true);
-                
                 const response = await fetch(`/view/${dataType}`);
                 const data = await response.json();
-
                 if (response.ok) {
                     displayCategoryBreakdown(data, dataType);
                 } else {
@@ -1557,6 +1619,8 @@ async function downloadOrphanedPaymentsEnhanced() {
             if (data.type === 'category_breakdown') {
                 content = generateCategoryBreakdownHTML(data, dataType);
             } else if (data.type === 'cash_flow_breakdown') {
+                content = generateCashFlowBreakdownHTML(data);
+            } else if (data.type === 'vendor_cash_flow_breakdown') {
                 content = generateCashFlowBreakdownHTML(data);
             }
             
@@ -1657,7 +1721,7 @@ async function downloadOrphanedPaymentsEnhanced() {
             
             let html = `
                 <div class="tab-container">
-                    <h3>💰 Perfect Cash Flow Statement - Category Breakdown</h3>
+                    <h3>💰 ${data.vendor_name ? `Vendor: ${data.vendor_name} - ` : ''}${data.type === 'vendor_cash_flow_breakdown' ? 'Vendor Cash Flow' : 'Perfect Cash Flow Statement'} - Category Breakdown</h3>
                     <div class="alert alert-success">
                         <i class="fas fa-chart-line"></i>
                         <div>
@@ -1854,19 +1918,22 @@ async function downloadOrphanedPaymentsEnhanced() {
         async function downloadFile(fileType) {
             try {
                 const response = await fetch(`/download/${fileType}`);
-                
                 if (response.ok) {
                     const blob = await response.blob();
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `${fileType}_category_breakdown_${new Date().toISOString().split('T')[0]}.xlsx`;
+                    let filename;
+                    if (fileType === 'vendor_cashflow_all') {
+                        filename = `vendor_cashflow_analysis_${new Date().toISOString().split('T')[0]}.xlsx`;
+                    } else {
+                        filename = `${fileType}_category_breakdown_${new Date().toISOString().split('T')[0]}.xlsx`;
+                    }
+                    a.download = filename;
                     document.body.appendChild(a);
                     a.click();
                     window.URL.revokeObjectURL(url);
                     document.body.removeChild(a);
-                    
-                    showAlert('Category breakdown file downloaded successfully!', 'success');
+                    showAlert('File downloaded successfully!', 'success');
                 } else {
                     const data = await response.json();
                     showAlert(`Download Error: ${data.error}`, 'error');
@@ -2951,6 +3018,143 @@ async function checkStatus() {
         showAlert(`Status Error: ${error.message}`, 'error');
     }
 }
+async function runVendorAnalysis() {
+    try {
+        showLoading(true);
+        showAlert('Running vendor cash flow analysis...', 'info');
+        
+        const response = await fetch('/vendor_cashflow');
+        const data = await response.json();
+
+        if (response.ok) {
+            showAlert('Vendor cash flow analysis completed successfully!', 'success');
+            displayVendorCashFlowDashboard(data);
+            
+            // Enable buttons
+            const viewBtn = document.getElementById('viewAllVendorsBtn');
+            const downloadBtn = document.getElementById('downloadAllVendorsBtn');
+            const selectBox = document.getElementById('vendorSelect');
+            
+            if (viewBtn) viewBtn.disabled = false;
+            if (downloadBtn) downloadBtn.disabled = false;
+            if (selectBox) selectBox.disabled = false;
+            
+            // Load vendor list
+            loadVendorList();
+            
+            console.log('Vendor analysis data:', data); // For debugging
+        } else {
+            showAlert(`Vendor analysis failed: ${data.error}`, 'error');
+            console.error('Vendor analysis error:', data);
+        }
+    } catch (error) {
+        showAlert(`Vendor analysis error: ${error.message}`, 'error');
+        console.error('Vendor analysis exception:', error);
+    } finally {
+        showLoading(false);
+    }
+}
+
+
+        function displayVendorCashFlowDashboard(data) {
+            const dashboardSection = document.getElementById('vendorCashFlowDashboard');
+            const summaryStats = document.getElementById('vendorCashFlowSummaryStats');
+            
+            const summary = data.summary_stats;
+            
+            summaryStats.innerHTML = `
+                <div class="stat-card">
+                    <i class="fas fa-users stat-icon"></i>
+                    <span class="stat-number">${summary.total_vendors_matched}</span>
+                    <span class="stat-label">Total Vendors</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-exchange-alt stat-icon"></i>
+                    <span class="stat-number">${summary.total_transactions_analyzed}</span>
+                    <span class="stat-label">Total Transactions</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-dollar-sign stat-icon"></i>
+                    <span class="stat-number">${formatAmount(summary.total_amount_all_vendors)}</span>
+                    <span class="stat-label">Total Amount</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-robot stat-icon"></i>
+                    <span class="stat-number">${summary.ai_enabled ? 'Yes' : 'No'}</span>
+                    <span class="stat-label">AI Enabled</span>
+                </div>
+            `;
+            
+            dashboardSection.classList.remove('hidden');
+        }
+
+async function loadVendorList() {
+    try {
+        console.log('Loading vendor list...');
+        const response = await fetch('/vendor_list');
+        const data = await response.json();
+        
+        console.log('Vendor list response:', data);
+        
+        if (response.ok && data.status === 'success') {
+            const select = document.getElementById('vendorSelect');
+            if (!select) {
+                console.error('Vendor select element not found');
+                return;
+            }
+            
+            select.innerHTML = '<option value="">Choose a vendor...</option>';
+            
+            if (data.vendors && data.vendors.length > 0) {
+                // Sort vendors alphabetically by name
+                const sortedVendors = data.vendors.sort((a, b) => 
+                    a.vendor_name.localeCompare(b.vendor_name)
+                );
+                
+                sortedVendors.forEach(vendor => {
+                    const option = document.createElement('option');
+                    option.value = vendor.vendor_name;
+                    // Show only vendor name and category, no money amounts
+                    option.textContent = `${vendor.vendor_name} (${vendor.category})`;
+                    select.appendChild(option);
+                });
+                
+                showAlert(`Loaded ${data.vendors.length} vendors for selection`, 'success');
+                console.log(`Loaded ${data.vendors.length} vendors`);
+            } else {
+                showAlert('No vendors found in analysis', 'warning');
+            }
+        } else {
+            showAlert(`Error loading vendor list: ${data.error || 'Unknown error'}`, 'error');
+            console.error('Vendor list error:', data);
+        }
+    } catch (error) {
+        showAlert(`Error loading vendor list: ${error.message}`, 'error');
+        console.error('Vendor list exception:', error);
+    }
+}
+
+        async function viewIndividualVendor() {
+            const vendorName = document.getElementById('vendorSelect').value;
+            if (!vendorName) return;
+            
+            try {
+                showLoading(true);
+                
+                const response = await fetch(`/view_vendor_cashflow/${encodeURIComponent(vendorName)}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayCategoryBreakdown(data, `vendor_${vendorName}`);
+                } else {
+                    showAlert(`Error loading vendor cash flow: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showAlert(`Error loading vendor cash flow: ${error.message}`, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
     </script>
 </body>
 </html>

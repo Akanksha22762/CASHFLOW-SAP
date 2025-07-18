@@ -25,16 +25,17 @@ app = Flask(__name__)
 
 def load_master_data():
     try:
+        # Loading data from the Excel file
         chart_of_accounts_data = pd.read_excel("steel_plant_master_data.xlsx", sheet_name="Chart of Accounts")
         customers_data = pd.read_excel("steel_plant_master_data.xlsx", sheet_name="Customers")
-        vendors_data = pd.read_excel("steel_plant_master_data.xlsx", sheet_name="Vendors")
+        vendors_data = pd.read_excel("steel_plant_master_data.xlsx", sheet_name="Vendors")  # Vendor data loaded
         revenue_centres_data = pd.read_excel("steel_plant_master_data.xlsx", sheet_name="Revenue Centres")
         cost_centres_data = pd.read_excel("steel_plant_master_data.xlsx", sheet_name="Cost Centres")
 
         return {
             "chart_of_accounts": chart_of_accounts_data,
             "customers": customers_data,
-            "vendors": vendors_data,
+            "vendors": vendors_data,  # Ensure that vendor data is returned here
             "revenue_centres": revenue_centres_data,
             "cost_centres": cost_centres_data
         }
@@ -49,6 +50,318 @@ def load_master_data():
         print(f"❌ Unexpected error: {str(e)}")
         return None
 
+# Add these functions to your app1.py file (replace existing vendor functions)
+
+def enhanced_match_vendor_to_description(description, vendor_data, use_ai=True):
+    """
+    Enhanced vendor matching with AI support - handles salary/payroll specially
+    """
+    if pd.isna(description) or not description:
+        return "Unknown Vendor"
+    
+    desc_lower = str(description).lower()
+    
+    # SPECIAL HANDLING FOR SALARY/PAYROLL - Don't treat as vendor transactions
+    salary_patterns = ['salary', 'wages', 'payroll', 'bonus', 'incentive', 'commission', 'overtime',
+                      'employee', 'staff', 'pf', 'esi', 'gratuity', 'pension', 'medical insurance',
+                      'welfare', 'training', 'recruitment', 'hr', 'human resource', 'contractor fee',
+                      'allowance', 'reimbursement', 'travel allowance', 'da', 'hra', 'conveyance']
+    
+    if any(pattern in desc_lower for pattern in salary_patterns):
+        return "Internal - Payroll"  # Special category for salary payments
+    
+    # SPECIAL HANDLING FOR OTHER INTERNAL TRANSACTIONS
+    internal_patterns = ['internal transfer', 'inter branch', 'head office', 'branch transfer',
+                        'cash deposit', 'cash withdrawal', 'bank charges', 'service charges',
+                        'interest earned', 'interest paid', 'dividend received']
+    
+    if any(pattern in desc_lower for pattern in internal_patterns):
+        return "Internal - Banking"
+    
+    # EXISTING VENDOR MATCHING LOGIC
+    # First try exact matching with vendor names
+    for _, vendor_row in vendor_data.iterrows():
+        vendor_name = str(vendor_row['Vendor Name']).lower()
+        if vendor_name in desc_lower:
+            return vendor_row['Vendor Name']
+    
+    # Try category-based matching
+    for _, vendor_row in vendor_data.iterrows():
+        category = str(vendor_row['Category']).lower()
+        vendor_name = str(vendor_row['Vendor Name'])
+        
+        # Match based on category keywords
+        if category == 'raw material' and any(word in desc_lower for word in ['steel', 'iron', 'coal', 'ore', 'raw', 'material', 'scrap', 'metal']):
+            return vendor_name
+        elif category == 'utilities' and any(word in desc_lower for word in ['electricity', 'power', 'water', 'gas', 'fuel', 'utility', 'energy']):
+            return vendor_name
+        elif category == 'transport' and any(word in desc_lower for word in ['transport', 'freight', 'cargo', 'delivery', 'shipping', 'logistics']):
+            return vendor_name
+        elif category == 'it services' and any(word in desc_lower for word in ['it', 'computer', 'software', 'system', 'network', 'tech']):
+            return vendor_name
+        elif category == 'equipment' and any(word in desc_lower for word in ['equipment', 'machinery', 'machine', 'tool', 'furnace', 'conveyor']):
+            return vendor_name
+        elif category == 'services' and any(word in desc_lower for word in ['service', 'maintenance', 'security', 'cleaning', 'legal', 'audit']):
+            return vendor_name
+        elif category == 'banking' and any(word in desc_lower for word in ['bank', 'loan', 'interest', 'emi', 'finance']):
+            return vendor_name
+        elif category == 'government' and any(word in desc_lower for word in ['tax', 'gst', 'excise', 'government', 'department']):
+            return vendor_name
+    
+    # Try fuzzy matching with vendor names
+    best_match = None
+    best_score = 0
+    
+    for _, vendor_row in vendor_data.iterrows():
+        vendor_name = str(vendor_row['Vendor Name']).lower()
+        
+        # Split vendor name into words and check for partial matches
+        vendor_words = vendor_name.split()
+        score = 0
+        
+        for word in vendor_words:
+            if len(word) > 3 and word in desc_lower:
+                score += 1
+        
+        # Calculate similarity ratio
+        similarity = SequenceMatcher(None, desc_lower, vendor_name).ratio()
+        
+        # Combined score
+        combined_score = (score / max(len(vendor_words), 1)) * 0.7 + similarity * 0.3
+        
+        if combined_score > best_score and combined_score > 0.3:
+            best_score = combined_score
+            best_match = vendor_row['Vendor Name']
+    
+    if best_match:
+        return best_match
+    
+    # If AI is enabled and no match found, use AI
+    if use_ai and os.getenv('OPENAI_API_KEY'):
+        ai_match = ai_vendor_matching(description, vendor_data)
+        if ai_match:
+            return ai_match
+    
+    # Default fallback
+    return "Unknown Vendor"
+
+def ai_vendor_matching(description, vendor_data):
+    """
+    Use AI to match vendor based on description - with salary handling
+    """
+    try:
+        from openai import OpenAI
+        client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+        
+        # Check if this is a salary/payroll transaction first
+        desc_lower = str(description).lower()
+        salary_patterns = ['salary', 'wages', 'payroll', 'bonus', 'employee', 'staff', 'pf', 'esi']
+        
+        if any(pattern in desc_lower for pattern in salary_patterns):
+            return "Internal - Payroll"
+        
+        # Create vendor list for AI with categories
+        vendor_list = []
+        for _, vendor in vendor_data.iterrows():
+            vendor_list.append(f"- {vendor['Vendor Name']} ({vendor['Category']})")
+        
+        vendor_list_str = "\n".join(vendor_list)
+        
+        prompt = f"""
+        You are a financial analyst for a steel manufacturing company. 
+        
+        TRANSACTION DESCRIPTION: "{description}"
+        
+        SPECIAL RULES:
+        - If this is salary/payroll/employee payment, respond with "Internal - Payroll"
+        - If this is bank charges/interest/internal transfer, respond with "Internal - Banking"
+        
+        AVAILABLE VENDORS:
+        {vendor_list_str}
+        
+        Based on the transaction description, identify the most likely vendor from the list above.
+        Consider the category and typical business transactions for a steel plant.
+        
+        GUIDELINES:
+        - Raw Material: steel, iron, coal, ore, scrap, chemicals
+        - Utilities: electricity, power, water, gas, fuel
+        - Transport: logistics, freight, cargo, delivery, shipping
+        - IT Services: software, hardware, systems, network
+        - Equipment: machinery, tools, furnace, conveyor
+        - Services: maintenance, security, cleaning, legal, audit
+        - Banking: loans, interest, EMI, finance
+        - Government: tax, GST, excise, regulatory
+        
+        If no clear match exists, respond with "Unknown Vendor".
+        
+        Respond with ONLY the vendor name exactly as listed, or "Unknown Vendor", or "Internal - Payroll", or "Internal - Banking".
+        """
+        
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=100,
+            temperature=0.1
+        )
+        
+        result = response.choices[0].message.content.strip()
+        
+        # Check for special internal categories first
+        if result in ["Internal - Payroll", "Internal - Banking"]:
+            print(f"✅ AI Internal Match: '{description[:30]}...' → {result}")
+            return result
+        
+        # Validate result against vendor list
+        vendor_names = vendor_data['Vendor Name'].tolist()
+        if result in vendor_names:
+            print(f"✅ AI Vendor Match: '{description[:30]}...' → {result}")
+            return result
+        elif "Unknown Vendor" in result:
+            return "Unknown Vendor"
+        else:
+            # Try partial match
+            for vendor_name in vendor_names:
+                if vendor_name.lower() in result.lower():
+                    print(f"✅ AI Vendor Match (partial): '{description[:30]}...' → {vendor_name}")
+                    return vendor_name
+        
+        return "Unknown Vendor"
+        
+    except Exception as e:
+        print(f"❌ AI Vendor matching error: {e}")
+        return "Unknown Vendor"
+
+
+def enhanced_vendor_cashflow_breakdown(df, vendor_data, use_ai=True):
+    """
+    Enhanced vendor-wise cash flow breakdown with AI support - handles internal transactions
+    """
+    print(f"🏭 Starting Enhanced Vendor Cash Flow Analysis...")
+    print(f"📊 Processing {len(df)} transactions against {len(vendor_data)} vendors")
+    
+    vendor_cashflows = {}
+    
+    # Apply vendor matching to each transaction
+    df['Vendor'] = df['Description'].apply(
+        lambda desc: enhanced_match_vendor_to_description(desc, vendor_data, use_ai)
+    )
+    
+    # Group by vendor (including internal categories)
+    for vendor_name in df['Vendor'].unique():
+        vendor_df = df[df['Vendor'] == vendor_name]
+        
+        # Handle internal transactions specially
+        if vendor_name.startswith('Internal - '):
+            vendor_category = vendor_name.split(' - ')[1]  # 'Payroll' or 'Banking'
+            payment_terms = 'Internal'
+            vendor_id = f'INT-{vendor_category.upper()}'
+        else:
+            # Get vendor details from master data
+            vendor_info = vendor_data[vendor_data['Vendor Name'] == vendor_name]
+            if not vendor_info.empty:
+                vendor_category = vendor_info.iloc[0]['Category']
+                payment_terms = vendor_info.iloc[0]['Payment Terms']
+                vendor_id = vendor_info.iloc[0]['Vendor ID']
+            else:
+                vendor_category = 'Unknown'
+                payment_terms = 'Unknown'
+                vendor_id = 'Unknown'
+        
+        # Calculate cash flow by category
+        cash_flow_categories = {
+            "Operating Activities": 0,
+            "Investing Activities": 0,
+            "Financing Activities": 0
+        }
+        
+        # Categorize transactions based on vendor category
+        for _, row in vendor_df.iterrows():
+            amount = float(row.get('Amount', 0))
+            category = row.get('Category', 'Operating Activities')
+            
+            # Override category based on vendor category for better classification
+            if vendor_category in ['Payroll', 'Raw Material', 'Utilities', 'Transport', 'Services', 'Government']:
+                cash_flow_categories['Operating Activities'] += amount
+            elif vendor_category in ['Equipment', 'Contractor']:
+                cash_flow_categories['Investing Activities'] += amount
+            elif vendor_category in ['Banking', 'Insurance']:
+                cash_flow_categories['Financing Activities'] += amount
+            else:
+                # Use original category
+                if category in cash_flow_categories:
+                    cash_flow_categories[category] += amount
+                else:
+                    cash_flow_categories['Operating Activities'] += amount
+        
+        # Calculate vendor metrics
+        total_amount = vendor_df['Amount'].sum()
+        transaction_count = len(vendor_df)
+        
+        # Separate inflows and outflows
+        inflows = vendor_df[vendor_df['Amount'] > 0]['Amount'].sum()
+        outflows = abs(vendor_df[vendor_df['Amount'] < 0]['Amount'].sum())
+        
+        # Create transaction list
+        transactions = []
+        for _, row in vendor_df.iterrows():
+            transactions.append({
+                'Description': row['Description'],
+                'Amount': row['Amount'],
+                'Date': row.get('Date', ''),
+                'Category': row.get('Category', ''),
+                'Type': row.get('Type', ''),
+                'Status': row.get('Status', ''),
+                'Cash_Flow_Direction': 'Inflow' if row['Amount'] > 0 else 'Outflow'
+            })
+        
+        vendor_cashflows[vendor_name] = {
+            'vendor_info': {
+                'vendor_id': vendor_id,
+                'vendor_name': vendor_name,
+                'category': vendor_category,
+                'payment_terms': payment_terms
+            },
+            'cash_flow_categories': cash_flow_categories,
+            'financial_metrics': {
+                'total_amount': float(total_amount),
+                'transaction_count': transaction_count,
+                'average_transaction_amount': float(total_amount / transaction_count) if transaction_count > 0 else 0,
+                'cash_inflows': float(inflows),
+                'cash_outflows': float(outflows),
+                'net_cash_flow': float(total_amount)
+            },
+            'transactions': transactions,
+            'analysis': {
+                'payment_frequency': 'High' if transaction_count > 10 else 'Medium' if transaction_count > 5 else 'Low',
+                'cash_flow_impact': 'Positive' if total_amount > 0 else 'Negative',
+                'vendor_importance': 'Critical' if abs(total_amount) > 100000 else 'Important' if abs(total_amount) > 50000 else 'Regular'
+            }
+        }
+    
+    # Calculate percentages
+    total_all_vendors = sum(vendor['financial_metrics']['total_amount'] for vendor in vendor_cashflows.values())
+    
+    for vendor_name, vendor_data in vendor_cashflows.items():
+        if total_all_vendors != 0:
+            vendor_data['financial_metrics']['percentage_of_total'] = (
+                vendor_data['financial_metrics']['total_amount'] / total_all_vendors * 100
+            )
+        else:
+            vendor_data['financial_metrics']['percentage_of_total'] = 0
+    
+    print(f"✅ Vendor Cash Flow Analysis Complete!")
+    print(f"   📈 Matched {len(vendor_cashflows)} vendors/categories")
+    print(f"   💰 Total Amount: {total_all_vendors:,.2f}")
+    
+    # Show AI usage statistics
+    ai_matched = sum(1 for vendor in df['Vendor'] if vendor != 'Unknown Vendor')
+    print(f"   🤖 AI+Rules matched: {ai_matched}/{len(df)} transactions ({ai_matched/len(df)*100:.1f}%)")
+    
+    return vendor_cashflows
+
+
+
+
 
 DATA_FOLDER = "data"
 if not os.path.exists(DATA_FOLDER):
@@ -56,94 +369,17 @@ if not os.path.exists(DATA_FOLDER):
 
 import openai
 
-def retry_openai_request(prompt, retries=3, backoff_factor=2):
-    """
-    Retry OpenAI API requests with exponential backoff.
-    """
-    for i in range(retries):
-        try:
-            response = openai.Completion.create(model="gpt-4", prompt=prompt, max_tokens=100)
-            return response
-        except openai.error.RateLimitError as e:
-            wait_time = backoff_factor ** i  # Exponential backoff
-            print(f"Rate limit exceeded, retrying in {wait_time} seconds...")
-            time.sleep(wait_time)
-        except Exception as e:
-            print(f"API error: {e}")
-            break
-    return None
-
-# Store reconciled data globally
-reconciliation_data = {}
-# 🎯 OPTIMIZED PROMPT - Best practices for hard descriptions
-
-def categorize_with_openai(description, amount=0):
-    """
-    Ultra-optimized OpenAI categorization with real-world business intelligence
-    """
-    global openai_cache
-    if description in openai_cache:
-        return openai_cache[description]
-    
-    try:
-        import openai
-        import os
-        import time
-        import random
-        
-        api_key = os.getenv('OPENAI_API_KEY')
-        if not api_key:
-            return None
-        
-        time.sleep(random.uniform(0.5, 1.0))
-        
-        from openai import OpenAI
-        client = OpenAI(api_key=api_key)
-        
-        
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=20,  # Enough for response + reasoning
-            temperature=0.1,  # Slight creativity for pattern recognition
-            timeout=30
-        )
-        
-        result = response.choices[0].message.content.strip()
-        
-        # Enhanced validation
-        valid_categories = ["Operating Activities", "Investing Activities", "Financing Activities"]
-        if result in valid_categories:
-            print(f"✅ AI: '{description[:40]}...' → {result}")
-            openai_cache[description] = result
-            return result
-        else:
-            # Extract category from longer response
-            for category in valid_categories:
-                if category.lower() in result.lower():
-                    print(f"✅ AI (extracted): '{description[:40]}...' → {category}")
-                    openai_cache[description] = category
-                    return category
-            
-            # Ultimate fallback
-            print(f"⚠️ AI unclear response for '{description[:40]}...', defaulting to Operating")
-            openai_cache[description] = "Operating Activities"
-            return "Operating Activities"
-            
-    except Exception as e:
-        print(f"❌ AI error for '{description[:40]}...': {e}")
-        return "Operating Activities"  # Safe fallback
 
 
-# 🎯 OPTIMIZED BATCH PROMPT
+
 def categorize_with_openai_batch(descriptions_list):
     """
-    Optimized batch processing with enhanced pattern recognition
+    Enhanced batch processing with universal prompt
     """
     try:
         api_key = os.getenv('OPENAI_API_KEY')
         if not api_key:
-            return {desc: "Operating Activities" for desc in descriptions_list}
+            return {desc: "Operating Activities (No AI)" for desc in descriptions_list}
         
         import time
         import random
@@ -152,56 +388,56 @@ def categorize_with_openai_batch(descriptions_list):
         from openai import OpenAI
         client = OpenAI(api_key=api_key)
 
-        # 🚀 OPTIMIZED BATCH PROMPT
+        # Enhanced batch prompt
         batch_prompt = f"""
-        Senior Financial Analyst Task: Categorize these business transactions for cash flow statement.
-        
-        QUICK REFERENCE:
-        • Operating: Daily business (sales, payments, expenses, salaries, utilities) - DEFAULT
-        • Investing: Assets & equipment (machinery, property, capex, installations)  
-        • Financing: Capital & debt (loans, EMI, interest, dividends, share capital)
-        
-        PATTERN RECOGNITION:
-        • Payment codes (NEFT, RTGS, UPI, CHQ) → Usually Operating
-        • Asset terms (EQUIP, MACH, PROP, CONST) → Investing
-        • Capital terms (LOAN, EMI, CAP, DIV) → Financing
-        • Unclear/cryptic → Operating (safe default)
-        
-        TRANSACTIONS:
-        {chr(10).join([f"{i+1}. {desc}" for i, desc in enumerate(descriptions_list)])}
-        
-        FORMAT: Respond with exactly one category per line:
-        1. Operating Activities
-        2. Investing Activities  
-        3. Operating Activities
-        (continue for all {len(descriptions_list)} transactions)
-        """
+You are a Senior Financial Controller categorizing business transactions.
+
+RULES:
+- Operating Activities: Daily operations, payroll, utilities, taxes, supplier payments (DEFAULT)
+- Investing Activities: Asset purchases, equipment, property, machinery, vehicles
+- Financing Activities: Loans, EMI, dividends, share capital, debt
+
+PATTERNS:
+- PAYROLL: salary, wages, payroll, bonus, PF, ESI, employee → Operating Activities
+- SUPPLIERS: purchase, vendor, supplier, raw material, inventory → Operating Activities  
+- UTILITIES: electricity, water, gas, fuel, telephone, rent → Operating Activities
+- TAXES: income tax, GST, TDS, statutory → Operating Activities
+- ASSETS: machinery, equipment, vehicle, building, construction → Investing Activities
+- LOANS: loan, EMI, borrowing, dividend, share capital → Financing Activities
+
+TRANSACTIONS:
+{chr(10).join([f"{i+1}. {desc}" for i, desc in enumerate(descriptions_list)])}
+
+RESPONSE FORMAT (one category per line):
+1. Operating Activities
+2. Investing Activities
+3. Operating Activities
+"""
 
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[{"role": "user", "content": batch_prompt}],
-            max_tokens=len(descriptions_list) * 10,
+            max_tokens=len(descriptions_list) * 8,
             temperature=0.1,
-            timeout=90
+            timeout=120
         )
 
         result = response.choices[0].message.content.strip()
         
-        # Robust parsing
+        # Enhanced parsing
         lines = result.split('\n')
         categories = {}
         valid_categories = ["Operating Activities", "Investing Activities", "Financing Activities"]
 
         for i, line in enumerate(lines):
             if i < len(descriptions_list):
-                # Extract category from various formats
                 category = None
                 
-                # Try standard format: "1. Operating Activities"
+                # Try standard format
                 if '. ' in line:
                     category = line.split('. ', 1)[-1].strip()
                 
-                # Try to find any valid category in the line
+                # Try to find valid category
                 if not category or category not in valid_categories:
                     for valid_cat in valid_categories:
                         if valid_cat.lower() in line.lower():
@@ -211,87 +447,24 @@ def categorize_with_openai_batch(descriptions_list):
                 # Final fallback
                 if not category or category not in valid_categories:
                     category = "Operating Activities"
-                    print(f"⚠️ Batch: Unclear response for line {i+1}, defaulting to Operating")
                 
-                categories[descriptions_list[i]] = category
+                categories[descriptions_list[i]] = f"{category} (AI)"
 
         # Ensure all descriptions have categories
         for desc in descriptions_list:
             if desc not in categories:
-                categories[desc] = "Operating Activities"
+                categories[desc] = "Operating Activities (AI)"
 
-        success_rate = len([c for c in categories.values() if c != "Operating Activities"]) / len(categories) * 100
-        print(f"✅ Batch: {len(categories)} categorized, {success_rate:.1f}% non-default classifications")
+        print(f"✅ Universal Batch: {len(categories)} categorized")
         return categories
 
     except Exception as e:
-        print(f"❌ Batch error: {e}")
-        return {desc: "Operating Activities" for desc in descriptions_list}
+        print(f"❌ Universal Batch error: {e}")
+        return {desc: "Operating Activities (AI)" for desc in descriptions_list}
 
         
 
-def is_unclear_transaction(description, amount=0):
-    """
-    ENHANCED: Much better detection to reduce unnecessary AI calls
-    """
-    if pd.isna(description) or description is None:
-        return True
-    
-    desc_str = str(description).strip()
-    desc_lower = desc_str.lower() if desc_str else ""
-    
-    # EXPANDED: Much more comprehensive clear indicators
-    clear_indicators = [
-        # Revenue/Sales
-        'sale', 'sales', 'revenue', 'client', 'customer payment', 'steel sale',
-        'export sale', 'domestic sale', 'invoice', 'advance from customer',
-        
-        # Vendor/Supplier payments
-        'vendor payment', 'supplier payment', 'payment to vendor', 'purchase',
-        'raw material', 'material purchase', 'bill payment',
-        
-        # Payroll/HR
-        'salary', 'wages', 'bonus', 'payroll', 'pf', 'provident fund', 
-        'esi', 'labor', 'welfare fund',
-        
-        # Utilities/Operating expenses
-        'electricity', 'power bill', 'water utility', 'utility', 'telephone',
-        'internet', 'rent', 'maintenance', 'repair',
-        
-        # Taxes/Statutory
-        'gst payment', 'tds', 'tax payment', 'vat', 'statutory', 'refund',
-        
-        # Financing
-        'loan', 'emi', 'interest', 'dividend', 'bank charges', 'finance charges',
-        'loan disbursement', 'loan repayment',
-        
-        # Investing
-        'machinery purchase', 'equipment purchase', 'capex', 'asset purchase',
-        'construction', 'building purchase', 'vehicle purchase',
-        
-        # Banking/General
-        'opening balance', 'closing balance', 'balance', 'transfer', 'credit',
-        'debit', 'deposit', 'withdrawal'
-    ]
-    
-    # If ANY clear indicator is found, it's NOT unclear
-    if any(indicator in desc_lower for indicator in clear_indicators):
-        return False  # Clearly categorizable, no AI needed
-    
-    # ONLY flag as unclear if it's truly cryptic
-    unclear_indicators = [
-        len(desc_str) < 4,  # Very short (reduced threshold)
-        desc_str.count('-') > 5,  # Excessive dashes
-        desc_str.count('/') > 4,  # Excessive slashes
-        # Only flag all-caps if it's very long AND has no clear words
-        (desc_str.isupper() and len(desc_str) > 25 and 
-         not any(word in desc_lower for word in ['payment', 'sale', 'purchase', 'loan', 'tax'])),
-        # Only flag coded patterns if they're very long and cryptic
-        (re.match(r'^[A-Z0-9\-/\s]*$', desc_str) and len(desc_str) > 20 and
-         not any(word in desc_lower for word in ['payment', 'sale', 'purchase']))
-    ]
-    
-    return any(unclear_indicators)
+
 
 
 def fast_categorize_batch(descriptions, amounts, use_ai=True):
@@ -379,33 +552,144 @@ def fast_categorize_batch(descriptions, amounts, use_ai=True):
         # Complete fallback to rules
         return [rule_based_categorize(desc, amt) for desc, amt in zip(descriptions, amounts)]
 
+
 def rule_based_categorize(description, amount):
     """
-    Enhanced rule-based categorization for different types of financial data
+    Enhanced rule-based categorization using universal patterns
     """
     desc_lower = str(description).lower()
     
-    # Financial Institution specific patterns
-    if any(pattern in desc_lower for pattern in ['interest income', 'loan interest', 'investment income', 'fee income']):
-        return "Operating Activities (Rule)"
-    elif any(pattern in desc_lower for pattern in ['borrowing', 'funding', 'debt issuance', 'capital']):
-        return "Financing Activities (Rule)"
-    elif any(pattern in desc_lower for pattern in ['securities purchase', 'investment purchase', 'asset acquisition']):
-        return "Investing Activities (Rule)"
+    # PAYROLL & HR - Operating Activities
+    payroll_patterns = ['salary', 'wages', 'payroll', 'bonus', 'incentive', 'commission', 'overtime',
+                       'employee', 'staff', 'pf', 'esi', 'gratuity', 'pension', 'medical insurance',
+                       'welfare', 'training', 'recruitment', 'hr', 'contractor fee']
     
-    # Administrative and operational expenses for financial institutions
-    elif any(pattern in desc_lower for pattern in ['administrative', 'personnel', 'operational', 'provision']):
-        return "Operating Activities (Rule)"
+    # VENDOR & SUPPLIER - Operating Activities  
+    vendor_patterns = ['purchase', 'procurement', 'raw material', 'inventory', 'stock', 'supplies',
+                      'vendor payment', 'supplier payment', 'trade payable', 'bill payment',
+                      'maintenance', 'repair', 'service', 'outsourcing']
     
-    # General business patterns
-    elif any(pattern in desc_lower for pattern in ['loan', 'emi', 'interest', 'dividend', 'capital', 'share', 'borrowing', 'debt']):
-        return "Financing Activities (Rule)"
-    elif any(pattern in desc_lower for pattern in ['equipment', 'machinery', 'asset', 'property', 'vehicle', 'construction', 'capex']):
-        return "Investing Activities (Rule)"
+    # UTILITIES & INFRASTRUCTURE - Operating Activities
+    utility_patterns = ['electricity', 'power', 'water', 'gas', 'fuel', 'diesel', 'petrol',
+                       'telephone', 'internet', 'communication', 'software license',
+                       'rent', 'lease', 'facility', 'housekeeping', 'security', 'insurance premium']
     
-    # Default to Operating
-    return "Operating Activities (Rule)"
+    # TAXATION - Operating Activities
+    tax_patterns = ['income tax', 'gst', 'vat', 'tds', 'advance tax', 'tax refund',
+                   'statutory', 'government fee', 'compliance', 'audit fee', 'legal expense']
+    
+    # SALES & REVENUE - Operating Activities
+    sales_patterns = ['sales', 'customer payment', 'service income', 'commission earned',
+                     'export', 'domestic sale', 'advance from customer', 'royalty']
+    
+    # CAPITAL EXPENDITURE - Investing Activities
+    capex_patterns = ['machinery', 'equipment', 'plant', 'tool', 'vehicle', 'computer',
+                     'building', 'construction', 'renovation', 'infrastructure', 'installation',
+                     'land purchase', 'property', 'asset purchase', 'capital work']
+    
+    # FINANCING - Financing Activities
+    finance_patterns = ['loan', 'emi', 'borrowing', 'debt', 'interest paid', 'dividend payment',
+                       'share capital', 'equity', 'investor funding', 'refinancing']
+    
+    # Check patterns
+    if any(pattern in desc_lower for pattern in payroll_patterns):
+        return "Operating Activities (Rule-Payroll)"
+    elif any(pattern in desc_lower for pattern in vendor_patterns):
+        return "Operating Activities (Rule-Vendor)"
+    elif any(pattern in desc_lower for pattern in utility_patterns):
+        return "Operating Activities (Rule-Utility)"
+    elif any(pattern in desc_lower for pattern in tax_patterns):
+        return "Operating Activities (Rule-Tax)"
+    elif any(pattern in desc_lower for pattern in sales_patterns):
+        return "Operating Activities (Rule-Sales)"
+    elif any(pattern in desc_lower for pattern in capex_patterns):
+        return "Investing Activities (Rule-CapEx)"
+    elif any(pattern in desc_lower for pattern in finance_patterns):
+        return "Financing Activities (Rule-Finance)"
+    
+    # Default to Operating Activities
+    return "Operating Activities (Rule-Default)"
+def categorize_with_openai(description, amount=0):
+    """
+    Enhanced OpenAI categorization with universal prompt
+    """
+    global openai_cache
+    if description in openai_cache:
+        return openai_cache[description]
+    
+    try:
+        import openai
+        import os
+        import time
+        import random
+        
+        api_key = os.getenv('OPENAI_API_KEY')
+        if not api_key:
+            return "Operating Activities (No AI)"
+        
+        time.sleep(random.uniform(0.3, 0.8))
+        
+        from openai import OpenAI
+        client = OpenAI(api_key=api_key)
+        
+        # Universal prompt for all business scenarios
+        prompt = f"""
+You are a Senior Financial Controller with 20+ years of experience in cash flow statement preparation.
 
+TRANSACTION: "{description}" | Amount: {amount}
+
+CATEGORIES:
+- Operating Activities: Daily business operations, revenue, expenses, payroll, utilities, taxes, supplier payments (DEFAULT)
+- Investing Activities: Asset purchases/sales, equipment, property, machinery, vehicles, construction
+- Financing Activities: Loans, EMI, dividends, share capital, debt transactions
+
+COMPREHENSIVE PATTERNS:
+- PAYROLL: salary, wages, payroll, bonus, PF, ESI, employee, staff → Operating Activities
+- SUPPLIERS: purchase, vendor, supplier, raw material, inventory, bills → Operating Activities  
+- UTILITIES: electricity, water, gas, fuel, telephone, internet, rent → Operating Activities
+- TAXES: income tax, GST, TDS, statutory, compliance → Operating Activities
+- SALES: sales, customer payment, service income, revenue → Operating Activities
+- ASSETS: machinery, equipment, vehicle, building, land, construction → Investing Activities
+- LOANS: loan, EMI, borrowing, interest, dividend, share capital → Financing Activities
+
+RESPONSE: Reply with exactly one category:
+Operating Activities
+Investing Activities
+Financing Activities
+"""
+        
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=30,
+            temperature=0.1,
+            timeout=45
+        )
+        
+        result = response.choices[0].message.content.strip()
+        
+        # Enhanced validation
+        valid_categories = ["Operating Activities", "Investing Activities", "Financing Activities"]
+        if result in valid_categories:
+            print(f"✅ AI Universal: '{description[:50]}...' → {result}")
+            openai_cache[description] = result
+            return f"{result} (AI)"
+        else:
+            # Extract category from response
+            for category in valid_categories:
+                if category.lower() in result.lower():
+                    print(f"✅ AI Extracted: '{description[:50]}...' → {category}")
+                    openai_cache[description] = category
+                    return f"{category} (AI)"
+            
+            # Ultimate fallback
+            print(f"⚠️ AI unclear response for '{description[:50]}...', defaulting to Operating")
+            openai_cache[description] = "Operating Activities"
+            return "Operating Activities (AI-Default)"
+            
+    except Exception as e:
+        print(f"❌ AI error for '{description[:50]}...': {e}")
+        return "Operating Activities (Error)"
 def ultra_fast_process(df, use_ai=True, max_ai_transactions=100):
     """
     Ultra-fast processing with intelligent AI usage
@@ -2145,14 +2429,14 @@ def enhanced_standardize_columns(df):
     print(f"   Sample Description: '{df_standardized['Description'].iloc[0]}'")
     
     return df_standardized
-def pure_ai_categorization(description, amount=0, context_data=None):
+def pure_ai_categorization(description, amount=0, context_data=None, vendor=None):
     """
-    Enhanced AI categorization with financial institution awareness
+    Pure AI categorization using universal prompt
     """
     global openai_cache
     
-    # Create cache key including context
-    cache_key = f"{description}_{amount}"
+    # Create cache key
+    cache_key = f"{description}_{amount}_{vendor}"
     if cache_key in openai_cache:
         return openai_cache[cache_key]
     
@@ -2166,138 +2450,72 @@ def pure_ai_categorization(description, amount=0, context_data=None):
         if not api_key:
             return "Operating Activities (No AI)"
         
-        time.sleep(random.uniform(0.2, 0.5))  # Shorter delay
+        time.sleep(random.uniform(0.2, 0.5))
         
         from openai import OpenAI
         client = OpenAI(api_key=api_key)
         
-        # Enhanced context detection
-        context_info = ""
-        if context_data:
-            context_info = f"\nContext: This appears to be {context_data.get('data_type', 'financial')} data."
+        # Universal prompt with vendor context
+        vendor_info = f" | Vendor: {vendor}" if vendor and vendor != "Unknown Vendor" else ""
+        context_info = f" | Context: {context_data.get('data_type', 'financial')}" if context_data else ""
         
-        # Add special handling for financial institution data
-        desc_lower = str(description).lower()
-        if 'ibrd' in desc_lower or 'world bank' in desc_lower:
-            context_info += "\nSpecial Note: This is World Bank/IBRD financial institution data with income statement format."
-        elif any(word in desc_lower for word in ['loans - interest', 'borrowings - interest', 'administrative', 'investments, net', 'fair value']):
-            context_info += "\nSpecial Note: This appears to be financial institution income statement data."
-        elif any(word in desc_lower for word in ['interest income', 'loan interest', 'investment income', 'fee income', 'commitment charges']):
-            context_info += "\nSpecial Note: This appears to be financial institution revenue/expense data."
-        elif any(word in desc_lower for word in ['provisions for losses', 'board of governors', 'equity duration']):
-            context_info += "\nSpecial Note: This appears to be financial institution regulatory/governance data."
+        prompt = f"""
+Senior Financial Controller: Categorize this transaction for cash flow statement.
 
+TRANSACTION: "{description}" | Amount: {amount}{vendor_info}{context_info}
 
-        if 'ibrd' in desc_lower or 'world bank' in desc_lower:
-            context_info += "\nSpecial Note: This is World Bank/IBRD financial institution data with income statement format."
-        elif 'board of governors' in desc_lower or 'approved transfers' in desc_lower:
-            context_info += "\nSpecial Note: This is a regulatory/governance transfer that should be classified as Financing Activities."
-        elif 'investments, net - trading' in desc_lower or 'equity duration extension' in desc_lower:
-            context_info += "\nSpecial Note: This is a trading/risk management activity that should be classified as Operating Activities for financial institutions."
-        
-        # Enhanced prompt with financial institution guidance
-        prompt = f"""You are an expert financial analyst specializing in cash flow statement preparation for ALL types of organizations including financial institutions.
+CATEGORIES:
+- Operating Activities: Daily business operations (DEFAULT)
+- Investing Activities: Asset purchases/sales, equipment, property
+- Financing Activities: Loans, EMI, dividends, share capital
 
-Analyze this business transaction and categorize it according to standard accounting principles.
+KEY PATTERNS:
+- PAYROLL: salary, wages, payroll, bonus, PF, ESI, employee, staff → Operating Activities
+- SUPPLIERS: purchase, vendor, supplier, raw material, inventory → Operating Activities  
+- UTILITIES: electricity, water, gas, fuel, telephone, rent → Operating Activities
+- TAXES: income tax, GST, TDS, statutory → Operating Activities
+- ASSETS: machinery, equipment, vehicle, building, construction → Investing Activities
+- LOANS: loan, EMI, borrowing, dividend, share capital → Financing Activities
 
-TRANSACTION DETAILS:
-Description: "{description}"
-Amount: {amount}
-{context_info}
-
-CATEGORIZATION RULES:
-Classify into ONE of these three cash flow categories:
-
-1. "Operating Activities" - Core business operations that generate revenue or incur expenses
-   For Financial Institutions: Interest income/expense, fee income, administrative expenses, provisions, trading income
-   For Regular Businesses: Sales revenue, customer payments, vendor payments, payroll, utilities, rent, taxes
-   Examples: Loans - Interest, Borrowings - Interest, Administrative, Provisions for losses, Trading income
-
-2. "Investing Activities" - Long-term asset acquisitions, disposals, and investments
-   For Financial Institutions: Securities purchases/sales, loan originations (if held for investment), property/equipment
-   For Regular Businesses: Equipment purchases, machinery, vehicles, buildings, land, technology systems
-   Examples: Securities investments, Equipment purchases, Asset acquisitions, Property investments
-
-3. "Financing Activities" - Capital structure changes and debt management
-   For Financial Institutions: Share capital, dividends, subordinated debt, regulatory capital transactions
-   For Regular Businesses: Loans, borrowings, loan repayments, dividends, share capital, equity investments
-   Examples: Share capital issuance, Dividends paid, Subordinated debt, Regulatory transfers
-
-SPECIAL GUIDANCE FOR FINANCIAL INSTITUTIONS:
-- Interest income/expense from core banking = Operating Activities
-- Administrative expenses = Operating Activities  
-- Fair value adjustments on trading portfolios = Operating Activities
-- Provisions for loan losses = Operating Activities
-- Board/regulatory approved transfers = Financing Activities
-- Securities trading (if part of core business) = Operating Activities
-- Trading portfolios and fair value adjustments = Operating Activities
-- Equity duration extension strategies = Operating Activities
-- Securities investments (held-to-maturity) = Investing Activities
-
-WORLD BANK/IBRD SPECIFIC - FOLLOW THESE RULES EXACTLY:
-- "Loans - Interest" = Operating Activities (core lending business)
-- "Borrowings - Interest" = Operating Activities (funding costs for lending)
-- "Loans - Commitment charges" = Operating Activities (loan-related fees)
-- "Investments, net - Trading" = Operating Activities (trading is core business)
-- "Equity duration extension strategy" = Operating Activities (risk management)
-- "Fair value adjustments" = Operating Activities (mark-to-market adjustments)
-- "Board of Governors-approved transfers" = Financing Activities (regulatory capital)
-- "Administrative" = Operating Activities (operational expenses)
-- "Provisions for losses" = Operating Activities (credit loss provisions)
-
-FOR WORLD BANK/IBRD: Lending, trading, and risk management are ALL Operating Activities because they are the core business operations of a financial institution.
-
-ANALYSIS GUIDELINES:
-- Consider the organization type and core business model
-- For financial institutions like World Bank/IBRD, ALL lending and trading activities are Operating Activities
-- IGNORE amount size - focus on business context
-- For World Bank/IBRD: "Loans", "Borrowings", "Trading", "Equity duration" = Operating Activities
-- Only "Board of Governors-approved transfers" = Financing Activities
-- Default to "Operating Activities" when uncertain
-- Keywords for Operating: "interest", "administrative", "provisions", "fair value", "trading", "equity duration"
-- Keywords for Financing: "board approved transfers", "regulatory capital"
-
-RESPONSE FORMAT:
-Respond with exactly one of these three options:
-- "Operating Activities"
-- "Investing Activities" 
-- "Financing Activities"
-
-Be precise and consistent. This categorization will be used for financial reporting and reconciliation."""
+RESPONSE: One category only:
+Operating Activities
+Investing Activities
+Financing Activities
+"""
         
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[{"role": "user", "content": prompt}],
-            max_tokens=20,  # Increased slightly for better responses
+            max_tokens=30,
             temperature=0.1,
-            timeout=30
+            timeout=45
         )
         
         result = response.choices[0].message.content.strip()
         
         # Enhanced validation
         valid_categories = ["Operating Activities", "Investing Activities", "Financing Activities"]
-        for category in valid_categories:
-            if category.lower() in result.lower():
-                openai_cache[cache_key] = category
-                print(f"✅ AI Enhanced: '{description[:40]}...' → {category}")
-                return f"{category} (AI)"
-        
-        # Extract category from longer response
-        for category in valid_categories:
-            if any(word in result.lower() for word in category.lower().split()):
-                print(f"✅ AI Extracted: '{description[:40]}...' → {category}")
-                openai_cache[cache_key] = category
-                return f"{category} (AI)"
-        
-        # Ultimate fallback
-        print(f"⚠️ AI unclear response for '{description[:40]}...', defaulting to Operating")
-        openai_cache[description] = "Operating Activities"
-        return "Operating Activities (AI-Default)"
-        
+        if result in valid_categories:
+            print(f"✅ Pure AI: '{description[:50]}...' → {result}")
+            openai_cache[cache_key] = result
+            return f"{result} (AI)"
+        else:
+            # Extract category from response
+            for category in valid_categories:
+                if category.lower() in result.lower():
+                    print(f"✅ Pure AI Extracted: '{description[:50]}...' → {category}")
+                    openai_cache[cache_key] = category
+                    return f"{category} (AI)"
+            
+            # Ultimate fallback
+            print(f"⚠️ Pure AI unclear, defaulting to Operating")
+            openai_cache[cache_key] = "Operating Activities"
+            return "Operating Activities (AI-Default)"
+            
     except Exception as e:
-        print(f"❌ AI error for '{description[:40]}...': {e}")
+        print(f"❌ Pure AI error: {e}")
         return "Operating Activities (Error)"
+
 def create_empty_ap_analysis():
     """Create empty AP analysis structure"""
     return {
@@ -3044,6 +3262,162 @@ def download_orphaned_payments():
         import traceback
         traceback.print_exc()
         return jsonify({'error': f'Download failed: {str(e)}'}), 500    
+
+@app.route('/view_vendor_cashflow/<vendor_name>', methods=['GET'])
+def view_vendor_cashflow(vendor_name):
+    """View individual vendor cash flow in the same format as regular cash flow"""
+    global reconciliation_data
+    
+    if 'vendor_cashflow_data' not in reconciliation_data:
+        return jsonify({'error': 'No vendor cash flow data found. Please run vendor analysis first.'}), 400
+    
+    vendor_analysis = reconciliation_data['vendor_cashflow_data']['vendor_analysis']
+    
+    # Handle "all" vendors or specific vendor
+    if vendor_name.lower() == 'all':
+        # Combine all vendor data into cash flow format
+        all_transactions = []
+        combined_breakdown = {
+            'Operating Activities': {'transactions': [], 'total': 0, 'count': 0, 'inflows': 0, 'outflows': 0},
+            'Investing Activities': {'transactions': [], 'total': 0, 'count': 0, 'inflows': 0, 'outflows': 0},
+            'Financing Activities': {'transactions': [], 'total': 0, 'count': 0, 'inflows': 0, 'outflows': 0}
+        }
+        
+        for vendor, data in vendor_analysis.items():
+            for transaction in data['transactions']:
+                # Determine cash flow category based on vendor category
+                vendor_category = data['vendor_info']['category']
+                
+                if vendor_category in ['Raw Material', 'Utilities', 'Transport', 'Services', 'Government']:
+                    cash_flow_category = 'Operating Activities'
+                elif vendor_category in ['Equipment', 'Contractor']:
+                    cash_flow_category = 'Investing Activities'
+                elif vendor_category in ['Banking', 'Insurance']:
+                    cash_flow_category = 'Financing Activities'
+                else:
+                    cash_flow_category = 'Operating Activities'
+                
+                # Enhanced transaction with vendor info
+                enhanced_transaction = {
+                    'Description': f"{transaction['Description']} (Vendor: {vendor})",
+                    'Amount': transaction['Amount'],
+                    'Date': transaction['Date'],
+                    'Category': cash_flow_category,
+                    'Type': transaction['Type'],
+                    'Status': transaction['Status'],
+                    'Cash_Flow_Direction': transaction['Cash_Flow_Direction'],
+                    'Vendor_Name': vendor,
+                    'Vendor_Category': vendor_category,
+                    'Vendor_ID': data['vendor_info']['vendor_id'],
+                    'Payment_Terms': data['vendor_info']['payment_terms']
+                }
+                
+                # Add to combined breakdown
+                combined_breakdown[cash_flow_category]['transactions'].append(enhanced_transaction)
+                combined_breakdown[cash_flow_category]['total'] += transaction['Amount']
+                combined_breakdown[cash_flow_category]['count'] += 1
+                
+                if transaction['Amount'] > 0:
+                    combined_breakdown[cash_flow_category]['inflows'] += transaction['Amount']
+                else:
+                    combined_breakdown[cash_flow_category]['outflows'] += transaction['Amount']
+        
+        return jsonify({
+            'type': 'vendor_cash_flow_breakdown',
+            'vendor_name': 'All Vendors',
+            'breakdown': combined_breakdown,
+            'summary': {
+                'total_transactions': sum(cat['count'] for cat in combined_breakdown.values()),
+                'total_amount': sum(cat['total'] for cat in combined_breakdown.values()),
+                'operating_total': combined_breakdown['Operating Activities']['total'],
+                'investing_total': combined_breakdown['Investing Activities']['total'],
+                'financing_total': combined_breakdown['Financing Activities']['total'],
+                'net_cash_flow': sum(cat['total'] for cat in combined_breakdown.values()),
+                'operating_count': combined_breakdown['Operating Activities']['count'],
+                'investing_count': combined_breakdown['Investing Activities']['count'],
+                'financing_count': combined_breakdown['Financing Activities']['count']
+            }
+        })
+    
+    else:
+        # Specific vendor
+        if vendor_name not in vendor_analysis:
+            return jsonify({'error': f'Vendor "{vendor_name}" not found in analysis'}), 404
+        
+        vendor_data = vendor_analysis[vendor_name]
+        
+        # Create cash flow breakdown in the same format as regular cash flow
+        cash_flow_breakdown = {
+            'Operating Activities': {'transactions': [], 'total': 0, 'count': 0, 'inflows': 0, 'outflows': 0},
+            'Investing Activities': {'transactions': [], 'total': 0, 'count': 0, 'inflows': 0, 'outflows': 0},
+            'Financing Activities': {'transactions': [], 'total': 0, 'count': 0, 'inflows': 0, 'outflows': 0}
+        }
+        
+        # Categorize transactions based on vendor category
+        vendor_category = vendor_data['vendor_info']['category']
+        
+        for transaction in vendor_data['transactions']:
+            # Determine cash flow category
+            if vendor_category in ['Raw Material', 'Utilities', 'Transport', 'Services', 'Government']:
+                cash_flow_category = 'Operating Activities'
+            elif vendor_category in ['Equipment', 'Contractor']:
+                cash_flow_category = 'Investing Activities'
+            elif vendor_category in ['Banking', 'Insurance']:
+                cash_flow_category = 'Financing Activities'
+            else:
+                cash_flow_category = 'Operating Activities'
+            
+            # Enhanced transaction with vendor info
+            enhanced_transaction = {
+                'Description': transaction['Description'],
+                'Amount': transaction['Amount'],
+                'Date': transaction['Date'],
+                'Category': cash_flow_category,
+                'Type': transaction['Type'],
+                'Status': transaction['Status'],
+                'Cash_Flow_Direction': transaction['Cash_Flow_Direction'],
+                'Vendor_Name': vendor_name,
+                'Vendor_Category': vendor_category,
+                'Vendor_ID': vendor_data['vendor_info']['vendor_id'],
+                'Payment_Terms': vendor_data['vendor_info']['payment_terms']
+            }
+            
+            # Add to appropriate category
+            cash_flow_breakdown[cash_flow_category]['transactions'].append(enhanced_transaction)
+            cash_flow_breakdown[cash_flow_category]['total'] += transaction['Amount']
+            cash_flow_breakdown[cash_flow_category]['count'] += 1
+            
+            if transaction['Amount'] > 0:
+                cash_flow_breakdown[cash_flow_category]['inflows'] += transaction['Amount']
+            else:
+                cash_flow_breakdown[cash_flow_category]['outflows'] += transaction['Amount']
+        
+        return jsonify({
+            'type': 'vendor_cash_flow_breakdown',
+            'vendor_name': vendor_name,
+            'vendor_info': vendor_data['vendor_info'],
+            'breakdown': cash_flow_breakdown,
+            'summary': {
+                'total_transactions': vendor_data['financial_metrics']['transaction_count'],
+                'total_amount': vendor_data['financial_metrics']['total_amount'],
+                'operating_total': cash_flow_breakdown['Operating Activities']['total'],
+                'investing_total': cash_flow_breakdown['Investing Activities']['total'],
+                'financing_total': cash_flow_breakdown['Financing Activities']['total'],
+                'net_cash_flow': vendor_data['financial_metrics']['net_cash_flow'],
+                'operating_count': cash_flow_breakdown['Operating Activities']['count'],
+                'investing_count': cash_flow_breakdown['Investing Activities']['count'],
+                'financing_count': cash_flow_breakdown['Financing Activities']['count'],
+                'vendor_metrics': {
+                    'average_transaction_amount': vendor_data['financial_metrics']['average_transaction_amount'],
+                    'cash_inflows': vendor_data['financial_metrics']['cash_inflows'],
+                    'cash_outflows': vendor_data['financial_metrics']['cash_outflows'],
+                    'percentage_of_total': vendor_data['financial_metrics']['percentage_of_total'],
+                    'payment_frequency': vendor_data['analysis']['payment_frequency'],
+                    'vendor_importance': vendor_data['analysis']['vendor_importance']
+                }
+            }
+        })
+
 @app.route('/debug_data_structure', methods=['GET'])
 def debug_data_structure():
     """Debug endpoint to check data structure"""
@@ -3085,8 +3459,9 @@ def view_data(data_type):
         return jsonify({"error": "No reconciliation data found. Please run reconciliation first."}), 400
 
     allowed_keys = {
-        "matched_exact", "matched_fuzzy", "unmatched_sap", "unmatched_bank", "cash_flow", 
-        "unmatched_sap_cashflow", "unmatched_bank_cashflow", "unmatched_combined_cashflow"
+    "matched_exact", "matched_fuzzy", "unmatched_sap", "unmatched_bank", "cash_flow",
+    "unmatched_sap_cashflow", "unmatched_bank_cashflow", "unmatched_combined_cashflow",
+    "vendor_cashflow_all"  # ADD THIS LINE
     }
 
     if data_type not in allowed_keys:
@@ -3209,9 +3584,103 @@ def view_data(data_type):
                     "net_cash_flow": sum(cat['total'] for cat in cash_flow_breakdown.values())
                 }
             })
+        elif data_type == "vendor_cashflow_all":
+            if 'vendor_cashflow_data' not in reconciliation_data:
+                return jsonify({"error": "No vendor cash flow data found. Please run vendor analysis first."}), 404
+            vendor_analysis = reconciliation_data['vendor_cashflow_data']['vendor_analysis']
+            combined_breakdown = {
+                'Operating Activities': {'transactions': [], 'total': 0, 'count': 0, 'inflows': 0, 'outflows': 0},
+                'Investing Activities': {'transactions': [], 'total': 0, 'count': 0, 'inflows': 0, 'outflows': 0},
+                'Financing Activities': {'transactions': [], 'total': 0, 'count': 0, 'inflows': 0, 'outflows': 0}
+            }
+            
+            for vendor_name, vendor_data in vendor_analysis.items():
+                vendor_category = vendor_data['vendor_info']['category']
+                
+                for transaction in vendor_data['transactions']:
+                    # Determine cash flow category based on vendor category
+                    if vendor_category in ['Raw Material', 'Utilities', 'Transport', 'Services', 'Government']:
+                        cash_flow_category = 'Operating Activities'
+                    elif vendor_category in ['Equipment', 'Contractor']:
+                        cash_flow_category = 'Investing Activities'
+                    elif vendor_category in ['Banking', 'Insurance']:
+                        cash_flow_category = 'Financing Activities'
+                    else:
+                        cash_flow_category = 'Operating Activities'
+                    
+                    # Enhanced transaction with vendor info
+                    enhanced_transaction = {
+                        'Description': f"{transaction['Description']} (Vendor: {vendor_name})",
+                        'Amount': transaction['Amount'],
+                        'Date': transaction['Date'],
+                        'Category': cash_flow_category,
+                        'Type': transaction['Type'],
+                        'Status': transaction['Status'],
+                        'Cash_Flow_Direction': transaction['Cash_Flow_Direction'],
+                        'Vendor_Name': vendor_name,
+                        'Vendor_Category': vendor_category,
+                        'Vendor_ID': vendor_data['vendor_info']['vendor_id'],
+                        'Payment_Terms': vendor_data['vendor_info']['payment_terms']
+                    }
+                    
+                    # Add to appropriate category
+                    combined_breakdown[cash_flow_category]['transactions'].append(enhanced_transaction)
+                    combined_breakdown[cash_flow_category]['total'] += transaction['Amount']
+                    combined_breakdown[cash_flow_category]['count'] += 1
+                    
+                    if transaction['Amount'] > 0:
+                        combined_breakdown[cash_flow_category]['inflows'] += transaction['Amount']
+                    else:
+                        combined_breakdown[cash_flow_category]['outflows'] += transaction['Amount']
+            
+            return jsonify({
+                "type": "vendor_cash_flow_breakdown",
+                "breakdown": combined_breakdown,
+                "summary": {
+                    "total_transactions": sum(cat['count'] for cat in combined_breakdown.values()),
+                    "total_amount": sum(cat['total'] for cat in combined_breakdown.values()),
+                    "operating_total": combined_breakdown['Operating Activities']['total'],
+                    "investing_total": combined_breakdown['Investing Activities']['total'],
+                    "financing_total": combined_breakdown['Financing Activities']['total'],
+                    "net_cash_flow": sum(cat['total'] for cat in combined_breakdown.values()),
+                    "operating_count": combined_breakdown['Operating Activities']['count'],
+                    "investing_count": combined_breakdown['Investing Activities']['count'],
+                    "financing_count": combined_breakdown['Financing Activities']['count']
+                }
+            })
+
     except Exception as e:
         return jsonify({"error": f"Error generating view: {str(e)}"}), 500
-
+@app.route('/vendor_list', methods=['GET'])
+def get_vendor_list():
+    """Get list of vendors for UI selection"""
+    global reconciliation_data
+    
+    if 'vendor_cashflow_data' not in reconciliation_data:
+        return jsonify({'error': 'No vendor cash flow data found. Please run vendor analysis first.'}), 400
+    
+    vendor_analysis = reconciliation_data['vendor_cashflow_data']['vendor_analysis']
+    
+    vendor_list = []
+    for vendor_name, vendor_data in vendor_analysis.items():
+        vendor_list.append({
+            'vendor_name': vendor_name,
+            'vendor_id': vendor_data['vendor_info']['vendor_id'],
+            'category': vendor_data['vendor_info']['category'],
+            'total_amount': vendor_data['financial_metrics']['total_amount'],
+            'transaction_count': vendor_data['financial_metrics']['transaction_count'],
+            'payment_terms': vendor_data['vendor_info']['payment_terms'],
+            'importance': vendor_data['analysis']['vendor_importance']
+        })
+    
+    # Sort by total amount (descending)
+    vendor_list.sort(key=lambda x: abs(x['total_amount']), reverse=True)
+    
+    return jsonify({
+        'status': 'success',
+        'vendors': vendor_list,
+        'total_vendors': len(vendor_list)
+    })
 @app.route('/download/<data_type>', methods=['GET'])
 def download_data(data_type):
     global reconciliation_data
@@ -3221,7 +3690,8 @@ def download_data(data_type):
 
     allowed_keys = {
         "matched_exact", "matched_fuzzy", "unmatched_sap", "unmatched_bank", "cash_flow",
-        "unmatched_sap_cashflow", "unmatched_bank_cashflow", "unmatched_combined_cashflow"
+        "unmatched_sap_cashflow", "unmatched_bank_cashflow", "unmatched_combined_cashflow",
+        "vendor_cashflow_all"
     }
 
     if data_type not in allowed_keys:
@@ -3471,6 +3941,168 @@ def download_data(data_type):
                     
                     top_inflows.to_excel(writer, sheet_name='⬆️_TOP_10_INFLOWS', index=False)
                     top_outflows.to_excel(writer, sheet_name='⬇️_TOP_10_OUTFLOWS', index=False)
+
+            # ===== VENDOR CASH FLOW DATA DOWNLOAD =====
+            elif data_type == "vendor_cashflow_all":
+                if 'vendor_cashflow_data' not in reconciliation_data:
+                    return jsonify({'error': 'No vendor cash flow data found. Please run vendor analysis first.'}), 400
+                
+                vendor_analysis = reconciliation_data['vendor_cashflow_data']['vendor_analysis']
+                combined_breakdown = {
+                    'Operating Activities': {'transactions': [], 'total': 0, 'count': 0, 'inflows': 0, 'outflows': 0},
+                    'Investing Activities': {'transactions': [], 'total': 0, 'count': 0, 'inflows': 0, 'outflows': 0},
+                    'Financing Activities': {'transactions': [], 'total': 0, 'count': 0, 'inflows': 0, 'outflows': 0}
+                }
+                
+                for vendor_name, vendor_data in vendor_analysis.items():
+                    vendor_category = vendor_data['vendor_info']['category']
+                    for transaction in vendor_data['transactions']:
+                        # Determine cash flow category based on vendor category
+                        if vendor_category in ['Raw Material', 'Utilities', 'Transport', 'Services', 'Government']:
+                            cash_flow_category = 'Operating Activities'
+                        elif vendor_category in ['Equipment', 'Contractor']:
+                            cash_flow_category = 'Investing Activities'
+                        elif vendor_category in ['Banking', 'Insurance']:
+                            cash_flow_category = 'Financing Activities'
+                        else:
+                            cash_flow_category = 'Operating Activities'
+                        
+                        enhanced_transaction = {
+                            'Description': f"{transaction['Description']} (Vendor: {vendor_name})",
+                            'Date': transaction['Date'],
+                            'Amount': transaction['Amount'],
+                            'Category': cash_flow_category,
+                            'Type': transaction['Type'],
+                            'Status': transaction['Status'],
+                            'Cash_Flow_Direction': transaction['Cash_Flow_Direction'],
+                            'Vendor_Name': vendor_name,
+                            'Vendor_Category': vendor_category,
+                            'Vendor_ID': vendor_data['vendor_info']['vendor_id'],
+                            'Payment_Terms': vendor_data['vendor_info']['payment_terms']
+                        }
+                        
+                        combined_breakdown[cash_flow_category]['transactions'].append(enhanced_transaction)
+                        combined_breakdown[cash_flow_category]['total'] += transaction['Amount']
+                        combined_breakdown[cash_flow_category]['count'] += 1
+                        
+                        if transaction['Amount'] > 0:
+                            combined_breakdown[cash_flow_category]['inflows'] += transaction['Amount']
+                        else:
+                            combined_breakdown[cash_flow_category]['outflows'] += transaction['Amount']
+                
+                # Create the cash flow summary exactly like regular cash flow
+                operating_total = combined_breakdown['Operating Activities']['total']
+                investing_total = combined_breakdown['Investing Activities']['total']
+                financing_total = combined_breakdown['Financing Activities']['total']
+                net_cash_flow = operating_total + investing_total + financing_total
+                
+                # 1. VENDOR CASH FLOW EXECUTIVE SUMMARY
+                vendor_cf_summary = [
+                    {'Cash_Flow_Category': 'Operating Activities', 'Count': combined_breakdown['Operating Activities']['count'], 
+                     'Cash_Inflows': combined_breakdown['Operating Activities']['inflows'], 
+                     'Cash_Outflows': combined_breakdown['Operating Activities']['outflows'],
+                     'Net_Cash_Flow': operating_total, 'Percentage': round((operating_total/net_cash_flow*100) if net_cash_flow != 0 else 0, 2)},
+                    {'Cash_Flow_Category': 'Investing Activities', 'Count': combined_breakdown['Investing Activities']['count'],
+                     'Cash_Inflows': combined_breakdown['Investing Activities']['inflows'],
+                     'Cash_Outflows': combined_breakdown['Investing Activities']['outflows'], 
+                     'Net_Cash_Flow': investing_total, 'Percentage': round((investing_total/net_cash_flow*100) if net_cash_flow != 0 else 0, 2)},
+                    {'Cash_Flow_Category': 'Financing Activities', 'Count': combined_breakdown['Financing Activities']['count'],
+                     'Cash_Inflows': combined_breakdown['Financing Activities']['inflows'],
+                     'Cash_Outflows': combined_breakdown['Financing Activities']['outflows'],
+                     'Net_Cash_Flow': financing_total, 'Percentage': round((financing_total/net_cash_flow*100) if net_cash_flow != 0 else 0, 2)},
+                    {'Cash_Flow_Category': '=== VENDOR NET TOTAL ===', 'Count': sum(cat['count'] for cat in combined_breakdown.values()),
+                     'Cash_Inflows': sum(cat['inflows'] for cat in combined_breakdown.values()),
+                     'Cash_Outflows': sum(cat['outflows'] for cat in combined_breakdown.values()),
+                     'Net_Cash_Flow': net_cash_flow, 'Percentage': 100.0}
+                ]
+                
+                summary_df = pd.DataFrame(vendor_cf_summary)
+                summary_df.to_excel(writer, sheet_name='💰_VENDOR_CASHFLOW_SUMMARY', index=False)
+
+                # 2. DETAILED CATEGORY SHEETS FOR VENDOR CASH FLOW
+                for category, data in combined_breakdown.items():
+                    if data['transactions']:
+                        # Enhance transaction data for vendor cash flow
+                        enhanced_transactions = []
+                        
+                        for i, transaction in enumerate(data['transactions'], 1):
+                            enhanced_trans = {
+                                'Row_Number': i,
+                                'Description': transaction.get('Description', ''),
+                                'Cash_Flow_Amount': transaction.get('Amount', 0),
+                                'Cash_Flow_Direction': 'INFLOW' if transaction.get('Amount', 0) > 0 else 'OUTFLOW',
+                                'Absolute_Amount': abs(transaction.get('Amount', 0)),
+                                'Date': transaction.get('Date', ''),
+                                'Category': category,
+                                'Vendor_Name': transaction.get('Vendor_Name', ''),
+                                'Vendor_Category': transaction.get('Vendor_Category', ''),
+                                'Vendor_ID': transaction.get('Vendor_ID', ''),
+                                'Payment_Terms': transaction.get('Payment_Terms', ''),
+                                'Impact_on_Cash': 'Increases Cash' if transaction.get('Amount', 0) > 0 else 'Decreases Cash'
+                            }
+                            enhanced_transactions.append(enhanced_trans)
+                        
+                        # Create category cash flow sheet
+                        category_cf_df = pd.DataFrame(enhanced_transactions)
+                        sheet_name = f"VCF_{category.replace(' ', '_')}"[:20] + f"_{data['count']}"
+                        category_cf_df.to_excel(writer, sheet_name=sheet_name, index=False)
+                        
+                        # Add vendor cash flow summary for category
+                        workbook = writer.book
+                        worksheet = writer.sheets[sheet_name]
+                        worksheet.insert_rows(1, 8)
+                        
+                        worksheet['A1'] = f'VENDOR CASH FLOW CATEGORY: {category}'
+                        worksheet['A2'] = f'Transaction Count: {data["count"]}'
+                        worksheet['A3'] = f'Total Cash Inflows: {data["inflows"]:.2f}'
+                        worksheet['A4'] = f'Total Cash Outflows: {data["outflows"]:.2f}'
+                        worksheet['A5'] = f'Net Cash Flow: {data["total"]:.2f}'
+                        worksheet['A6'] = f'Category Impact: {"Positive" if data["total"] > 0 else "Negative"} Cash Flow'
+                        worksheet['A7'] = f'Percentage of Total: {round((data["total"]/net_cash_flow*100) if net_cash_flow != 0 else 0, 2)}%'
+                        worksheet['A8'] = '=' * 60
+                
+                # 3. COMPLETE VENDOR CASH FLOW STATEMENT
+                all_vendor_transactions = []
+                for category, data in combined_breakdown.items():
+                    for transaction in data['transactions']:
+                        all_vendor_transactions.append(transaction)
+                
+                if all_vendor_transactions:
+                    vendor_cf_df = pd.DataFrame(all_vendor_transactions)
+                    vendor_cf_df.to_excel(writer, sheet_name='📋_COMPLETE_VENDOR_CASHFLOW', index=False)
+                
+                # 4. VENDOR-WISE BREAKDOWN
+                vendor_breakdown_data = []
+                for vendor_name, vendor_data in vendor_analysis.items():
+                    vendor_breakdown_data.append({
+                        'Vendor_Name': vendor_name,
+                        'Vendor_ID': vendor_data['vendor_info']['vendor_id'],
+                        'Category': vendor_data['vendor_info']['category'],
+                        'Payment_Terms': vendor_data['vendor_info']['payment_terms'],
+                        'Total_Amount': vendor_data['financial_metrics']['total_amount'],
+                        'Transaction_Count': vendor_data['financial_metrics']['transaction_count'],
+                        'Cash_Inflows': vendor_data['financial_metrics']['cash_inflows'],
+                        'Cash_Outflows': vendor_data['financial_metrics']['cash_outflows'],
+                        'Net_Cash_Flow': vendor_data['financial_metrics']['net_cash_flow'],
+                        'Percentage_of_Total': vendor_data['financial_metrics']['percentage_of_total'],
+                        'Operating_Activities': vendor_data['cash_flow_categories']['Operating Activities'],
+                        'Investing_Activities': vendor_data['cash_flow_categories']['Investing Activities'],
+                        'Financing_Activities': vendor_data['cash_flow_categories']['Financing Activities'],
+                        'Payment_Frequency': vendor_data['analysis']['payment_frequency'],
+                        'Vendor_Importance': vendor_data['analysis']['vendor_importance']
+                    })
+                
+                if vendor_breakdown_data:
+                    vendor_breakdown_df = pd.DataFrame(vendor_breakdown_data)
+                    vendor_breakdown_df.to_excel(writer, sheet_name='🏭_VENDOR_BREAKDOWN', index=False)
+                
+                # 5. Top 10 vendor cash flows
+                if vendor_breakdown_data:
+                    top_vendor_inflows = pd.DataFrame(vendor_breakdown_data).nlargest(10, 'Cash_Inflows')
+                    top_vendor_outflows = pd.DataFrame(vendor_breakdown_data).nsmallest(10, 'Cash_Outflows')
+                    
+                    top_vendor_inflows.to_excel(writer, sheet_name='⬆️_TOP_VENDOR_INFLOWS', index=False)
+                    top_vendor_outflows.to_excel(writer, sheet_name='⬇️_TOP_VENDOR_OUTFLOWS', index=False)
 
         return send_file(
             filepath,
@@ -3826,6 +4458,308 @@ def get_ap_ar_dashboard():
         }), 500
 
 
+
+# REPLACE your existing /vendor_cashflow route with this enhanced version
+@app.route('/vendor_cashflow', methods=['GET'])
+def get_vendor_cashflow():
+    """Enhanced vendor cash flow analysis endpoint"""
+    try:
+        print("🏭 Starting Enhanced Vendor Cash Flow Analysis...")
+        
+        # Load the master data (including vendor data)
+        master_data = load_master_data()
+        if master_data is None:
+            return jsonify({'error': 'Master data not found. Please check steel_plant_master_data.xlsx file.'}), 400
+
+        vendor_data = master_data.get('vendors')
+        if vendor_data is None or vendor_data.empty:
+            return jsonify({'error': 'Vendor data not available in master data.'}), 400
+        
+        print(f"📊 Loaded {len(vendor_data)} vendors from master data")
+        
+        # Load processed transaction data
+        sap_path = os.path.join(DATA_FOLDER, 'sap_data_processed.xlsx')
+        if not os.path.exists(sap_path):
+            return jsonify({'error': 'No processed transaction data found. Please upload and process files first.'}), 400
+        
+        # Load transaction data
+        df = pd.read_excel(sap_path)
+        print(f"📊 Loaded {len(df)} transactions for vendor analysis")
+        
+        # Ensure required columns exist
+        required_columns = ['Description', 'Amount']
+        missing_columns = [col for col in required_columns if col not in df.columns]
+        if missing_columns:
+            return jsonify({'error': f'Missing required columns in transaction data: {missing_columns}'}), 400
+        
+        # Check if AI should be used
+        use_ai = bool(os.getenv('OPENAI_API_KEY'))
+        print(f"🤖 AI enabled: {use_ai}")
+        
+        # Run enhanced vendor cash flow analysis
+        vendor_cashflow_results = enhanced_vendor_cashflow_breakdown(df, vendor_data, use_ai=use_ai)
+        
+        # Clean results for JSON serialization
+        cleaned_results = clean_nan_values(vendor_cashflow_results)
+        
+        # Generate summary statistics
+        summary_stats = {
+            'total_vendors_matched': len(vendor_cashflow_results),
+            'total_transactions_analyzed': len(df),
+            'total_amount_all_vendors': sum(vendor['financial_metrics']['total_amount'] for vendor in vendor_cashflow_results.values()),
+            'ai_enabled': use_ai,
+            'top_vendors_by_amount': [],
+            'vendor_category_breakdown': {}
+        }
+        
+        # Top 5 vendors by amount
+        sorted_vendors = sorted(
+            vendor_cashflow_results.items(),
+            key=lambda x: abs(x[1]['financial_metrics']['total_amount']),
+            reverse=True
+        )
+        
+        summary_stats['top_vendors_by_amount'] = [
+            {
+                'vendor_name': vendor_name,
+                'total_amount': vendor_data['financial_metrics']['total_amount'],
+                'transaction_count': vendor_data['financial_metrics']['transaction_count'],
+                'category': vendor_data['vendor_info']['category'],
+                'percentage_of_total': vendor_data['financial_metrics']['percentage_of_total']
+            }
+            for vendor_name, vendor_data in sorted_vendors[:5]
+        ]
+        
+        # Vendor category breakdown
+        category_totals = {}
+        for vendor_name, vendor_data in vendor_cashflow_results.items():
+            category = vendor_data['vendor_info']['category']
+            if category not in category_totals:
+                category_totals[category] = {
+                    'total_amount': 0,
+                    'transaction_count': 0,
+                    'vendor_count': 0
+                }
+            
+            category_totals[category]['total_amount'] += vendor_data['financial_metrics']['total_amount']
+            category_totals[category]['transaction_count'] += vendor_data['financial_metrics']['transaction_count']
+            category_totals[category]['vendor_count'] += 1
+        
+        summary_stats['vendor_category_breakdown'] = category_totals
+        
+        # Store results globally for download functionality
+        global reconciliation_data
+        if 'vendor_cashflow_data' not in reconciliation_data:
+            reconciliation_data['vendor_cashflow_data'] = {}
+        
+        reconciliation_data['vendor_cashflow_data'] = {
+            'vendor_analysis': cleaned_results,
+            'summary_stats': summary_stats,
+            'analysis_timestamp': datetime.now().isoformat()
+        }
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Enhanced vendor cash flow analysis completed successfully',
+            'vendor_cashflow': cleaned_results,
+            'summary_stats': summary_stats,
+            'analysis_info': {
+                'total_vendors_in_master': len(vendor_data),
+                'vendors_matched': len(vendor_cashflow_results),
+                'transactions_analyzed': len(df),
+                'ai_enabled': use_ai,
+                'analysis_timestamp': datetime.now().isoformat()
+            }
+        })
+        
+    except Exception as e:
+        print(f"❌ Error in vendor cash flow analysis: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'error': f'Vendor cash flow analysis failed: {str(e)}',
+            'details': 'Check server logs for detailed error information'
+        }), 500
+
+# ADD this new route for vendor cash flow download
+@app.route('/download_vendor_cashflow', methods=['GET'])
+def download_vendor_cashflow():
+    """Download comprehensive vendor cash flow analysis"""
+    global reconciliation_data
+    
+    if 'vendor_cashflow_data' not in reconciliation_data:
+        return jsonify({'error': 'No vendor cash flow data found. Please run vendor analysis first.'}), 400
+    
+    try:
+        vendor_data = reconciliation_data['vendor_cashflow_data']
+        vendor_analysis = vendor_data['vendor_analysis']
+        summary_stats = vendor_data['summary_stats']
+        
+        # Create temporary file
+        temp_dir = tempfile.gettempdir()
+        filename = f"VENDOR_CASHFLOW_ANALYSIS_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+        filepath = os.path.join(temp_dir, filename)
+        
+        with pd.ExcelWriter(filepath, engine='openpyxl') as writer:
+            
+            # 1. EXECUTIVE SUMMARY
+            executive_summary = [{
+                'Metric': 'Total Vendors Analyzed',
+                'Value': summary_stats['total_vendors_matched'],
+                'Details': 'Vendors with transactions'
+            }, {
+                'Metric': 'Total Transactions',
+                'Value': summary_stats['total_transactions_analyzed'],
+                'Details': 'All transactions processed'
+            }, {
+                'Metric': 'Total Amount (All Vendors)',
+                'Value': summary_stats['total_amount_all_vendors'],
+                'Details': 'Combined cash flow from all vendors'
+            }, {
+                'Metric': 'AI Analysis Enabled',
+                'Value': 'Yes' if summary_stats['ai_enabled'] else 'No',
+                'Details': 'AI-powered vendor matching'
+            }]
+            
+            pd.DataFrame(executive_summary).to_excel(writer, sheet_name='📊_EXECUTIVE_SUMMARY', index=False)
+            
+            # 2. TOP VENDORS BY AMOUNT
+            if summary_stats['top_vendors_by_amount']:
+                top_vendors_df = pd.DataFrame(summary_stats['top_vendors_by_amount'])
+                top_vendors_df.to_excel(writer, sheet_name='🏆_TOP_VENDORS', index=False)
+            
+            # 3. VENDOR CATEGORY BREAKDOWN
+            if summary_stats['vendor_category_breakdown']:
+                category_breakdown = []
+                for category, data in summary_stats['vendor_category_breakdown'].items():
+                    category_breakdown.append({
+                        'Category': category,
+                        'Total_Amount': data['total_amount'],
+                        'Transaction_Count': data['transaction_count'],
+                        'Vendor_Count': data['vendor_count'],
+                        'Average_Amount_Per_Vendor': data['total_amount'] / data['vendor_count'] if data['vendor_count'] > 0 else 0
+                    })
+                
+                pd.DataFrame(category_breakdown).to_excel(writer, sheet_name='📂_CATEGORY_BREAKDOWN', index=False)
+            
+            # 4. DETAILED VENDOR ANALYSIS
+            all_vendor_details = []
+            for vendor_name, vendor_info in vendor_analysis.items():
+                vendor_details = {
+                    'Vendor_ID': vendor_info['vendor_info']['vendor_id'],
+                    'Vendor_Name': vendor_name,
+                    'Category': vendor_info['vendor_info']['category'],
+                    'Payment_Terms': vendor_info['vendor_info']['payment_terms'],
+                    'Total_Amount': vendor_info['financial_metrics']['total_amount'],
+                    'Transaction_Count': vendor_info['financial_metrics']['transaction_count'],
+                    'Average_Transaction': vendor_info['financial_metrics']['average_transaction_amount'],
+                    'Cash_Inflows': vendor_info['financial_metrics']['cash_inflows'],
+                    'Cash_Outflows': vendor_info['financial_metrics']['cash_outflows'],
+                    'Net_Cash_Flow': vendor_info['financial_metrics']['net_cash_flow'],
+                    'Percentage_of_Total': vendor_info['financial_metrics']['percentage_of_total'],
+                    'Operating_Activities': vendor_info['cash_flow_categories']['Operating Activities'],
+                    'Investing_Activities': vendor_info['cash_flow_categories']['Investing Activities'],
+                    'Financing_Activities': vendor_info['cash_flow_categories']['Financing Activities'],
+                    'Payment_Frequency': vendor_info['analysis']['payment_frequency'],
+                    'Cash_Flow_Impact': vendor_info['analysis']['cash_flow_impact'],
+                    'Vendor_Importance': vendor_info['analysis']['vendor_importance']
+                }
+                all_vendor_details.append(vendor_details)
+            
+            pd.DataFrame(all_vendor_details).to_excel(writer, sheet_name='🏭_ALL_VENDOR_DETAILS', index=False)
+            
+            # 5. INDIVIDUAL VENDOR TRANSACTION SHEETS (for top 10 vendors)
+            top_10_vendors = sorted(
+                vendor_analysis.items(),
+                key=lambda x: abs(x[1]['financial_metrics']['total_amount']),
+                reverse=True
+            )[:10]
+            
+            for vendor_name, vendor_info in top_10_vendors:
+                if vendor_info['transactions']:
+                    transactions_df = pd.DataFrame(vendor_info['transactions'])
+                    
+                    # Add vendor info to transactions
+                    transactions_df['Vendor_ID'] = vendor_info['vendor_info']['vendor_id']
+                    transactions_df['Vendor_Category'] = vendor_info['vendor_info']['category']
+                    transactions_df['Payment_Terms'] = vendor_info['vendor_info']['payment_terms']
+                    
+                    # Clean vendor name for sheet name
+                    clean_vendor_name = vendor_name.replace(' ', '_').replace('&', 'AND')[:20]
+                    sheet_name = f"V_{clean_vendor_name}"
+                    
+                    transactions_df.to_excel(writer, sheet_name=sheet_name, index=False)
+            
+            # 6. CASH FLOW CATEGORIES SUMMARY
+            cash_flow_summary = []
+            total_operating = sum(v['cash_flow_categories']['Operating Activities'] for v in vendor_analysis.values())
+            total_investing = sum(v['cash_flow_categories']['Investing Activities'] for v in vendor_analysis.values())
+            total_financing = sum(v['cash_flow_categories']['Financing Activities'] for v in vendor_analysis.values())
+            
+            cash_flow_summary = [{
+                'Cash_Flow_Category': 'Operating Activities',
+                'Total_Amount': total_operating,
+                'Percentage': (total_operating / (total_operating + total_investing + total_financing) * 100) if (total_operating + total_investing + total_financing) != 0 else 0,
+                'Description': 'Day-to-day business operations'
+            }, {
+                'Cash_Flow_Category': 'Investing Activities',
+                'Total_Amount': total_investing,
+                'Percentage': (total_investing / (total_operating + total_investing + total_financing) * 100) if (total_operating + total_investing + total_financing) != 0 else 0,
+                'Description': 'Capital expenditure and investments'
+            }, {
+                'Cash_Flow_Category': 'Financing Activities',
+                'Total_Amount': total_financing,
+                'Percentage': (total_financing / (total_operating + total_investing + total_financing) * 100) if (total_operating + total_investing + total_financing) != 0 else 0,
+                'Description': 'Loans, equity, and financing'
+            }]
+            
+            pd.DataFrame(cash_flow_summary).to_excel(writer, sheet_name='💰_CASHFLOW_CATEGORIES', index=False)
+            
+            # 7. RECOMMENDATIONS
+            recommendations = []
+            
+            # Generate dynamic recommendations based on analysis
+            if summary_stats['total_vendors_matched'] > 50:
+                recommendations.append({
+                    'Category': 'Vendor Management',
+                    'Recommendation': 'High number of vendors detected - consider vendor consolidation',
+                    'Priority': 'Medium',
+                    'Impact': 'Improved efficiency and cost reduction'
+                })
+            
+            # Check for vendors with high transaction frequency
+            high_freq_vendors = [v for v in vendor_analysis.values() if v['analysis']['payment_frequency'] == 'High']
+            if len(high_freq_vendors) > 10:
+                recommendations.append({
+                    'Category': 'Payment Processing',
+                    'Recommendation': 'Many high-frequency vendors - consider automated payment systems',
+                    'Priority': 'High',
+                    'Impact': 'Reduced manual processing and improved cash flow'
+                })
+            
+            # Check for critical vendors
+            critical_vendors = [v for v in vendor_analysis.values() if v['analysis']['vendor_importance'] == 'Critical']
+            if critical_vendors:
+                recommendations.append({
+                    'Category': 'Risk Management',
+                    'Recommendation': f'{len(critical_vendors)} critical vendors identified - ensure backup suppliers',
+                    'Priority': 'High',
+                    'Impact': 'Reduced supply chain risk'
+                })
+            
+            if recommendations:
+                pd.DataFrame(recommendations).to_excel(writer, sheet_name='💡_RECOMMENDATIONS', index=False)
+        
+        return send_file(
+            filepath,
+            as_attachment=True,
+            download_name=filename,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        
+    except Exception as e:
+        print(f"❌ Vendor cash flow download error: {str(e)}")
+        return jsonify({'error': f'Download failed: {str(e)}'}), 500
 # Replace the existing download_ap_ar_analysis function in app1.py with this fixed version:
 
 @app.route('/download_ap_ar/<analysis_type>', methods=['GET'])
