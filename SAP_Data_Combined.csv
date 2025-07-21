@@ -1,0 +1,449 @@
+Amount,Description,Date,Type,Category,Source,Transaction No,Reference,Balance (INR),Status
+0,Opening Balance,2025-06-25,OPEN,Other,Transactions,1,OPEN,0,
+1500000,Customer Payment - Invoice 1001,2025-06-25,INWARD,Sales,Transactions,2,CUST-INV-1001,1500000,
+700000,Vendor Payment - Raw Materials,2025-06-25,OUTWARD,Materials,Transactions,3,VEN-PAY-2001,800000,
+250000,GST Payment,2025-06-25,OUTWARD,Tax,Transactions,4,STAT-GST-3001,550000,
+900000,Payroll Disbursement,2025-06-25,OUTWARD,Payroll,Transactions,5,EMP-PAY-4001,-350000,
+800000,Customer Advance,2025-06-25,INWARD,Sales,Transactions,6,CUST-ADV-1002,450000,
+120000,Vendor Payment - Spares,2025-06-25,OUTWARD,Other,Transactions,7,VEN-PAY-2002,330000,
+180000,TDS Payment,2025-06-25,OUTWARD,Other,Transactions,8,STAT-TDS-3002,150000,
+100000,Electricity Bill Payment,2025-06-25,OUTWARD,Utilities,Transactions,9,UTIL-5001,50000,
+35000,Interest Credit,2025-06-25,INWARD,Interest,Transactions,10,INT-6001,85000,
+50000,Vendor Payment - Logistics,2025-06-25,OUTWARD,Logistics,Transactions,11,VEN-PAY-2003,35000,
+200000,Provident Fund Payment,2025-06-25,OUTWARD,Other,Transactions,12,STAT-PF-3003,-165000,
+950000,Customer Payment - Invoice 1003,2025-06-25,INWARD,Sales,Transactions,13,CUST-INV-1003,785000,
+60000,Vendor Payment - Packaging,2025-06-25,OUTWARD,Other,Transactions,14,VEN-PAY-2004,725000,
+50000,ESI Payment,2025-06-25,OUTWARD,Other,Transactions,15,STAT-ESI-3004,675000,
+90000,Vendor Payment - Maintenance,2025-06-25,OUTWARD,Maintenance,Transactions,16,VEN-PAY-2005,585000,
+700000,Customer Payment - Invoice 1004,2025-06-25,INWARD,Sales,Transactions,17,CUST-INV-1004,1285000,
+110000,Vendor Payment - Chemicals,2025-06-25,OUTWARD,Other,Transactions,18,VEN-PAY-2006,1175000,
+200000,Government Grant Received,2025-06-25,INWARD,Other,Transactions,19,GRANT-7001,1375000,
+40000,Vendor Payment - Security,2025-06-25,OUTWARD,Other,Transactions,20,VEN-PAY-2007,1335000,
+30000,Water Bill Payment,2025-06-25,OUTWARD,Utilities,Transactions,21,UTIL-5002,1305000,
+80000,Vendor Payment - IT Services,2025-06-25,OUTWARD,Maintenance,Transactions,22,VEN-PAY-2008,1225000,
+250000,Loan Repayment,2025-06-25,OUTWARD,Other,Transactions,23,LOAN-8001,975000,
+50000,Statutory Refund,2025-06-25,INWARD,Other,Transactions,24,REFUND-9001,1025000,
+70000,Vendor Payment - Fuel,2025-06-25,OUTWARD,Other,Transactions,25,VEN-PAY-2009,955000,
+12000,Interest Credit,2025-06-25,INWARD,Interest,Transactions,26,INT-6002,967000,
+600000,Customer Payment - Invoice 1005,2025-06-25,INWARD,Sales,Transactions,27,CUST-INV-1005,1567000,
+30000,Vendor Payment - Scrap Disposal,2025-06-25,OUTWARD,Scrap,Transactions,28,VEN-PAY-2010,1537000,
+20000,Labor Welfare Fund,2025-06-25,OUTWARD,Other,Transactions,29,STAT-LWF-3005,1517000,
+40000,Vendor Payment - Tools,2025-06-25,OUTWARD,Other,Transactions,30,VEN-PAY-2011,1477000,
+50000,Vendor Payment - Transport,2025-06-25,OUTWARD,Logistics,Transactions,31,VEN-PAY-2012,1427000,
+25000,Royalty Payment,2025-06-25,OUTWARD,Other,Transactions,32,ROYALTY-1001,1402000,
+100000,Export Incentive Received,2025-06-25,INWARD,Other,Transactions,33,GRANT-7002,1502000,
+35000,Vendor Payment - Safety,2025-06-25,OUTWARD,Other,Transactions,34,VEN-PAY-2013,1467000,
+15000,Vendor Payment - Cleaning Services,2025-06-25,OUTWARD,Maintenance,Transactions,35,VEN-PAY-2014,1452000,
+12000,Vendor Payment - Cleaning Services,2025-07-08,OUTWARD,Maintenance,Transactions,36,VEN-PAY-2014,1440000,
+10000,Vendor Payment - Calibration,2025-06-25,OUTWARD,Other,Transactions,37,VEN-PAY-2015,1430000,
+400000,Customer Payment - Invoice 1006,2025-06-25,INWARD,Sales,Transactions,38,CUST-INV-1006,1830000,
+20000,Vendor Payment - Office Supplies,2025-06-25,OUTWARD,Other,Transactions,39,VEN-PAY-2016,1810000,
+60000,Vendor Payment - Consultancy,2025-06-25,OUTWARD,Consultancy,Transactions,40,VEN-PAY-2017,1750000,
+30000,Vendor Payment - Training,2025-06-25,OUTWARD,Other,Transactions,41,VEN-PAY-2018,1720000,
+50000,Vendor Payment - Insurance,2025-06-25,OUTWARD,Insurance,Transactions,42,VEN-PAY-2019,1670000,
+250000,Customer Payment - Invoice 1007,2025-06-25,INWARD,Sales,Transactions,43,CUST-INV-1007,1920000,
+15000,Vendor Payment - Lubricants,2025-06-25,OUTWARD,Other,Transactions,44,VEN-PAY-2020,1905000,
+25000,Vendor Payment - Spare Parts,2025-06-25,OUTWARD,Other,Transactions,45,VEN-PAY-2021,1880000,
+8000,Vendor Payment - Uniforms,2025-06-25,OUTWARD,Other,Transactions,46,VEN-PAY-2022,1872000,
+5000,Vendor Payment - Printing,2025-06-25,OUTWARD,Other,Transactions,47,VEN-PAY-2023,1867000,
+4000,Vendor Payment - Courier,2025-06-25,OUTWARD,Other,Transactions,48,VEN-PAY-2024,1863000,
+3000,Vendor Payment - Pest Control,2025-06-25,OUTWARD,Other,Transactions,49,VEN-PAY-2025,1860000,
+20000,Vendor Payment - Canteen,2025-06-25,OUTWARD,Other,Transactions,50,VEN-PAY-2026,1840000,
+30000,Vendor Payment - Electricity Bills,2025-07-04,OUTWARD,Utilities,Transactions,51,VEN-PAY-2049,1810000,
+30000,Vendor Payment - Electricity Bills,2025-07-04,OUTWARD,Utilities,Transactions,52,VEN-PAY-2050,1780000,
+300000,Vendor Payment - Electricity Bills,2025-07-04,OUTWARD,Utilities,Transactions,53,VEN-PAY-2051,1480000,
+300000,Vendor Payment - Electricity Bills,2025-07-04,OUTWARD,Utilities,Transactions,54,VEN-PAY-2052,1180000,
+300000,Vendor Payment - Electricity Bills,2025-07-04,OUTWARD,Utilities,Transactions,55,VEN-PAY-2053,880000,
+300000,Vendor Payment - Electricity Bills,2025-07-04,OUTWARD,Utilities,Transactions,56,VEN-PAY-2054,580000,
+300000,Vendor Payment - Electricity Bills,2025-07-04,OUTWARD,Utilities,Transactions,57,VEN-PAY-2055,280000,
+300000,Vendor Payment - Electricity Bills,2025-07-04,INWARD,Utilities,Transactions,58,CUST-INV-1056,580000,
+10000,Vendor Payment - Electricity Bills,2025-07-04,OUTWARD,Utilities,Transactions,59,VEN-PAY-2057,570000,
+300000,Vendor Payment - Electricity Bills,2025-07-04,OUTWARD,Utilities,Transactions,60,VEN-PAY-2058,270000,
+500000,Vendor Payment - Electricity Bills,2025-07-04,OUTWARD,Utilities,Transactions,61,VEN-PAY-2059,-230000,
+100,Vendor Payment - Electricity Bills,2025-07-04,INWARD,Utilities,Transactions,62,CUST-INV-1060,-229900,
+300000,Vendor Payment - Electricity Bills,2025-07-04,OUTWARD,Utilities,Transactions,63,VEN-PAY-2061,-529900,
+500000,Vendor Payment - Electricity Bills,2025-07-04,OUTWARD,Utilities,Transactions,64,VEN-PAY-2062,-1029900,
+300,Vendor Payment - Electricity Bills,2025-07-04,INWARD,Utilities,Transactions,65,CUST-INV-1063,-1029600,
+500000,loan received from bank,2025-07-04,INWARD,Other,Transactions,66,MISC-IN-1064,-529600,
+300000,loan emi paid,2025-07-04,OUTWARD,Other,Transactions,67,LOAN-8065,-829600,
+500000,loan received from bank,2025-07-04,OUTWARD,Other,Transactions,68,LOAN-8066,-1329600,
+500000,loan received from bank,2025-07-08,Outward,Other,Transactions,,,-1829600,
+500000,loan received from bank,2025-07-08,INWARD,Other,Transactions,,LOAN-9001,-1329600,
+500000,loan received from bank,2025-07-08,INWARD,Other,Transactions,,LOAN-9001,-829600,
+15000,Vendor Payment - Customer Payment,2025-07-08,Inward,Sales,Transactions,,,-814600,
+12000,Office Rent Payment,2025-07-08,Outward,Other,Transactions,,,-826600,
+89000,Vendor Payment - Electricity Bills,2025-07-08,Outward,Utilities,Transactions,,,-915600,
+151995.7,Machinery Spare Parts,2025-03-01,Accounts Payable,Other,AP/AR,,,,Pending
+166188.37,Maintenance Service Charges,2025-03-01,Accounts Payable,Maintenance,AP/AR,,,,Paid
+170056.05,Utility Bill Payment,2025-03-01,Accounts Payable,Utilities,AP/AR,,,,Partially Paid
+467097.61,Export Sale - Europe,2025-03-01,Accounts Receivable,Other,AP/AR,,,,Pending
+127014.72,Commission Income,2025-03-01,Accounts Receivable,Sales,AP/AR,,,,Received
+234907.9,IT Services Invoice,2025-03-02,Accounts Payable,Maintenance,AP/AR,,,,Pending
+241758.36,Commission Income,2025-03-02,Accounts Receivable,Sales,AP/AR,,,,Received
+494322.86,Export Sale - Europe,2025-03-02,Accounts Receivable,Other,AP/AR,,,,Partially Received
+289799.09,Maintenance Service Charges,2025-03-03,Accounts Payable,Maintenance,AP/AR,,,,Pending
+172677.4,Scrap Sale,2025-03-03,Accounts Receivable,Scrap,AP/AR,,,,Pending
+424069.32,Miscellaneous Income,2025-03-03,Accounts Receivable,Sales,AP/AR,,,,Pending
+456116.42,Scrap Sale,2025-03-03,Accounts Receivable,Scrap,AP/AR,,,,Pending
+128893.8,Purchase Invoice - Vendor B,2025-03-04,Accounts Payable,Other,AP/AR,,,,Partially Paid
+31700.19,Purchase Invoice - Vendor B,2025-03-04,Accounts Payable,Other,AP/AR,,,,Paid
+190745.23,Utility Bill Payment,2025-03-04,Accounts Payable,Utilities,AP/AR,,,,Paid
+427364.99,Sales Invoice - Client A,2025-03-04,Accounts Receivable,Sales,AP/AR,,,,Partially Received
+271474.93,Miscellaneous Income,2025-03-04,Accounts Receivable,Sales,AP/AR,,,,Received
+362171.54,Commission Income,2025-03-04,Accounts Receivable,Sales,AP/AR,,,,Received
+189063.24,Purchase Invoice - Vendor A,2025-03-05,Accounts Payable,Other,AP/AR,,,,Pending
+208475.88,Machinery Spare Parts,2025-03-05,Accounts Payable,Other,AP/AR,,,,Paid
+226562.25,Purchase Invoice - Vendor B,2025-03-05,Accounts Payable,Other,AP/AR,,,,Paid
+320536.44,Miscellaneous Income,2025-03-05,Accounts Receivable,Sales,AP/AR,,,,Pending
+211260.34,Purchase Invoice - Vendor B,2025-03-06,Accounts Payable,Other,AP/AR,,,,Pending
+104068.65,Purchase Invoice - Vendor A,2025-03-06,Accounts Payable,Other,AP/AR,,,,Pending
+193672.13,Advance from Client C,2025-03-06,Accounts Receivable,Other,AP/AR,,,,Pending
+270271.5,Sales Invoice - Client B,2025-03-06,Accounts Receivable,Sales,AP/AR,,,,Partially Received
+62216.5,IT Services Invoice,2025-03-07,Accounts Payable,Maintenance,AP/AR,,,,Pending
+186752.62,Purchase Invoice - Vendor A,2025-03-07,Accounts Payable,Other,AP/AR,,,,Paid
+208109.03,Transport Charges,2025-03-07,Accounts Payable,Logistics,AP/AR,,,,Paid
+123772.34,Sales Invoice - Client B,2025-03-07,Accounts Receivable,Sales,AP/AR,,,,Partially Received
+235189.54,Advance from Client C,2025-03-07,Accounts Receivable,Other,AP/AR,,,,Partially Received
+450465.18,Sales Invoice - Client A,2025-03-07,Accounts Receivable,Sales,AP/AR,,,,Received
+168513.46,Machinery Spare Parts,2025-03-08,Accounts Payable,Other,AP/AR,,,,Pending
+284118.33,Maintenance Service Charges,2025-03-08,Accounts Payable,Maintenance,AP/AR,,,,Partially Paid
+481394.25,Commission Income,2025-03-08,Accounts Receivable,Sales,AP/AR,,,,Partially Received
+233849.55,Advance from Client C,2025-03-08,Accounts Receivable,Other,AP/AR,,,,Received
+257467.28,Maintenance Service Charges,2025-03-09,Accounts Payable,Maintenance,AP/AR,,,,Pending
+290242.12,Export Sale - Europe,2025-03-09,Accounts Receivable,Other,AP/AR,,,,Partially Received
+95616.92,Machinery Spare Parts,2025-03-10,Accounts Payable,Other,AP/AR,,,,Partially Paid
+89599.31,Maintenance Service Charges,2025-03-10,Accounts Payable,Maintenance,AP/AR,,,,Partially Paid
+374887.73,Miscellaneous Income,2025-03-10,Accounts Receivable,Sales,AP/AR,,,,Pending
+375134.36,Scrap Sale,2025-03-10,Accounts Receivable,Scrap,AP/AR,,,,Received
+401441.46,Miscellaneous Income,2025-03-10,Accounts Receivable,Sales,AP/AR,,,,Partially Received
+194619.18,Purchase Invoice - Vendor B,2025-03-11,Accounts Payable,Other,AP/AR,,,,Partially Paid
+206551.69,Utility Bill Payment,2025-03-11,Accounts Payable,Utilities,AP/AR,,,,Partially Paid
+420785.19,Commission Income,2025-03-11,Accounts Receivable,Sales,AP/AR,,,,Partially Received
+452667.81,Sales Invoice - Client A,2025-03-11,Accounts Receivable,Sales,AP/AR,,,,Partially Received
+161377.11,Sales Invoice - Client A,2025-03-11,Accounts Receivable,Sales,AP/AR,,,,Received
+115809.76,Transport Charges,2025-03-12,Accounts Payable,Logistics,AP/AR,,,,Pending
+170092.37,Advance from Client C,2025-03-12,Accounts Receivable,Other,AP/AR,,,,Received
+48326.34,Purchase Invoice - Vendor B,2025-03-13,Accounts Payable,Other,AP/AR,,,,Partially Paid
+255879.43,Scrap Sale,2025-03-13,Accounts Receivable,Scrap,AP/AR,,,,Received
+90626.77,Miscellaneous Income,2025-03-13,Accounts Receivable,Sales,AP/AR,,,,Received
+262415.12,Machinery Spare Parts,2025-03-14,Accounts Payable,Other,AP/AR,,,,Pending
+289239.05,Maintenance Service Charges,2025-03-14,Accounts Payable,Maintenance,AP/AR,,,,Pending
+341398.63,Miscellaneous Income,2025-03-14,Accounts Receivable,Sales,AP/AR,,,,Partially Received
+243330.42,IT Services Invoice,2025-03-15,Accounts Payable,Maintenance,AP/AR,,,,Paid
+239297.77,Purchase Invoice - Vendor A,2025-03-15,Accounts Payable,Other,AP/AR,,,,Pending
+70558.48,Scrap Sale,2025-03-15,Accounts Receivable,Scrap,AP/AR,,,,Received
+377015.69,Commission Income,2025-03-15,Accounts Receivable,Sales,AP/AR,,,,Received
+248501.02,Maintenance Service Charges,2025-03-16,Accounts Payable,Maintenance,AP/AR,,,,Paid
+205702.6,Purchase Invoice - Vendor A,2025-03-16,Accounts Payable,Other,AP/AR,,,,Paid
+189668.59,Purchase Invoice - Vendor A,2025-03-16,Accounts Payable,Other,AP/AR,,,,Partially Paid
+118469.93,Scrap Sale,2025-03-16,Accounts Receivable,Scrap,AP/AR,,,,Pending
+413689.12,Commission Income,2025-03-16,Accounts Receivable,Sales,AP/AR,,,,Partially Received
+128405.8,Machinery Spare Parts,2025-03-17,Accounts Payable,Other,AP/AR,,,,Pending
+284415.84,Purchase Invoice - Vendor A,2025-03-17,Accounts Payable,Other,AP/AR,,,,Paid
+57624.08,Sales Invoice - Client A,2025-03-17,Accounts Receivable,Sales,AP/AR,,,,Partially Received
+200436.46,Sales Invoice - Client B,2025-03-17,Accounts Receivable,Sales,AP/AR,,,,Received
+211980.36,Machinery Spare Parts,2025-03-18,Accounts Payable,Other,AP/AR,,,,Partially Paid
+180328.7,Maintenance Service Charges,2025-03-18,Accounts Payable,Maintenance,AP/AR,,,,Partially Paid
+266770,Purchase Invoice - Vendor B,2025-03-18,Accounts Payable,Other,AP/AR,,,,Partially Paid
+249780.05,Miscellaneous Income,2025-03-18,Accounts Receivable,Sales,AP/AR,,,,Received
+210181.39,Purchase Invoice - Vendor A,2025-03-19,Accounts Payable,Other,AP/AR,,,,Pending
+138961.8,Maintenance Service Charges,2025-03-19,Accounts Payable,Maintenance,AP/AR,,,,Pending
+490654.58,Sales Invoice - Client A,2025-03-19,Accounts Receivable,Sales,AP/AR,,,,Received
+451831.14,Scrap Sale,2025-03-19,Accounts Receivable,Scrap,AP/AR,,,,Partially Received
+125460.5,Purchase Invoice - Vendor A,2025-03-20,Accounts Payable,Other,AP/AR,,,,Pending
+285213.13,Purchase Invoice - Vendor A,2025-03-20,Accounts Payable,Other,AP/AR,,,,Paid
+113931.85,Commission Income,2025-03-20,Accounts Receivable,Sales,AP/AR,,,,Partially Received
+24667.77,Purchase Invoice - Vendor A,2025-03-21,Accounts Payable,Other,AP/AR,,,,Paid
+296758.06,Purchase Invoice - Vendor B,2025-03-21,Accounts Payable,Other,AP/AR,,,,Partially Paid
+29896.94,Purchase Invoice - Vendor B,2025-03-21,Accounts Payable,Other,AP/AR,,,,Partially Paid
+115816.16,Scrap Sale,2025-03-21,Accounts Receivable,Scrap,AP/AR,,,,Pending
+52790.71,IT Services Invoice,2025-03-22,Accounts Payable,Maintenance,AP/AR,,,,Partially Paid
+90409.71,Purchase Invoice - Vendor A,2025-03-22,Accounts Payable,Other,AP/AR,,,,Pending
+132820.56,Scrap Sale,2025-03-22,Accounts Receivable,Scrap,AP/AR,,,,Pending
+261269.89,Machinery Spare Parts,2025-03-23,Accounts Payable,Other,AP/AR,,,,Pending
+397092.49,Advance from Client C,2025-03-23,Accounts Receivable,Other,AP/AR,,,,Pending
+14576.51,Utility Bill Payment,2025-03-24,Accounts Payable,Utilities,AP/AR,,,,Paid
+46759.98,Purchase Invoice - Vendor A,2025-03-24,Accounts Payable,Other,AP/AR,,,,Paid
+42958.3,Transport Charges,2025-03-24,Accounts Payable,Logistics,AP/AR,,,,Pending
+391228.35,Export Sale - Europe,2025-03-24,Accounts Receivable,Other,AP/AR,,,,Partially Received
+63436.46,Scrap Sale,2025-03-24,Accounts Receivable,Scrap,AP/AR,,,,Partially Received
+22575.86,Transport Charges,2025-03-25,Accounts Payable,Logistics,AP/AR,,,,Partially Paid
+234440.84,Advance from Client C,2025-03-25,Accounts Receivable,Other,AP/AR,,,,Pending
+499307.51,Sales Invoice - Client A,2025-03-25,Accounts Receivable,Sales,AP/AR,,,,Received
+346187.77,Export Sale - Europe,2025-03-25,Accounts Receivable,Other,AP/AR,,,,Received
+31312.31,Maintenance Service Charges,2025-03-26,Accounts Payable,Maintenance,AP/AR,,,,Pending
+186406.25,Utility Bill Payment,2025-03-26,Accounts Payable,Utilities,AP/AR,,,,Pending
+89754.64,Purchase Invoice - Vendor B,2025-03-26,Accounts Payable,Other,AP/AR,,,,Partially Paid
+358954.87,Scrap Sale,2025-03-26,Accounts Receivable,Scrap,AP/AR,,,,Received
+269972.85,Scrap Sale,2025-03-26,Accounts Receivable,Scrap,AP/AR,,,,Received
+306659.13,Scrap Sale,2025-03-26,Accounts Receivable,Scrap,AP/AR,,,,Pending
+257309.89,Purchase Invoice - Vendor A,2025-03-27,Accounts Payable,Other,AP/AR,,,,Partially Paid
+169887.22,IT Services Invoice,2025-03-27,Accounts Payable,Maintenance,AP/AR,,,,Pending
+140950.93,Maintenance Service Charges,2025-03-27,Accounts Payable,Maintenance,AP/AR,,,,Pending
+415435.42,Advance from Client C,2025-03-27,Accounts Receivable,Other,AP/AR,,,,Received
+367510.13,Export Sale - Europe,2025-03-27,Accounts Receivable,Other,AP/AR,,,,Received
+202881.28,Utility Bill Payment,2025-03-28,Accounts Payable,Utilities,AP/AR,,,,Paid
+209178.1,Purchase Invoice - Vendor B,2025-03-28,Accounts Payable,Other,AP/AR,,,,Paid
+417568.23,Sales Invoice - Client A,2025-03-28,Accounts Receivable,Sales,AP/AR,,,,Pending
+225930.8,Purchase Invoice - Vendor A,2025-03-29,Accounts Payable,Other,AP/AR,,,,Paid
+47733.48,IT Services Invoice,2025-03-29,Accounts Payable,Maintenance,AP/AR,,,,Pending
+285224.86,Scrap Sale,2025-03-29,Accounts Receivable,Scrap,AP/AR,,,,Partially Received
+211296.23,Sales Invoice - Client A,2025-03-29,Accounts Receivable,Sales,AP/AR,,,,Partially Received
+217239.06,Miscellaneous Income,2025-03-29,Accounts Receivable,Sales,AP/AR,,,,Partially Received
+184118.93,Utility Bill Payment,2025-03-30,Accounts Payable,Utilities,AP/AR,,,,Paid
+258632.15,Scrap Sale,2025-03-30,Accounts Receivable,Scrap,AP/AR,,,,Pending
+75031.01,Maintenance Service Charges,2025-03-31,Accounts Payable,Maintenance,AP/AR,,,,Pending
+255158.29,Utility Bill Payment,2025-03-31,Accounts Payable,Utilities,AP/AR,,,,Paid
+231155.63,Purchase Invoice - Vendor A,2025-03-31,Accounts Payable,Other,AP/AR,,,,Partially Paid
+220265.08,Miscellaneous Income,2025-03-31,Accounts Receivable,Sales,AP/AR,,,,Partially Received
+205743.25,Transport Charges,2025-04-01,Accounts Payable,Logistics,AP/AR,,,,Partially Paid
+186608.53,Purchase Invoice - Vendor A,2025-04-01,Accounts Payable,Other,AP/AR,,,,Partially Paid
+211106.64,IT Services Invoice,2025-04-01,Accounts Payable,Maintenance,AP/AR,,,,Pending
+354322.4,Advance from Client C,2025-04-01,Accounts Receivable,Other,AP/AR,,,,Received
+11770.68,Utility Bill Payment,2025-04-02,Accounts Payable,Utilities,AP/AR,,,,Pending
+200629.94,Transport Charges,2025-04-02,Accounts Payable,Logistics,AP/AR,,,,Pending
+320254.29,Commission Income,2025-04-02,Accounts Receivable,Sales,AP/AR,,,,Pending
+163839.98,Machinery Spare Parts,2025-04-03,Accounts Payable,Other,AP/AR,,,,Paid
+177039.03,Export Sale - Europe,2025-04-03,Accounts Receivable,Other,AP/AR,,,,Received
+363582.02,Advance from Client C,2025-04-03,Accounts Receivable,Other,AP/AR,,,,Partially Received
+266169.23,Purchase Invoice - Vendor A,2025-04-04,Accounts Payable,Other,AP/AR,,,,Pending
+228786.4,Purchase Invoice - Vendor B,2025-04-04,Accounts Payable,Other,AP/AR,,,,Pending
+33658.64,Machinery Spare Parts,2025-04-04,Accounts Payable,Other,AP/AR,,,,Paid
+247974.24,Export Sale - Europe,2025-04-04,Accounts Receivable,Other,AP/AR,,,,Received
+143851.75,Export Sale - Europe,2025-04-04,Accounts Receivable,Other,AP/AR,,,,Partially Received
+179134.7,Sales Invoice - Client A,2025-04-04,Accounts Receivable,Sales,AP/AR,,,,Pending
+206761.01,Machinery Spare Parts,2025-04-05,Accounts Payable,Other,AP/AR,,,,Paid
+203468.44,Transport Charges,2025-04-05,Accounts Payable,Logistics,AP/AR,,,,Pending
+492378.37,Export Sale - Europe,2025-04-05,Accounts Receivable,Other,AP/AR,,,,Pending
+97411.61,Purchase Invoice - Vendor B,2025-04-06,Accounts Payable,Other,AP/AR,,,,Pending
+135204.56,Miscellaneous Income,2025-04-06,Accounts Receivable,Sales,AP/AR,,,,Received
+154241.75,Purchase Invoice - Vendor A,2025-04-07,Accounts Payable,Other,AP/AR,,,,Paid
+196301.65,Sales Invoice - Client B,2025-04-07,Accounts Receivable,Sales,AP/AR,,,,Partially Received
+172029.83,Transport Charges,2025-04-08,Accounts Payable,Logistics,AP/AR,,,,Partially Paid
+204564.88,Sales Invoice - Client A,2025-04-08,Accounts Receivable,Sales,AP/AR,,,,Partially Received
+223747.6,Sales Invoice - Client A,2025-04-08,Accounts Receivable,Sales,AP/AR,,,,Received
+100787.58,IT Services Invoice,2025-04-09,Accounts Payable,Maintenance,AP/AR,,,,Paid
+357654.49,Export Sale - Europe,2025-04-09,Accounts Receivable,Other,AP/AR,,,,Received
+66434.95,Advance from Client C,2025-04-09,Accounts Receivable,Other,AP/AR,,,,Pending
+94217.86,Advance from Client C,2025-04-09,Accounts Receivable,Other,AP/AR,,,,Partially Received
+209986.91,IT Services Invoice,2025-04-10,Accounts Payable,Maintenance,AP/AR,,,,Paid
+136646.42,Purchase Invoice - Vendor A,2025-04-10,Accounts Payable,Other,AP/AR,,,,Pending
+298546.93,Export Sale - Europe,2025-04-10,Accounts Receivable,Other,AP/AR,,,,Partially Received
+262452.08,Maintenance Service Charges,2025-04-11,Accounts Payable,Maintenance,AP/AR,,,,Partially Paid
+173203.63,Sales Invoice - Client B,2025-04-11,Accounts Receivable,Sales,AP/AR,,,,Pending
+260136.81,Sales Invoice - Client A,2025-04-11,Accounts Receivable,Sales,AP/AR,,,,Pending
+66232.07,Transport Charges,2025-04-12,Accounts Payable,Logistics,AP/AR,,,,Paid
+220939.94,Utility Bill Payment,2025-04-12,Accounts Payable,Utilities,AP/AR,,,,Partially Paid
+52830.05,IT Services Invoice,2025-04-12,Accounts Payable,Maintenance,AP/AR,,,,Pending
+106663.18,Advance from Client C,2025-04-12,Accounts Receivable,Other,AP/AR,,,,Partially Received
+230154.19,IT Services Invoice,2025-04-13,Accounts Payable,Maintenance,AP/AR,,,,Pending
+317694.9,Miscellaneous Income,2025-04-13,Accounts Receivable,Sales,AP/AR,,,,Received
+178045.75,IT Services Invoice,2025-04-14,Accounts Payable,Maintenance,AP/AR,,,,Partially Paid
+196467.63,Transport Charges,2025-04-14,Accounts Payable,Logistics,AP/AR,,,,Partially Paid
+260631.59,Utility Bill Payment,2025-04-14,Accounts Payable,Utilities,AP/AR,,,,Partially Paid
+225483.78,Sales Invoice - Client B,2025-04-14,Accounts Receivable,Sales,AP/AR,,,,Received
+319378.71,Export Sale - Europe,2025-04-14,Accounts Receivable,Other,AP/AR,,,,Received
+112063.24,Purchase Invoice - Vendor A,2025-04-15,Accounts Payable,Other,AP/AR,,,,Pending
+143905.32,Utility Bill Payment,2025-04-15,Accounts Payable,Utilities,AP/AR,,,,Pending
+116933.9,Purchase Invoice - Vendor A,2025-04-15,Accounts Payable,Other,AP/AR,,,,Paid
+433482.52,Commission Income,2025-04-15,Accounts Receivable,Sales,AP/AR,,,,Pending
+157049.67,Transport Charges,2025-04-16,Accounts Payable,Logistics,AP/AR,,,,Paid
+170751.75,Transport Charges,2025-04-16,Accounts Payable,Logistics,AP/AR,,,,Partially Paid
+140422.77,Purchase Invoice - Vendor A,2025-04-16,Accounts Payable,Other,AP/AR,,,,Partially Paid
+167548.11,Sales Invoice - Client B,2025-04-16,Accounts Receivable,Sales,AP/AR,,,,Received
+83921.93,Scrap Sale,2025-04-16,Accounts Receivable,Scrap,AP/AR,,,,Pending
+60715.92,Export Sale - Europe,2025-04-16,Accounts Receivable,Other,AP/AR,,,,Received
+156319.21,Purchase Invoice - Vendor A,2025-04-17,Accounts Payable,Other,AP/AR,,,,Pending
+81845.68,Purchase Invoice - Vendor A,2025-04-17,Accounts Payable,Other,AP/AR,,,,Paid
+161979.88,Maintenance Service Charges,2025-04-17,Accounts Payable,Maintenance,AP/AR,,,,Partially Paid
+192697.47,Advance from Client C,2025-04-17,Accounts Receivable,Other,AP/AR,,,,Received
+234594.79,Maintenance Service Charges,2025-04-18,Accounts Payable,Maintenance,AP/AR,,,,Partially Paid
+25186,Transport Charges,2025-04-18,Accounts Payable,Logistics,AP/AR,,,,Partially Paid
+42296.81,Advance from Client C,2025-04-18,Accounts Receivable,Other,AP/AR,,,,Pending
+342405.88,Scrap Sale,2025-04-18,Accounts Receivable,Scrap,AP/AR,,,,Received
+364629.49,Advance from Client C,2025-04-18,Accounts Receivable,Other,AP/AR,,,,Partially Received
+53608.26,IT Services Invoice,2025-04-19,Accounts Payable,Maintenance,AP/AR,,,,Pending
+202447.51,Transport Charges,2025-04-19,Accounts Payable,Logistics,AP/AR,,,,Paid
+290631.99,Utility Bill Payment,2025-04-19,Accounts Payable,Utilities,AP/AR,,,,Partially Paid
+73186.31,Export Sale - Europe,2025-04-19,Accounts Receivable,Other,AP/AR,,,,Partially Received
+161695.12,Sales Invoice - Client A,2025-04-19,Accounts Receivable,Sales,AP/AR,,,,Received
+397914.36,Commission Income,2025-04-19,Accounts Receivable,Sales,AP/AR,,,,Pending
+250398.1,Machinery Spare Parts,2025-04-20,Accounts Payable,Other,AP/AR,,,,Partially Paid
+274609.92,Machinery Spare Parts,2025-04-20,Accounts Payable,Other,AP/AR,,,,Pending
+204432.25,Machinery Spare Parts,2025-04-20,Accounts Payable,Other,AP/AR,,,,Partially Paid
+187672.86,Sales Invoice - Client A,2025-04-20,Accounts Receivable,Sales,AP/AR,,,,Pending
+177448.85,Sales Invoice - Client B,2025-04-20,Accounts Receivable,Sales,AP/AR,,,,Received
+299993.22,Purchase Invoice - Vendor B,2025-04-21,Accounts Payable,Other,AP/AR,,,,Pending
+423769.91,Advance from Client C,2025-04-21,Accounts Receivable,Other,AP/AR,,,,Pending
+166533.52,IT Services Invoice,2025-04-22,Accounts Payable,Maintenance,AP/AR,,,,Partially Paid
+20946.77,Transport Charges,2025-04-22,Accounts Payable,Logistics,AP/AR,,,,Paid
+189229.12,IT Services Invoice,2025-04-22,Accounts Payable,Maintenance,AP/AR,,,,Partially Paid
+89501.13,Sales Invoice - Client B,2025-04-22,Accounts Receivable,Sales,AP/AR,,,,Partially Received
+316122.84,Miscellaneous Income,2025-04-22,Accounts Receivable,Sales,AP/AR,,,,Pending
+22670.8,Maintenance Service Charges,2025-04-23,Accounts Payable,Maintenance,AP/AR,,,,Paid
+218679.85,Machinery Spare Parts,2025-04-23,Accounts Payable,Other,AP/AR,,,,Paid
+92629.1,Transport Charges,2025-04-23,Accounts Payable,Logistics,AP/AR,,,,Partially Paid
+271665.46,Sales Invoice - Client B,2025-04-23,Accounts Receivable,Sales,AP/AR,,,,Received
+394341.42,Miscellaneous Income,2025-04-23,Accounts Receivable,Sales,AP/AR,,,,Pending
+284667.75,Machinery Spare Parts,2025-04-24,Accounts Payable,Other,AP/AR,,,,Paid
+233137.18,Maintenance Service Charges,2025-04-24,Accounts Payable,Maintenance,AP/AR,,,,Paid
+215143.81,Scrap Sale,2025-04-24,Accounts Receivable,Scrap,AP/AR,,,,Pending
+107851.89,Miscellaneous Income,2025-04-24,Accounts Receivable,Sales,AP/AR,,,,Partially Received
+437770.94,Sales Invoice - Client B,2025-04-24,Accounts Receivable,Sales,AP/AR,,,,Pending
+263493.91,Maintenance Service Charges,2025-04-25,Accounts Payable,Maintenance,AP/AR,,,,Partially Paid
+216306.28,Purchase Invoice - Vendor A,2025-04-25,Accounts Payable,Other,AP/AR,,,,Partially Paid
+46156.55,IT Services Invoice,2025-04-25,Accounts Payable,Maintenance,AP/AR,,,,Pending
+230166.42,Advance from Client C,2025-04-25,Accounts Receivable,Other,AP/AR,,,,Partially Received
+136867.04,IT Services Invoice,2025-04-26,Accounts Payable,Maintenance,AP/AR,,,,Pending
+465931.24,Advance from Client C,2025-04-26,Accounts Receivable,Other,AP/AR,,,,Received
+204262.44,Sales Invoice - Client A,2025-04-26,Accounts Receivable,Sales,AP/AR,,,,Received
+298412.35,Maintenance Service Charges,2025-04-27,Accounts Payable,Maintenance,AP/AR,,,,Paid
+166155.59,Sales Invoice - Client A,2025-04-27,Accounts Receivable,Sales,AP/AR,,,,Pending
+107234.2,Machinery Spare Parts,2025-04-28,Accounts Payable,Other,AP/AR,,,,Pending
+21107.93,Purchase Invoice - Vendor B,2025-04-28,Accounts Payable,Other,AP/AR,,,,Paid
+251022.04,Machinery Spare Parts,2025-04-28,Accounts Payable,Other,AP/AR,,,,Partially Paid
+311520.65,Export Sale - Europe,2025-04-28,Accounts Receivable,Other,AP/AR,,,,Pending
+135402.72,Sales Invoice - Client A,2025-04-28,Accounts Receivable,Sales,AP/AR,,,,Pending
+186575.23,Machinery Spare Parts,2025-04-29,Accounts Payable,Other,AP/AR,,,,Paid
+235090.06,Purchase Invoice - Vendor A,2025-04-29,Accounts Payable,Other,AP/AR,,,,Pending
+45336.02,Utility Bill Payment,2025-04-29,Accounts Payable,Utilities,AP/AR,,,,Pending
+399010.56,Commission Income,2025-04-29,Accounts Receivable,Sales,AP/AR,,,,Received
+64320.37,Sales Invoice - Client A,2025-04-29,Accounts Receivable,Sales,AP/AR,,,,Received
+14766.25,Transport Charges,2025-04-30,Accounts Payable,Logistics,AP/AR,,,,Partially Paid
+80162.06,Transport Charges,2025-04-30,Accounts Payable,Logistics,AP/AR,,,,Pending
+134479.28,Utility Bill Payment,2025-04-30,Accounts Payable,Utilities,AP/AR,,,,Partially Paid
+289625.22,Sales Invoice - Client B,2025-04-30,Accounts Receivable,Sales,AP/AR,,,,Pending
+337425.3,Commission Income,2025-04-30,Accounts Receivable,Sales,AP/AR,,,,Partially Received
+286487.07,Purchase Invoice - Vendor A,2025-05-01,Accounts Payable,Other,AP/AR,,,,Partially Paid
+238059.58,Transport Charges,2025-05-01,Accounts Payable,Logistics,AP/AR,,,,Partially Paid
+201322.33,Sales Invoice - Client A,2025-05-01,Accounts Receivable,Sales,AP/AR,,,,Received
+321478.69,Sales Invoice - Client A,2025-05-01,Accounts Receivable,Sales,AP/AR,,,,Received
+376185.13,Advance from Client C,2025-05-01,Accounts Receivable,Other,AP/AR,,,,Received
+79926.52,Utility Bill Payment,2025-05-02,Accounts Payable,Utilities,AP/AR,,,,Partially Paid
+388035.67,Sales Invoice - Client A,2025-05-02,Accounts Receivable,Sales,AP/AR,,,,Partially Received
+172934.12,Miscellaneous Income,2025-05-02,Accounts Receivable,Sales,AP/AR,,,,Pending
+277546.74,Advance from Client C,2025-05-02,Accounts Receivable,Other,AP/AR,,,,Partially Received
+235951.35,IT Services Invoice,2025-05-03,Accounts Payable,Maintenance,AP/AR,,,,Paid
+319550.57,Export Sale - Europe,2025-05-03,Accounts Receivable,Other,AP/AR,,,,Pending
+360862.08,Sales Invoice - Client A,2025-05-03,Accounts Receivable,Sales,AP/AR,,,,Received
+153786.86,Sales Invoice - Client A,2025-05-03,Accounts Receivable,Sales,AP/AR,,,,Pending
+101522.79,Purchase Invoice - Vendor A,2025-05-04,Accounts Payable,Other,AP/AR,,,,Paid
+494670.12,Export Sale - Europe,2025-05-04,Accounts Receivable,Other,AP/AR,,,,Partially Received
+134123.74,Export Sale - Europe,2025-05-04,Accounts Receivable,Other,AP/AR,,,,Partially Received
+150194.34,Sales Invoice - Client B,2025-05-04,Accounts Receivable,Sales,AP/AR,,,,Pending
+89232.82,Utility Bill Payment,2025-05-05,Accounts Payable,Utilities,AP/AR,,,,Paid
+267951.09,Maintenance Service Charges,2025-05-05,Accounts Payable,Maintenance,AP/AR,,,,Partially Paid
+269444.87,Maintenance Service Charges,2025-05-05,Accounts Payable,Maintenance,AP/AR,,,,Paid
+253139.58,Sales Invoice - Client B,2025-05-05,Accounts Receivable,Sales,AP/AR,,,,Received
+462912.13,Advance from Client C,2025-05-05,Accounts Receivable,Other,AP/AR,,,,Partially Received
+33957.34,IT Services Invoice,2025-05-06,Accounts Payable,Maintenance,AP/AR,,,,Paid
+134876.07,Purchase Invoice - Vendor A,2025-05-06,Accounts Payable,Other,AP/AR,,,,Pending
+167393.6,Advance from Client C,2025-05-06,Accounts Receivable,Other,AP/AR,,,,Pending
+333850.42,Advance from Client C,2025-05-06,Accounts Receivable,Other,AP/AR,,,,Received
+305284.6,Export Sale - Europe,2025-05-06,Accounts Receivable,Other,AP/AR,,,,Received
+138733.43,Machinery Spare Parts,2025-05-07,Accounts Payable,Other,AP/AR,,,,Paid
+436318.22,Commission Income,2025-05-07,Accounts Receivable,Sales,AP/AR,,,,Received
+89621.05,Maintenance Service Charges,2025-05-08,Accounts Payable,Maintenance,AP/AR,,,,Pending
+204643.33,Purchase Invoice - Vendor A,2025-05-08,Accounts Payable,Other,AP/AR,,,,Paid
+158794.95,Utility Bill Payment,2025-05-08,Accounts Payable,Utilities,AP/AR,,,,Partially Paid
+476866.8,Sales Invoice - Client B,2025-05-08,Accounts Receivable,Sales,AP/AR,,,,Pending
+307710.72,Miscellaneous Income,2025-05-08,Accounts Receivable,Sales,AP/AR,,,,Received
+71852.71,Sales Invoice - Client A,2025-05-08,Accounts Receivable,Sales,AP/AR,,,,Pending
+115023.67,Utility Bill Payment,2025-05-09,Accounts Payable,Utilities,AP/AR,,,,Partially Paid
+185477.5,Purchase Invoice - Vendor A,2025-05-09,Accounts Payable,Other,AP/AR,,,,Partially Paid
+285158.82,Maintenance Service Charges,2025-05-09,Accounts Payable,Maintenance,AP/AR,,,,Paid
+47673.86,Miscellaneous Income,2025-05-09,Accounts Receivable,Sales,AP/AR,,,,Pending
+189805.47,Scrap Sale,2025-05-09,Accounts Receivable,Scrap,AP/AR,,,,Received
+82387.38,Utility Bill Payment,2025-05-10,Accounts Payable,Utilities,AP/AR,,,,Pending
+223345.71,Purchase Invoice - Vendor A,2025-05-10,Accounts Payable,Other,AP/AR,,,,Paid
+122226.34,Transport Charges,2025-05-10,Accounts Payable,Logistics,AP/AR,,,,Partially Paid
+389732.6,Advance from Client C,2025-05-10,Accounts Receivable,Other,AP/AR,,,,Partially Received
+298945.88,Purchase Invoice - Vendor B,2025-05-11,Accounts Payable,Other,AP/AR,,,,Paid
+275778.88,Machinery Spare Parts,2025-05-11,Accounts Payable,Other,AP/AR,,,,Paid
+76506.92,Sales Invoice - Client A,2025-05-11,Accounts Receivable,Sales,AP/AR,,,,Pending
+270616.92,Purchase Invoice - Vendor B,2025-05-12,Accounts Payable,Other,AP/AR,,,,Paid
+245048.83,Purchase Invoice - Vendor A,2025-05-12,Accounts Payable,Other,AP/AR,,,,Paid
+357674.84,Advance from Client C,2025-05-12,Accounts Receivable,Other,AP/AR,,,,Partially Received
+152277.52,Scrap Sale,2025-05-12,Accounts Receivable,Scrap,AP/AR,,,,Received
+87177.57,Miscellaneous Income,2025-05-12,Accounts Receivable,Sales,AP/AR,,,,Partially Received
+60486.39,Machinery Spare Parts,2025-05-13,Accounts Payable,Other,AP/AR,,,,Paid
+75030.07,Transport Charges,2025-05-13,Accounts Payable,Logistics,AP/AR,,,,Pending
+50274.29,IT Services Invoice,2025-05-13,Accounts Payable,Maintenance,AP/AR,,,,Paid
+281470.5,Advance from Client C,2025-05-13,Accounts Receivable,Other,AP/AR,,,,Received
+295073.47,IT Services Invoice,2025-05-14,Accounts Payable,Maintenance,AP/AR,,,,Pending
+266431.47,Transport Charges,2025-05-14,Accounts Payable,Logistics,AP/AR,,,,Pending
+499801.57,Export Sale - Europe,2025-05-14,Accounts Receivable,Other,AP/AR,,,,Partially Received
+267590.87,Export Sale - Europe,2025-05-14,Accounts Receivable,Other,AP/AR,,,,Received
+46344.77,Purchase Invoice - Vendor A,2025-05-15,Accounts Payable,Other,AP/AR,,,,Paid
+31507.86,Machinery Spare Parts,2025-05-15,Accounts Payable,Other,AP/AR,,,,Paid
+160034.4,Machinery Spare Parts,2025-05-15,Accounts Payable,Other,AP/AR,,,,Pending
+298015.14,Commission Income,2025-05-15,Accounts Receivable,Sales,AP/AR,,,,Pending
+256403.26,Export Sale - Europe,2025-05-15,Accounts Receivable,Other,AP/AR,,,,Pending
+70838.95,Miscellaneous Income,2025-05-15,Accounts Receivable,Sales,AP/AR,,,,Pending
+56970.42,Purchase Invoice - Vendor B,2025-05-16,Accounts Payable,Other,AP/AR,,,,Partially Paid
+110346.69,Purchase Invoice - Vendor B,2025-05-16,Accounts Payable,Other,AP/AR,,,,Partially Paid
+48641.35,Miscellaneous Income,2025-05-16,Accounts Receivable,Sales,AP/AR,,,,Pending
+478612.3,Commission Income,2025-05-16,Accounts Receivable,Sales,AP/AR,,,,Received
+97819.14,Machinery Spare Parts,2025-05-17,Accounts Payable,Other,AP/AR,,,,Partially Paid
+324083.84,Scrap Sale,2025-05-17,Accounts Receivable,Scrap,AP/AR,,,,Partially Received
+59648.18,Purchase Invoice - Vendor B,2025-05-18,Accounts Payable,Other,AP/AR,,,,Partially Paid
+271580.26,Machinery Spare Parts,2025-05-18,Accounts Payable,Other,AP/AR,,,,Paid
+277939.62,IT Services Invoice,2025-05-18,Accounts Payable,Maintenance,AP/AR,,,,Pending
+32276.28,Sales Invoice - Client A,2025-05-18,Accounts Receivable,Sales,AP/AR,,,,Partially Received
+198827.69,Utility Bill Payment,2025-05-19,Accounts Payable,Utilities,AP/AR,,,,Partially Paid
+189251.44,Maintenance Service Charges,2025-05-19,Accounts Payable,Maintenance,AP/AR,,,,Pending
+267809.1,Maintenance Service Charges,2025-05-19,Accounts Payable,Maintenance,AP/AR,,,,Partially Paid
+478758.58,Commission Income,2025-05-19,Accounts Receivable,Sales,AP/AR,,,,Received
+404297.2,Sales Invoice - Client B,2025-05-19,Accounts Receivable,Sales,AP/AR,,,,Partially Received
+141527.8,Utility Bill Payment,2025-05-20,Accounts Payable,Utilities,AP/AR,,,,Partially Paid
+55843.33,Purchase Invoice - Vendor A,2025-05-20,Accounts Payable,Other,AP/AR,,,,Paid
+109971.28,Export Sale - Europe,2025-05-20,Accounts Receivable,Other,AP/AR,,,,Partially Received
+163165.42,Sales Invoice - Client B,2025-05-20,Accounts Receivable,Sales,AP/AR,,,,Partially Received
+296526.78,Machinery Spare Parts,2025-05-21,Accounts Payable,Other,AP/AR,,,,Paid
+47922.18,Maintenance Service Charges,2025-05-21,Accounts Payable,Maintenance,AP/AR,,,,Paid
+62030.13,Scrap Sale,2025-05-21,Accounts Receivable,Scrap,AP/AR,,,,Pending
+70035.74,Export Sale - Europe,2025-05-21,Accounts Receivable,Other,AP/AR,,,,Received
+79030.04,Sales Invoice - Client B,2025-05-21,Accounts Receivable,Sales,AP/AR,,,,Pending
+260607.52,Maintenance Service Charges,2025-05-22,Accounts Payable,Maintenance,AP/AR,,,,Paid
+289178.9,Purchase Invoice - Vendor B,2025-05-22,Accounts Payable,Other,AP/AR,,,,Pending
+363352.93,Scrap Sale,2025-05-22,Accounts Receivable,Scrap,AP/AR,,,,Pending
+88077.78,Miscellaneous Income,2025-05-22,Accounts Receivable,Sales,AP/AR,,,,Partially Received
+264931.94,Maintenance Service Charges,2025-05-23,Accounts Payable,Maintenance,AP/AR,,,,Paid
+36114.24,Purchase Invoice - Vendor A,2025-05-23,Accounts Payable,Other,AP/AR,,,,Paid
+483676.45,Export Sale - Europe,2025-05-23,Accounts Receivable,Other,AP/AR,,,,Pending
+182918.59,Scrap Sale,2025-05-23,Accounts Receivable,Scrap,AP/AR,,,,Pending
+252498.16,Advance from Client C,2025-05-23,Accounts Receivable,Other,AP/AR,,,,Partially Received
+92867.03,Maintenance Service Charges,2025-05-24,Accounts Payable,Maintenance,AP/AR,,,,Pending
+41174.15,IT Services Invoice,2025-05-24,Accounts Payable,Maintenance,AP/AR,,,,Pending
+220977.34,Utility Bill Payment,2025-05-24,Accounts Payable,Utilities,AP/AR,,,,Paid
+206284.99,Sales Invoice - Client A,2025-05-24,Accounts Receivable,Sales,AP/AR,,,,Partially Received
+105381.1,Scrap Sale,2025-05-24,Accounts Receivable,Scrap,AP/AR,,,,Partially Received
+122041.16,Purchase Invoice - Vendor A,2025-05-25,Accounts Payable,Other,AP/AR,,,,Paid
+169458.56,IT Services Invoice,2025-05-25,Accounts Payable,Maintenance,AP/AR,,,,Partially Paid
+68217.4,Scrap Sale,2025-05-25,Accounts Receivable,Scrap,AP/AR,,,,Pending
+192867.18,Export Sale - Europe,2025-05-25,Accounts Receivable,Other,AP/AR,,,,Received
+470084.8,Scrap Sale,2025-05-25,Accounts Receivable,Scrap,AP/AR,,,,Pending
+157645.53,Transport Charges,2025-05-26,Accounts Payable,Logistics,AP/AR,,,,Partially Paid
+29067.84,Sales Invoice - Client A,2025-05-26,Accounts Receivable,Sales,AP/AR,,,,Partially Received
+147385.8,IT Services Invoice,2025-05-27,Accounts Payable,Maintenance,AP/AR,,,,Paid
+185815.55,Purchase Invoice - Vendor B,2025-05-27,Accounts Payable,Other,AP/AR,,,,Partially Paid
+466370.68,Advance from Client C,2025-05-27,Accounts Receivable,Other,AP/AR,,,,Received
+297278.56,Maintenance Service Charges,2025-05-28,Accounts Payable,Maintenance,AP/AR,,,,Partially Paid
+174822.99,Scrap Sale,2025-05-28,Accounts Receivable,Scrap,AP/AR,,,,Partially Received
+250024.86,Scrap Sale,2025-05-28,Accounts Receivable,Scrap,AP/AR,,,,Partially Received
+246567.16,Maintenance Service Charges,2025-05-29,Accounts Payable,Maintenance,AP/AR,,,,Paid
+205403.85,Utility Bill Payment,2025-05-29,Accounts Payable,Utilities,AP/AR,,,,Paid
+400409.86,Advance from Client C,2025-05-29,Accounts Receivable,Other,AP/AR,,,,Partially Received
+347141.39,Miscellaneous Income,2025-05-29,Accounts Receivable,Sales,AP/AR,,,,Pending
+242549.2,Scrap Sale,2025-05-29,Accounts Receivable,Scrap,AP/AR,,,,Partially Received
+75987.54,Transport Charges,2025-05-30,Accounts Payable,Logistics,AP/AR,,,,Pending
+149330.15,Transport Charges,2025-05-30,Accounts Payable,Logistics,AP/AR,,,,Partially Paid
+219143.02,Machinery Spare Parts,2025-05-30,Accounts Payable,Other,AP/AR,,,,Paid
+343556.18,Miscellaneous Income,2025-05-30,Accounts Receivable,Sales,AP/AR,,,,Pending
+41869.7,Machinery Spare Parts,2025-05-31,Accounts Payable,Other,AP/AR,,,,Pending
+100970.82,Maintenance Service Charges,2025-05-31,Accounts Payable,Maintenance,AP/AR,,,,Pending
+210245.08,Maintenance Service Charges,2025-05-31,Accounts Payable,Maintenance,AP/AR,,,,Paid
+309624.25,Miscellaneous Income,2025-05-31,Accounts Receivable,Sales,AP/AR,,,,Received
+425704.73,Miscellaneous Income,2025-05-31,Accounts Receivable,Sales,AP/AR,,,,Partially Received
+355829.86,Sales Invoice - Client A,2025-05-31,Accounts Receivable,Sales,AP/AR,,,,Partially Received
+120000,Advance for Equipment Purchase,2025-07-04,Accounts Payable,Other,AP/AR,,,,Pending

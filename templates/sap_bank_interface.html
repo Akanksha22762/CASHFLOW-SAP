@@ -2185,6 +2185,180 @@
         }
 
         /* Recent Transactions Section */
+
+        /* Anomaly Detection Styles */
+        .anomaly-results {
+            background: var(--bg-primary);
+            border-radius: var(--border-radius-lg);
+            padding: 1.5rem;
+            margin-top: 1rem;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .anomaly-item {
+            background: var(--bg-secondary);
+            border-left: 4px solid var(--warning-color);
+            transition: var(--transition);
+        }
+
+        .anomaly-item:hover {
+            transform: translateX(4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .anomaly-item.text-danger {
+            border-left-color: var(--error-color);
+            background: rgba(220, 38, 38, 0.05);
+        }
+
+        .anomaly-item.text-warning {
+            border-left-color: var(--warning-color);
+            background: rgba(217, 119, 6, 0.05);
+        }
+
+        .anomaly-item.text-info {
+            border-left-color: var(--primary-color);
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        .text-danger {
+            color: var(--error-color) !important;
+        }
+
+        .text-warning {
+            color: var(--warning-color) !important;
+        }
+
+        .text-info {
+            color: var(--primary-color) !important;
+        }
+
+        /* Prediction Section Styles */
+        .predictions-section {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 1px solid #f59e0b;
+        }
+
+        .predictions-section .section-header {
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .btn-info {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-info:disabled {
+            background: var(--text-light);
+            cursor: not-allowed;
+        }
+
+        /* Clean Anomaly Results Styles */
+        .anomaly-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .anomaly-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .anomaly-filters {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .anomaly-filters .btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .anomaly-filters .btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .anomaly-filters .btn:first-child {
+            background: var(--error-color);
+            color: white;
+        }
+
+        .anomaly-item {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .anomaly-item.text-danger {
+            border-left-color: #dc3545;
+        }
+
+        .anomaly-item.text-warning {
+            border-left-color: #ffc107;
+        }
+
+        .anomaly-item.text-info {
+            border-left-color: #17a2b8;
+        }
+
+        .anomaly-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .stat-card {
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .anomaly-badge {
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .btn-purple-600 {
+            background-color: #9333ea;
+            color: white;
+        }
+
+        .btn-purple-600:hover {
+            background-color: #7c3aed;
+            color: white;
+        }
+
+        .text-purple-600 {
+            color: #9333ea;
+        }
+
+        .stat-card[onclick] {
+            transition: var(--transition);
+        }
+
+        .stat-card[onclick]:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .bg-light {
+            background: var(--bg-secondary);
+        }
     </style>
 </head>
 <body>
@@ -2742,7 +2916,100 @@
             </div>
         </div>
 
-        <!-- Step 5: Invoice-Payment Matching -->
+        <!-- Step 5: AI Predictions & Anomaly Detection -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-number">5</div>
+                <div class="section-title">
+                    <h2>AI Predictions & Anomaly Detection</h2>
+                    <p>Advanced predictive analytics and fraud detection</p>
+                </div>
+            </div>
+            <div class="section-content">
+
+
+                <div class="grid">
+                    <!-- Anomaly Detection -->
+                    <div class="stat-card">
+                        <i class="fas fa-robot stat-icon text-purple-600"></i>
+                        <h3 class="font-semibold mb-2">AI-Powered Anomaly Detection</h3>
+                        <p class="text-sm text-secondary mb-3">Advanced ML algorithms detect fraud & unusual patterns</p>
+                        <div class="ai-status mb-2">
+                            <span class="badge bg-success text-white text-xs">
+                                <i class="fas fa-check-circle"></i> AI/ML Ready
+                            </span>
+                            <span class="text-xs text-gray-600 ml-2">4 Models Active</span>
+                            <button class="btn btn-outline btn-xs ml-2" onclick="checkAIMLStatus()">
+                                <i class="fas fa-sync-alt"></i> Check Status
+                            </button>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-purple-600 btn-sm" id="anomalyDetectionBtn" onclick="runAnomalyDetection()" disabled>
+                                <i class="fas fa-brain"></i>
+                                AI Detect Anomalies
+                            </button>
+                            <button class="btn btn-outline btn-sm" onclick="downloadAnomalyReport()">
+                                <i class="fas fa-download"></i>
+                                Export Report
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Duplicate Payment Detection -->
+                    <div class="stat-card">
+                        <i class="fas fa-copy stat-icon text-danger"></i>
+                        <h3 class="font-semibold mb-2">Duplicate Detection</h3>
+                        <p class="text-sm text-secondary mb-3">Find duplicate or similar payments</p>
+                        <div class="btn-group">
+                            <button class="btn btn-danger btn-sm" id="duplicateDetectionBtn" onclick="runDuplicateDetection()" disabled>
+                                <i class="fas fa-search"></i>
+                                Find Duplicates
+                            </button>
+                            <button class="btn btn-outline btn-sm" onclick="downloadPredictions('duplicate_detection')">
+                                <i class="fas fa-download"></i>
+                                Export Report
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Cash Flow Forecasting -->
+                    <div class="stat-card">
+                        <i class="fas fa-chart-line stat-icon text-primary"></i>
+                        <h3 class="font-semibold mb-2">Cash Flow Forecasting</h3>
+                        <p class="text-sm text-secondary mb-3">Predict future cash flows</p>
+                        <div class="btn-group">
+                            <button class="btn btn-primary btn-sm" id="cashflowForecastBtn" onclick="runCashflowForecast()" disabled>
+                                <i class="fas fa-crystal-ball"></i>
+                                Forecast Cash Flow
+                            </button>
+                            <button class="btn btn-outline btn-sm" onclick="downloadPredictions('cashflow_forecast')">
+                                <i class="fas fa-download"></i>
+                                Export Report
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Payment Delay Prediction -->
+                    <div class="stat-card">
+                        <i class="fas fa-clock stat-icon text-info"></i>
+                        <h3 class="font-semibold mb-2">Payment Delay Prediction</h3>
+                        <p class="text-sm text-secondary mb-3">Predict payment delays</p>
+                        <div class="btn-group">
+                            <button class="btn btn-info btn-sm" id="paymentDelayBtn" onclick="runPaymentDelayPrediction()" disabled>
+                                <i class="fas fa-hourglass-half"></i>
+                                Predict Delays
+                            </button>
+                            <button class="btn btn-outline btn-sm" onclick="downloadPredictions('payment_delay')">
+                                <i class="fas fa-download"></i>
+                                Export Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 6: Invoice-Payment Matching -->
         <div class="section-card">
             <div class="section-header">
                 <div class="section-number">5</div>
@@ -3185,6 +3452,21 @@
             const uploadBtn = document.getElementById('uploadBtn');
             uploadBtn.disabled = !bankFileUploaded; // Only bank file is required
         }
+
+        function enablePredictionButtons() {
+            // Enable all prediction buttons after reconciliation is completed
+            const anomalyBtn = document.getElementById('anomalyDetectionBtn');
+            const duplicateBtn = document.getElementById('duplicateDetectionBtn');
+            const cashflowBtn = document.getElementById('cashflowForecastBtn');
+            const paymentDelayBtn = document.getElementById('paymentDelayBtn');
+            
+            if (anomalyBtn) anomalyBtn.disabled = false;
+            if (duplicateBtn) duplicateBtn.disabled = false;
+            if (cashflowBtn) cashflowBtn.disabled = false;
+            if (paymentDelayBtn) paymentDelayBtn.disabled = false;
+            
+            showAlert('AI Predictions are now available!', 'success');
+        }
         
         async function uploadFiles() {
             const sapFile = document.getElementById('sapFile').files[0];
@@ -3247,6 +3529,7 @@
                     filesProcessed = true;
                     displaySummaryDashboard(data.summary);
                     updateSummaryCards(data.summary);
+                    enablePredictionButtons(); // Enable prediction buttons after reconciliation
                 } else {
                     showAlert(`Reconciliation Error: ${data.error}`, 'error');
                 }
@@ -3256,6 +3539,284 @@
                 showLoading(false);
             }
         }
+
+        async function runAnomalyDetection() {
+            try {
+                showLoading(true);
+                showAlert('Running anomaly detection on your transaction data...', 'info');
+                
+                const response = await fetch('/anomaly-detection', {
+                    method: 'GET'
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.status === 'success') {
+                    // Display anomaly results in predictions dashboard
+                    displayPredictionsResults('anomaly_detection', data);
+                    showAlert(`Anomaly detection completed! Found ${data.total_anomalies} anomalies.`, 'success');
+                } else {
+                    showAlert(`Anomaly Detection Error: ${data.message || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                showAlert(`Anomaly Detection Error: ${error.message}`, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Placeholder functions for other predictions (will be implemented in Phase 1)
+        async function runDuplicateDetection() {
+            showAlert('Duplicate Detection - Coming in Phase 1!', 'info');
+        }
+
+        async function runCashflowForecast() {
+            showAlert('Cash Flow Forecasting - Coming in Phase 1!', 'info');
+        }
+
+        async function runPaymentDelayPrediction() {
+            showAlert('Payment Delay Prediction - Coming in Phase 1!', 'info');
+        }
+
+        function downloadPredictions(type) {
+            showAlert(`${type.replace('_', ' ').toUpperCase()} - Download coming soon!`, 'info');
+        }
+
+        function displayPredictionsResults(type, data) {
+            const resultsArea = document.getElementById('dashboardResultsArea');
+            const resultsContent = document.getElementById('resultsContent');
+            const resultsHeader = document.getElementById('resultsHeader');
+            const resultsTitle = document.getElementById('resultsTitle');
+            
+            if (type === 'anomaly_detection') {
+                // Create clean anomaly results section
+                let anomalyHtml = `
+                    <div class="anomaly-results">
+                        <!-- Summary Stats -->
+                        <div class="stats-grid-horizontal mb-4">
+                            <div class="stat-card bg-danger text-white shadow-lg" onclick="filterAnomalies('high')" style="cursor: pointer;">
+                                <div class="stat-icon mb-2">
+                                    <i class="fas fa-exclamation-triangle fa-2x"></i>
+                                </div>
+                                <div class="stat-value text-2xl font-bold">${data.severity_breakdown.high || 0}</div>
+                                <div class="stat-label font-semibold">High Risk</div>
+                            </div>
+                            <div class="stat-card bg-warning text-white shadow-lg" onclick="filterAnomalies('medium')" style="cursor: pointer;">
+                                <div class="stat-icon mb-2">
+                                    <i class="fas fa-exclamation-circle fa-2x"></i>
+                                </div>
+                                <div class="stat-value text-2xl font-bold">${data.severity_breakdown.medium || 0}</div>
+                                <div class="stat-label font-semibold">Medium Risk</div>
+                            </div>
+                            <div class="stat-card bg-info text-white shadow-lg" onclick="filterAnomalies('low')" style="cursor: pointer;">
+                                <div class="stat-icon mb-2">
+                                    <i class="fas fa-info-circle fa-2x"></i>
+                                </div>
+                                <div class="stat-value text-2xl font-bold">${data.severity_breakdown.low || 0}</div>
+                                <div class="stat-label font-semibold">Low Risk</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Anomalies List -->
+                        <div class="anomaly-list">
+                            <div class="anomaly-filters mb-4 flex gap-2">
+                                <button class="btn btn-danger btn-sm font-bold" onclick="filterAnomalies('high')">
+                                    <i class="fas fa-exclamation-triangle"></i> High Risk
+                                </button>
+                                <button class="btn btn-warning btn-sm font-bold" onclick="filterAnomalies('medium')">
+                                    <i class="fas fa-exclamation-circle"></i> Medium Risk
+                                </button>
+                                <button class="btn btn-info btn-sm font-bold" onclick="filterAnomalies('low')">
+                                    <i class="fas fa-info-circle"></i> Low Risk
+                                </button>
+                            </div>
+                            
+                            <div id="anomaliesContainer">
+                `;
+
+                // Add each anomaly with data attributes for filtering
+                data.anomalies.forEach((anomaly, index) => {
+                    const severityClass = anomaly.severity === 'high' ? 'text-danger' : 
+                                        anomaly.severity === 'medium' ? 'text-warning' : 'text-info';
+                    const severityBg = anomaly.severity === 'high' ? 'bg-danger' : 
+                                     anomaly.severity === 'medium' ? 'bg-warning' : 'bg-info';
+                    
+                    // Format transaction details
+                    let transactionDetails = '';
+                    if (anomaly.transaction) {
+                        if (anomaly.transaction.amount) {
+                            transactionDetails += `<div><strong>Amount:</strong> ₹${anomaly.transaction.amount.toLocaleString()}</div>`;
+                        }
+                        if (anomaly.transaction.date) {
+                            transactionDetails += `<div><strong>Date:</strong> ${anomaly.transaction.date}</div>`;
+                        }
+                        if (anomaly.transaction.vendor) {
+                            transactionDetails += `<div><strong>Vendor:</strong> ${anomaly.transaction.vendor}</div>`;
+                        }
+                        if (anomaly.transaction.total_amount) {
+                            transactionDetails += `<div><strong>Total Amount:</strong> ₹${anomaly.transaction.total_amount.toLocaleString()}</div>`;
+                        }
+                        if (anomaly.transaction.transaction_count) {
+                            transactionDetails += `<div><strong>Transactions:</strong> ${anomaly.transaction.transaction_count}</div>`;
+                        }
+                    }
+                    
+                    anomalyHtml += `
+                        <div class="anomaly-item p-4 mb-3 border rounded-lg shadow-sm ${severityClass}" 
+                             data-severity="${anomaly.severity}" 
+                             data-type="${anomaly.type}">
+                            <div class="anomaly-header flex justify-between items-start mb-3">
+                                <div class="flex-1">
+                                    <div class="font-bold text-lg mb-1">${anomaly.description}</div>
+                                    <div class="text-sm opacity-75">${anomaly.reason}</div>
+                                </div>
+                                <div class="anomaly-badge ${severityBg} text-white px-3 py-1 rounded-full text-xs font-bold ml-3">
+                                    ${anomaly.severity.toUpperCase()}
+                                </div>
+                            </div>
+                            <div class="anomaly-details bg-gray-50 p-3 rounded text-sm">
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div class="text-gray-600">
+                                        <strong>Type:</strong> ${anomaly.type.replace('_', ' ').toUpperCase()}
+                                    </div>
+                                    ${transactionDetails ? `<div class="col-span-2">${transactionDetails}</div>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                anomalyHtml += `
+                            </div>
+                        </div>
+                        
+                        <!-- Analysis Summary -->
+                        <div class="mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border">
+                            <h5 class="mb-3 font-bold text-gray-800">
+                                <i class="fas fa-chart-bar text-blue-600"></i> Analysis Summary
+                            </h5>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div class="bg-white p-3 rounded shadow-sm">
+                                    <div class="font-semibold text-gray-700 mb-1">Total Anomalies</div>
+                                    <div class="text-2xl font-bold text-blue-600">${data.total_anomalies}</div>
+                                </div>
+                                <div class="bg-white p-3 rounded shadow-sm">
+                                    <div class="font-semibold text-gray-700 mb-1">Total Transactions</div>
+                                    <div class="text-2xl font-bold text-green-600">${data.analysis_summary.total_transactions}</div>
+                                </div>
+                                <div class="bg-white p-3 rounded shadow-sm">
+                                    <div class="font-semibold text-gray-700 mb-1">Amount Range</div>
+                                    <div class="text-sm text-gray-600">${data.analysis_summary.amount_range}</div>
+                                </div>
+                                <div class="bg-white p-3 rounded shadow-sm">
+                                    <div class="font-semibold text-gray-700 mb-1">Processing Time</div>
+                                    <div class="text-sm text-gray-600">${data.processing_time}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- AI/ML Performance -->
+                        ${data.ai_ml_metrics && data.ai_ml_metrics.ai_powered ? `
+                        <div class="mt-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border">
+                            <h5 class="mb-3 font-bold text-gray-800">
+                                <i class="fas fa-robot text-purple-600"></i> AI/ML Performance
+                            </h5>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div class="bg-white p-3 rounded shadow-sm">
+                                    <div class="font-semibold text-gray-700 mb-1">AI Models Used</div>
+                                    <div class="text-sm text-purple-600">${data.ai_ml_metrics.models_used.join(', ')}</div>
+                                </div>
+                                <div class="bg-white p-3 rounded shadow-sm">
+                                    <div class="font-semibold text-gray-700 mb-1">Features Analyzed</div>
+                                    <div class="text-2xl font-bold text-purple-600">${data.ai_ml_metrics.features_used}</div>
+                                </div>
+                                <div class="bg-white p-3 rounded shadow-sm">
+                                    <div class="font-semibold text-gray-700 mb-1">AI Detected</div>
+                                    <div class="text-2xl font-bold text-pink-600">${data.ai_ml_metrics.ml_anomalies}</div>
+                                </div>
+                                <div class="bg-white p-3 rounded shadow-sm">
+                                    <div class="font-semibold text-gray-700 mb-1">Statistical</div>
+                                    <div class="text-2xl font-bold text-blue-600">${data.ai_ml_metrics.statistical_anomalies}</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Model Verification Details -->
+                            ${data.ai_ml_metrics.model_verification ? `
+                            <div class="mt-4 p-3 bg-white rounded border">
+                                <h6 class="font-semibold text-gray-800 mb-2">
+                                    <i class="fas fa-microscope text-blue-600"></i> Model Verification
+                                </h6>
+                                <div class="grid grid-cols-3 gap-3 text-xs">
+                                    <div class="bg-blue-50 p-2 rounded">
+                                        <div class="font-semibold">Isolation Forest</div>
+                                        <div class="text-blue-600">${data.ai_ml_metrics.model_verification.isolation_forest_anomalies} anomalies</div>
+                                    </div>
+                                    <div class="bg-green-50 p-2 rounded">
+                                        <div class="font-semibold">Local Outlier Factor</div>
+                                        <div class="text-green-600">${data.ai_ml_metrics.model_verification.lof_anomalies} anomalies</div>
+                                    </div>
+                                    <div class="bg-purple-50 p-2 rounded">
+                                        <div class="font-semibold">One-Class SVM</div>
+                                        <div class="text-purple-600">${data.ai_ml_metrics.model_verification.svm_anomalies} anomalies</div>
+                                    </div>
+                                    <div class="bg-orange-50 p-2 rounded">
+                                        <div class="font-semibold">DBSCAN</div>
+                                        <div class="text-orange-600">${data.ai_ml_metrics.model_verification.dbscan_anomalies} anomalies</div>
+                                    </div>
+                                    <div class="bg-gray-50 p-2 rounded">
+                                        <div class="font-semibold">Training Samples</div>
+                                        <div class="text-gray-600">${data.ai_ml_metrics.model_verification.training_samples}</div>
+                                    </div>
+                                    <div class="bg-indigo-50 p-2 rounded">
+                                        <div class="font-semibold">Features Used</div>
+                                        <div class="text-indigo-600">${data.ai_ml_metrics.model_verification.feature_count}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            ` : ''}
+                        </div>
+                        ` : `
+                        <div class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                            <div class="flex items-center">
+                                <i class="fas fa-exclamation-triangle text-yellow-600 mr-2"></i>
+                                <span class="text-sm text-yellow-800">Using enhanced statistical methods (AI/ML libraries not available)</span>
+                            </div>
+                        </div>
+                        `}
+                        
+
+                    </div>
+                `;
+
+                resultsTitle.textContent = 'Anomaly Detection Results';
+                resultsContent.innerHTML = anomalyHtml;
+                resultsHeader.style.display = 'flex';
+                
+                const backdrop = document.getElementById('dashboardBackdrop');
+                backdrop.classList.add('show');
+                resultsArea.classList.add('show');
+            }
+        }
+
+        function filterAnomalies(severity) {
+            const anomalies = document.querySelectorAll('.anomaly-item');
+            const filterButtons = document.querySelectorAll('.anomaly-filters .btn');
+            
+            // Update active filter button
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Filter anomalies
+            anomalies.forEach(anomaly => {
+                if (anomaly.dataset.severity === severity) {
+                    anomaly.style.display = 'block';
+                } else {
+                    anomaly.style.display = 'none';
+                }
+            });
+        }
+
+
         // Replace the existing downloadOrphanedPayments function in your HTML with this fixed version:
 
 function downloadOrphanedPayments() {
@@ -5839,6 +6400,64 @@ async function loadVendorList() {
                 case 'error': return 'fa-exclamation-circle';
                 case 'warning': return 'fa-exclamation-triangle';
                 default: return 'fa-info-circle';
+            }
+        }
+
+        // Check AI/ML status
+        async function checkAIMLStatus() {
+            try {
+                const response = await fetch('/test-ml-models');
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    showAlert(`✅ AI/ML Models Working! ${data.models_used.length} models active, ${data.features_used} features`, 'success');
+                    console.log('AI/ML Status:', data);
+                } else {
+                    showAlert(`❌ AI/ML Models Error: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                showAlert('❌ Cannot check AI/ML status. Server not running?', 'error');
+            }
+        }
+
+        // Download anomaly detection report
+        async function downloadAnomalyReport() {
+            try {
+                showAlert('📊 Generating anomaly detection report...', 'info');
+                
+                const response = await fetch('/download-anomaly-report');
+                
+                if (response.ok) {
+                    // Get the filename from the response headers
+                    const contentDisposition = response.headers.get('content-disposition');
+                    let filename = 'Anomaly_Detection_Report.xlsx';
+                    
+                    if (contentDisposition) {
+                        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+                        if (filenameMatch) {
+                            filename = filenameMatch[1];
+                        }
+                    }
+                    
+                    // Create blob and download
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    
+                    showAlert(`✅ Report downloaded: ${filename}`, 'success');
+                } else {
+                    const errorData = await response.json();
+                    showAlert(`❌ Download failed: ${errorData.message}`, 'error');
+                }
+            } catch (error) {
+                console.error('Download error:', error);
+                showAlert('❌ Download failed. Please try again.', 'error');
             }
         }
 

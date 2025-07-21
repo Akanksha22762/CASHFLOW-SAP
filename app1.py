@@ -16,9 +16,238 @@ import json
 from typing import Dict, List, Optional, Union, Any
 import warnings
 
+# Advanced AI/ML Libraries
+try:
+    from sklearn.ensemble import IsolationForest, RandomForestClassifier
+    from sklearn.cluster import DBSCAN, KMeans
+    from sklearn.preprocessing import StandardScaler, LabelEncoder
+    from sklearn.decomposition import PCA
+    from sklearn.metrics import silhouette_score
+    from sklearn.model_selection import train_test_split
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    from sklearn.neighbors import LocalOutlierFactor
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.svm import OneClassSVM
+    ML_AVAILABLE = True
+except ImportError:
+    ML_AVAILABLE = False
+    print("⚠️ Advanced ML libraries not available. Using enhanced statistical methods.")
+
+# Time Series Analysis
+try:
+    from statsmodels.tsa.seasonal import seasonal_decompose
+    from statsmodels.tsa.stattools import adfuller
+    TS_AVAILABLE = True
+except ImportError:
+    TS_AVAILABLE = False
+    print("⚠️ Time series libraries not available. Using basic time analysis.")
+
 # Suppress pandas warnings
 warnings.filterwarnings('ignore', category=FutureWarning)
 warnings.filterwarnings('ignore', category=UserWarning)
+
+# Define base directory
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# ===== ADVANCED AI/ML ANOMALY DETECTION MODELS =====
+
+class AdvancedAnomalyDetector:
+    """
+    Advanced AI/ML-powered anomaly detection system
+    Uses multiple algorithms for comprehensive detection
+    """
+    
+    def __init__(self):
+        self.models = {}
+        self.scalers = {}
+        self.feature_encoders = {}
+        self.is_trained = False
+        
+    def prepare_features(self, df):
+        """Prepare advanced features for ML models"""
+        features = df.copy()
+        
+        # Time-based features
+        features['hour'] = features['Date'].dt.hour
+        features['day_of_week'] = features['Date'].dt.dayofweek
+        features['day_of_month'] = features['Date'].dt.day
+        features['month'] = features['Date'].dt.month
+        features['is_weekend'] = features['day_of_week'].isin([5, 6])
+        features['is_month_end'] = features['Date'].dt.is_month_end
+        
+        # Amount-based features
+        features['amount_log'] = np.log1p(np.abs(features['Amount']))
+        features['amount_squared'] = features['Amount'] ** 2
+        features['amount_abs'] = np.abs(features['Amount'])
+        
+        # Transaction type encoding
+        features['is_debit'] = (features['Type'] == 'Debit').astype(int)
+        features['is_credit'] = (features['Type'] == 'Credit').astype(int)
+        
+        # Vendor frequency features
+        vendor_counts = features['Description'].value_counts()
+        features['vendor_frequency'] = features['Description'].map(vendor_counts)
+        features['vendor_frequency_log'] = np.log1p(features['vendor_frequency'])
+        
+        # Rolling statistics
+        features['amount_rolling_mean'] = features['Amount'].rolling(window=7, min_periods=1).mean()
+        features['amount_rolling_std'] = features['Amount'].rolling(window=7, min_periods=1).std()
+        features['amount_z_score'] = (features['Amount'] - features['amount_rolling_mean']) / features['amount_rolling_std']
+        
+        # Text features (simplified)
+        features['description_length'] = features['Description'].str.len()
+        features['has_numbers'] = features['Description'].str.contains(r'\d').astype(int)
+        features['has_special_chars'] = features['Description'].str.contains(r'[^a-zA-Z0-9\s]').astype(int)
+        
+        return features
+    
+    def train_models(self, df):
+        """Train multiple ML models for anomaly detection"""
+        if not ML_AVAILABLE:
+            return False
+            
+        try:
+            features = self.prepare_features(df)
+            
+            # Select numerical features for ML
+            ml_features = [
+                'hour', 'day_of_week', 'day_of_month', 'month', 'is_weekend', 'is_month_end',
+                'amount_log', 'amount_squared', 'amount_abs', 'is_debit', 'is_credit',
+                'vendor_frequency_log', 'amount_rolling_mean', 'amount_rolling_std', 'amount_z_score',
+                'description_length', 'has_numbers', 'has_special_chars'
+            ]
+            
+            X = features[ml_features].fillna(0)
+            
+            # Standardize features
+            self.scalers['standard'] = StandardScaler()
+            X_scaled = self.scalers['standard'].fit_transform(X)
+            
+            # Train Isolation Forest (Unsupervised)
+            self.models['isolation_forest'] = IsolationForest(
+                contamination=0.1,  # Expect 10% anomalies
+                random_state=42,
+                n_estimators=100
+            )
+            self.models['isolation_forest'].fit(X_scaled)
+            
+            # Train Local Outlier Factor (Unsupervised)
+            self.models['lof'] = LocalOutlierFactor(
+                contamination=0.1,
+                n_neighbors=20,
+                novelty=True
+            )
+            self.models['lof'].fit(X_scaled)
+            
+            # Train One-Class SVM (Unsupervised)
+            self.models['one_class_svm'] = OneClassSVM(
+                nu=0.1,  # Expected fraction of outliers
+                kernel='rbf',
+                gamma='scale'
+            )
+            self.models['one_class_svm'].fit(X_scaled)
+            
+            # Train DBSCAN for clustering
+            self.models['dbscan'] = DBSCAN(eps=0.5, min_samples=5)
+            self.models['dbscan'].fit(X_scaled)
+            
+            # Store feature names for later use
+            self.feature_names = ml_features
+            self.is_trained = True
+            
+            logger.info("✅ Advanced ML models trained successfully")
+            return True
+            
+        except Exception as e:
+            logger.error(f"❌ Error training ML models: {e}")
+            return False
+    
+    def detect_anomalies_ml(self, df):
+        """Detect anomalies using trained ML models"""
+        if not self.is_trained or not ML_AVAILABLE:
+            return []
+            
+        try:
+            features = self.prepare_features(df)
+            X = features[self.feature_names].fillna(0)
+            X_scaled = self.scalers['standard'].transform(X)
+            
+            anomalies = []
+            
+            # Isolation Forest predictions
+            if_anomalies = self.models['isolation_forest'].predict(X_scaled)
+            if_scores = self.models['isolation_forest'].decision_function(X_scaled)
+            
+            # LOF predictions
+            lof_scores = self.models['lof'].decision_function(X_scaled)
+            
+            # One-Class SVM predictions
+            svm_predictions = self.models['one_class_svm'].predict(X_scaled)
+            svm_scores = self.models['one_class_svm'].decision_function(X_scaled)
+            
+            # DBSCAN clustering
+            dbscan_labels = self.models['dbscan'].fit_predict(X_scaled)
+            
+            # Combine predictions
+            for idx, row in features.iterrows():
+                anomaly_score = 0
+                anomaly_reasons = []
+                
+                # Isolation Forest
+                if if_anomalies[idx] == -1:
+                    anomaly_score += 2
+                    anomaly_reasons.append("ML: Isolation Forest detected outlier")
+                
+                # LOF
+                if lof_scores[idx] < -0.5:
+                    anomaly_score += 1
+                    anomaly_reasons.append("ML: Local Outlier Factor detected anomaly")
+                
+                # One-Class SVM
+                if svm_predictions[idx] == -1:
+                    anomaly_score += 1
+                    anomaly_reasons.append("ML: One-Class SVM detected outlier")
+                
+                # DBSCAN (noise points)
+                if dbscan_labels[idx] == -1:
+                    anomaly_score += 1
+                    anomaly_reasons.append("ML: DBSCAN detected noise point")
+                
+                # Determine severity based on ML consensus
+                if anomaly_score >= 3:
+                    severity = 'high'
+                elif anomaly_score >= 2:
+                    severity = 'medium'
+                elif anomaly_score >= 1:
+                    severity = 'low'
+                else:
+                    continue
+                
+                anomalies.append({
+                    'type': 'ml_anomaly',
+                    'severity': severity,
+                    'description': f"AI/ML Detected: {row['Description'][:50]}...",
+                    'transaction': {
+                        'amount': float(row['Amount']),
+                        'description': str(row['Description']),
+                        'date': str(row['Date']),
+                        'type': str(row['Type']),
+                        'ml_score': anomaly_score,
+                        'if_score': float(if_scores[idx]),
+                        'lof_score': float(lof_scores[idx]),
+                        'svm_score': float(svm_scores[idx])
+                    },
+                    'reason': " | ".join(anomaly_reasons)
+                })
+            
+            return anomalies
+            
+        except Exception as e:
+            logger.error(f"❌ Error in ML anomaly detection: {e}")
+            return []
+
+# Initialize the advanced detector
+advanced_detector = AdvancedAnomalyDetector()
 
 # Set up logging with better configuration
 logging.basicConfig(
@@ -6838,6 +7067,604 @@ def get_metrics():
 @app.route('/')
 def home():
     return render_template("sap_bank_interface.html")
+
+# ===== ANOMALY DETECTION FEATURE (FEATURE 1) =====
+# This is a completely new feature that doesn't modify existing functionality
+
+def detect_anomalies(df, vendor_data=None):
+    """
+    ULTRA-ADVANCED AI/ML anomaly detection with multiple algorithms
+    Uses your existing data: 493 transactions, 100 vendors, 14 months history
+    """
+    try:
+        anomalies = []
+        
+        # Ensure we have the required columns
+        required_cols = ['Amount', 'Description', 'Date', 'Type']
+        if not all(col in df.columns for col in required_cols):
+            return {
+                'status': 'error',
+                'message': 'Missing required columns for anomaly detection',
+                'anomalies': []
+            }
+        
+        # Convert Date to datetime if it's not already
+        df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
+        df['Amount'] = pd.to_numeric(df['Amount'], errors='coerce')
+        
+        # Remove rows with invalid dates or amounts
+        df = df.dropna(subset=['Date', 'Amount'])
+        
+        if len(df) == 0:
+            return {
+                'status': 'error',
+                'message': 'No valid data found after cleaning',
+                'anomalies': []
+            }
+        
+        # ===== PHASE 1: TRAIN ADVANCED AI/ML MODELS =====
+        logger.info("🤖 Training advanced AI/ML models...")
+        ml_trained = advanced_detector.train_models(df)
+        
+        if ml_trained:
+            logger.info("✅ AI/ML models trained successfully")
+            # Get AI/ML anomalies
+            ml_anomalies = advanced_detector.detect_anomalies_ml(df)
+            anomalies.extend(ml_anomalies)
+            logger.info(f"🤖 AI/ML detected {len(ml_anomalies)} anomalies")
+            
+            # Add model verification data
+            model_verification = {
+                'isolation_forest_anomalies': len([a for a in ml_anomalies if 'Isolation Forest' in a['reason']]),
+                'lof_anomalies': len([a for a in ml_anomalies if 'Local Outlier Factor' in a['reason']]),
+                'svm_anomalies': len([a for a in ml_anomalies if 'One-Class SVM' in a['reason']]),
+                'dbscan_anomalies': len([a for a in ml_anomalies if 'DBSCAN' in a['reason']]),
+                'training_samples': len(df),
+                'feature_count': len(advanced_detector.feature_names) if hasattr(advanced_detector, 'feature_names') else 0
+            }
+        else:
+            logger.info("⚠️ Using enhanced statistical methods (ML not available)")
+            model_verification = {'error': 'ML libraries not available'}
+        
+        # Add business context columns
+        df['Hour'] = df['Date'].dt.hour
+        df['DayOfWeek'] = df['Date'].dt.dayofweek
+        df['Month'] = df['Date'].dt.month
+        df['Day'] = df['Date'].dt.day
+        df['IsMonthEnd'] = df['Date'].dt.is_month_end
+        df['IsWeekend'] = df['DayOfWeek'].isin([5, 6])  # Saturday, Sunday
+        
+        # 1. SMART AMOUNT ANOMALIES (Context-Aware)
+        amount_stats = df['Amount'].describe()
+        q1, q3 = amount_stats['25%'], amount_stats['75%']
+        iqr = q3 - q1
+        lower_bound = q1 - 1.5 * iqr
+        upper_bound = q3 + 1.5 * iqr
+        
+        # Find amount outliers with vendor context
+        amount_outliers = df[
+            (df['Amount'] < lower_bound) | (df['Amount'] > upper_bound)
+        ]
+        
+        for _, row in amount_outliers.iterrows():
+            # Check if vendor is known
+            vendor_known = vendor_data and any(vendor.lower() in str(row['Description']).lower() 
+                                             for vendor in vendor_data.keys())
+            
+            # Determine severity based on context
+            if vendor_known:
+                severity = 'medium'  # Known vendor = lower risk
+                reason = f"Large amount to known vendor (₹{row['Amount']:,.2f})"
+            else:
+                severity = 'high'  # Unknown vendor = higher risk
+                reason = f"Large amount to unknown vendor (₹{row['Amount']:,.2f})"
+            
+            # Additional context for very large amounts
+            if abs(row['Amount']) > upper_bound * 2:
+                severity = 'high'
+                reason = f"Extremely large amount (₹{row['Amount']:,.2f}) - requires immediate attention"
+            
+            anomalies.append({
+                'type': 'amount_anomaly',
+                'severity': severity,
+                'description': f"Unusual amount: ₹{row['Amount']:,.2f}",
+                'transaction': {
+                    'amount': float(row['Amount']),
+                    'description': str(row['Description']),
+                    'date': str(row['Date']),
+                    'type': str(row['Type']),
+                    'vendor_known': vendor_known
+                },
+                'reason': reason
+            })
+        
+        # 2. SMART FREQUENCY ANOMALIES (Vendor-Specific)
+        if 'Description' in df.columns:
+            vendor_counts = df['Description'].value_counts()
+            avg_frequency = vendor_counts.mean()
+            std_frequency = vendor_counts.std()
+            
+            # Find vendors with unusually high frequency
+            high_freq_vendors = vendor_counts[vendor_counts > (avg_frequency + 2 * std_frequency)]
+            
+            for vendor, count in high_freq_vendors.items():
+                # Check if this is a regular supplier
+                is_regular = vendor_data and any(vendor.lower() in v.lower() for v in vendor_data.keys())
+                
+                if is_regular:
+                    severity = 'low'  # Regular suppliers expected to have high frequency
+                    reason = f"Regular supplier appears {count} times (expected for steel plant operations)"
+                else:
+                    severity = 'medium'
+                    reason = f"Unknown vendor appears {count} times (normal: {avg_frequency:.0f} ± {std_frequency:.0f})"
+                
+                anomalies.append({
+                    'type': 'frequency_anomaly',
+                    'severity': severity,
+                    'description': f"Unusual frequency: {vendor}",
+                    'transaction': {
+                        'vendor': str(vendor),
+                        'frequency': int(count),
+                        'normal_range': f"0-{avg_frequency + std_frequency:.0f}",
+                        'is_regular_supplier': is_regular
+                    },
+                    'reason': reason
+                })
+        
+        # 3. SMART TIME-BASED ANOMALIES (Business Context)
+        # Check for transactions at unusual times with business context
+        unusual_hours = df[
+            (df['Hour'] < 6) | (df['Hour'] > 20)
+        ]
+        
+        for _, row in unusual_hours.iterrows():
+            # Determine severity based on business context
+            if row['IsMonthEnd'] and row['Hour'] == 0:
+                severity = 'low'  # Month-end batch processing
+                reason = f"Month-end batch transaction at {row['Hour']}:00 (normal for steel plant)"
+            elif row['IsWeekend'] and row['Hour'] == 0:
+                severity = 'low'  # Weekend midnight = expected batch processing
+                reason = f"Weekend batch processing at {row['Hour']}:00 (normal for steel plant operations)"
+            elif row['IsWeekend']:
+                severity = 'medium'  # Other weekend times
+                reason = f"Weekend transaction at {row['Hour']}:00 (unusual for business hours)"
+            elif row['Hour'] == 0:
+                severity = 'low'  # Midnight transactions might be system-generated
+                reason = f"System-generated transaction at {row['Hour']}:00"
+            else:
+                severity = 'medium'
+                reason = f"Transaction at {row['Hour']}:00 (normal: 6:00-20:00)"
+            
+            anomalies.append({
+                'type': 'time_anomaly',
+                'severity': severity,
+                'description': f"Unusual time: {row['Hour']}:00",
+                'transaction': {
+                    'amount': float(row['Amount']),
+                    'description': str(row['Description']),
+                    'date': str(row['Date']),
+                    'hour': int(row['Hour']),
+                    'is_weekend': bool(row['IsWeekend']),
+                    'is_month_end': bool(row['IsMonthEnd'])
+                },
+                'reason': reason
+            })
+        
+        # 4. SMART PATTERN ANOMALIES (Business Rules)
+        # Check for duplicate descriptions with same amount
+        desc_amount_pairs = df.groupby(['Description', 'Amount']).size()
+        duplicates = desc_amount_pairs[desc_amount_pairs > 1]
+        
+        for (desc, amount), count in duplicates.items():
+            # Check if this is an expected duplicate (monthly payments, etc.)
+            is_expected = any(keyword in str(desc).lower() for keyword in 
+                            ['emi', 'loan', 'insurance', 'rent', 'salary', 'monthly'])
+            
+            if is_expected:
+                severity = 'low'  # Expected monthly payments
+                reason = f"Expected monthly payment: {desc} (appears {count} times)"
+            else:
+                severity = 'medium'  # Unexpected duplicates
+                reason = f"Unexpected duplicate: {desc} (appears {count} times)"
+            
+            anomalies.append({
+                'type': 'pattern_anomaly',
+                'severity': severity,
+                'description': f"Duplicate pattern: {desc}",
+                'transaction': {
+                    'description': str(desc),
+                    'amount': float(amount),
+                    'occurrences': int(count),
+                    'is_expected': is_expected
+                },
+                'reason': reason
+            })
+        
+        # 5. VENDOR-SPECIFIC ANOMALIES (Enhanced)
+        if vendor_data:
+            # Check for transactions with vendors not in master data
+            known_vendors = set(vendor_data.keys())
+            unknown_vendors = []
+            
+            for desc in df['Description'].unique():
+                if not any(vendor.lower() in desc.lower() for vendor in known_vendors):
+                    unknown_vendors.append(desc)
+            
+            for vendor in unknown_vendors[:5]:  # Limit to top 5
+                # Check if this is a new vendor or potential fraud
+                vendor_transactions = df[df['Description'].str.contains(vendor, case=False, na=False)]
+                total_amount = vendor_transactions['Amount'].sum()
+                
+                if total_amount > 100000:  # High amount to unknown vendor
+                    severity = 'high'
+                    reason = f"High amount (₹{total_amount:,.2f}) to unknown vendor - requires verification"
+                else:
+                    severity = 'medium'
+                    reason = f"Unknown vendor with ₹{total_amount:,.2f} total transactions"
+                
+                anomalies.append({
+                    'type': 'vendor_anomaly',
+                    'severity': severity,
+                    'description': f"Unknown vendor: {vendor}",
+                    'transaction': {
+                        'vendor': str(vendor),
+                        'total_amount': float(total_amount),
+                        'transaction_count': len(vendor_transactions)
+                    },
+                    'reason': reason
+                })
+        
+        # 6. SEASONAL ANOMALIES (Steel Plant Specific)
+        # Check for unusual patterns during specific months/seasons
+        monthly_stats = df.groupby(df['Date'].dt.month)['Amount'].agg(['sum', 'count', 'mean'])
+        avg_monthly_amount = monthly_stats['sum'].mean()
+        std_monthly_amount = monthly_stats['sum'].std()
+        
+        for month, stats in monthly_stats.iterrows():
+            if abs(stats['sum'] - avg_monthly_amount) > 2 * std_monthly_amount:
+                month_name = pd.Timestamp(2024, month, 1).strftime('%B')
+                anomalies.append({
+                    'type': 'seasonal_anomaly',
+                    'severity': 'medium',
+                    'description': f"Unusual {month_name} activity",
+                    'transaction': {
+                        'month': month_name,
+                        'total_amount': float(stats['sum']),
+                        'transaction_count': int(stats['count']),
+                        'avg_amount': float(stats['mean'])
+                    },
+                    'reason': f"{month_name} total (₹{stats['sum']:,.2f}) is unusual compared to average (₹{avg_monthly_amount:,.2f})"
+                })
+        
+        # 7. SMART SEVERITY ADJUSTMENT (Reduce False Positives)
+        # Filter out low-severity anomalies if too many
+        if len(anomalies) > 100:
+            # Keep only high and medium severity, limit low severity
+            high_medium = [a for a in anomalies if a['severity'] in ['high', 'medium']]
+            low_severity = [a for a in anomalies if a['severity'] == 'low']
+            
+            # Keep only top 20 low severity anomalies
+            if len(low_severity) > 20:
+                low_severity = low_severity[:20]
+            
+            anomalies = high_medium + low_severity
+        
+        # Calculate summary statistics
+        severity_counts = {}
+        for anomaly in anomalies:
+            severity = anomaly['severity']
+            severity_counts[severity] = severity_counts.get(severity, 0) + 1
+        
+        # Calculate AI/ML model performance metrics
+        ml_metrics = {}
+        if ml_trained:
+            ml_metrics = {
+                'models_used': list(advanced_detector.models.keys()),
+                'features_used': len(advanced_detector.feature_names),
+                'ml_anomalies': len([a for a in anomalies if a['type'] == 'ml_anomaly']),
+                'statistical_anomalies': len([a for a in anomalies if a['type'] != 'ml_anomaly']),
+                'ai_powered': True,
+                'model_verification': model_verification
+            }
+        else:
+            ml_metrics = {
+                'ai_powered': False,
+                'reason': 'ML libraries not available'
+            }
+        
+        return {
+            'status': 'success',
+            'total_anomalies': len(anomalies),
+            'severity_breakdown': severity_counts,
+            'anomalies': anomalies,
+            'ai_ml_metrics': ml_metrics,
+            'analysis_summary': {
+                'total_transactions': len(df),
+                'amount_range': f"₹{df['Amount'].min():,.2f} - ₹{df['Amount'].max():,.2f}",
+                'date_range': f"{df['Date'].min()} to {df['Date'].max()}",
+                'debit_count': len(df[df['Type'] == 'Debit']),
+                'credit_count': len(df[df['Type'] == 'Credit'])
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Anomaly detection error: {e}")
+        return {
+            'status': 'error',
+            'message': f"Anomaly detection failed: {str(e)}",
+            'anomalies': []
+        }
+
+@app.route('/anomaly-detection', methods=['GET', 'POST'])
+def anomaly_detection_endpoint():
+    """
+    New endpoint for anomaly detection
+    Uses your existing Bank_Statement_Combined.xlsx data
+    """
+    try:
+        start_time = time.time()
+        
+        # Check if files have been uploaded and processed
+        data_folder = os.path.join(BASE_DIR, "data")
+        bank_processed_file = os.path.join(data_folder, "bank_data_processed.xlsx")
+        
+        if not os.path.exists(bank_processed_file):
+            return jsonify({
+                'status': 'error',
+                'message': 'Please upload and process files first before running anomaly detection'
+            }), 400
+        
+        # Load your existing bank data
+        bank_file = os.path.join(BASE_DIR, 'Bank_Statement_Combined.xlsx')
+        if not os.path.exists(bank_file):
+            return jsonify({
+                'status': 'error',
+                'message': 'Bank_Statement_Combined.xlsx not found'
+            }), 404
+        
+        # Load bank data
+        bank_df = pd.read_excel(bank_file)
+        
+        # Load vendor data if available
+        vendor_data = None
+        try:
+            master_data_file = os.path.join(BASE_DIR, 'steel_plant_master_data.xlsx')
+            if os.path.exists(master_data_file):
+                vendor_df = pd.read_excel(master_data_file, sheet_name='Vendors')
+                vendor_data = {}
+                for _, row in vendor_df.iterrows():
+                    vendor_data[row['Vendor Name']] = {
+                        'category': row['Category'],
+                        'payment_terms': row['Payment Terms']
+                    }
+        except Exception as e:
+            logger.warning(f"Could not load vendor data: {e}")
+        
+        # Run anomaly detection
+        result = detect_anomalies(bank_df, vendor_data)
+        
+        # Add performance metrics
+        processing_time = time.time() - start_time
+        result['processing_time'] = f"{processing_time:.2f} seconds"
+        result['timestamp'] = datetime.now().isoformat()
+        
+        # Record successful request
+        performance_monitor.record_request(processing_time, success=True)
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        logger.error(f"Anomaly detection endpoint error: {e}")
+        processing_time = time.time() - start_time
+        performance_monitor.record_request(processing_time, success=False)
+        
+        return jsonify({
+            'status': 'error',
+            'message': f"Anomaly detection failed: {str(e)}",
+            'timestamp': datetime.now().isoformat()
+        }), 500
+
+# ===== END ANOMALY DETECTION FEATURE =====
+
+@app.route('/download-anomaly-report', methods=['GET'])
+def download_anomaly_report():
+    """
+    Download anomaly detection report as Excel
+    """
+    try:
+        # Get the latest anomaly detection results from session or cache
+        # For now, we'll create a sample report based on the last detection
+        
+        # Load your existing bank data
+        bank_file = os.path.join(BASE_DIR, 'Bank_Statement_Combined.xlsx')
+        if not os.path.exists(bank_file):
+            return jsonify({
+                'status': 'error',
+                'message': 'Bank data not found. Please run anomaly detection first.'
+            }), 404
+        
+        bank_df = pd.read_excel(bank_file)
+        
+        # Load vendor data if available
+        vendor_data = None
+        try:
+            master_data_file = os.path.join(BASE_DIR, 'steel_plant_master_data.xlsx')
+            if os.path.exists(master_data_file):
+                vendor_df = pd.read_excel(master_data_file, sheet_name='Vendors')
+                vendor_data = {}
+                for _, row in vendor_df.iterrows():
+                    vendor_data[row['Vendor Name']] = {
+                        'category': row['Category'],
+                        'payment_terms': row['Payment Terms']
+                    }
+        except Exception as e:
+            logger.warning(f"Could not load vendor data: {e}")
+        
+        # Run anomaly detection to get current results
+        result = detect_anomalies(bank_df, vendor_data)
+        
+        if result['status'] != 'success':
+            return jsonify({
+                'status': 'error',
+                'message': 'Failed to generate anomaly report'
+            }), 500
+        
+        # Create detailed report
+        report_data = []
+        
+        for anomaly in result['anomalies']:
+            report_row = {
+                'Anomaly Type': anomaly['type'].replace('_', ' ').upper(),
+                'Severity': anomaly['severity'].upper(),
+                'Description': anomaly['description'],
+                'Reason': anomaly['reason'],
+                'Amount': anomaly['transaction'].get('amount', 'N/A'),
+                'Date': anomaly['transaction'].get('date', 'N/A'),
+                'Vendor': anomaly['transaction'].get('vendor', 'N/A'),
+                'Transaction Type': anomaly['transaction'].get('type', 'N/A')
+            }
+            
+            # Add ML-specific fields
+            if anomaly['type'] == 'ml_anomaly':
+                report_row['ML Score'] = anomaly['transaction'].get('ml_score', 'N/A')
+                report_row['Isolation Forest Score'] = anomaly['transaction'].get('if_score', 'N/A')
+                report_row['LOF Score'] = anomaly['transaction'].get('lof_score', 'N/A')
+                report_row['SVM Score'] = anomaly['transaction'].get('svm_score', 'N/A')
+            
+            report_data.append(report_row)
+        
+        # Create Excel file
+        df_report = pd.DataFrame(report_data)
+        
+        # Create Excel writer
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            # Main anomalies sheet
+            df_report.to_excel(writer, sheet_name='Anomalies', index=False)
+            
+            # Summary sheet
+            summary_data = {
+                'Metric': [
+                    'Total Anomalies',
+                    'High Severity',
+                    'Medium Severity', 
+                    'Low Severity',
+                    'AI/ML Detected',
+                    'Statistical Detected',
+                    'Total Transactions Analyzed',
+                    'Date Range',
+                    'Amount Range'
+                ],
+                'Value': [
+                    result['total_anomalies'],
+                    result['severity_breakdown'].get('high', 0),
+                    result['severity_breakdown'].get('medium', 0),
+                    result['severity_breakdown'].get('low', 0),
+                    result.get('ai_ml_metrics', {}).get('ml_anomalies', 0),
+                    result.get('ai_ml_metrics', {}).get('statistical_anomalies', 0),
+                    result['analysis_summary']['total_transactions'],
+                    result['analysis_summary']['date_range'],
+                    result['analysis_summary']['amount_range']
+                ]
+            }
+            
+            df_summary = pd.DataFrame(summary_data)
+            df_summary.to_excel(writer, sheet_name='Summary', index=False)
+            
+            # AI/ML Performance sheet
+            if result.get('ai_ml_metrics', {}).get('ai_powered'):
+                ml_data = {
+                    'Metric': [
+                        'AI Models Used',
+                        'Features Analyzed',
+                        'Training Samples',
+                        'Isolation Forest Anomalies',
+                        'Local Outlier Factor Anomalies',
+                        'One-Class SVM Anomalies',
+                        'DBSCAN Anomalies'
+                    ],
+                    'Value': [
+                        ', '.join(result['ai_ml_metrics']['models_used']),
+                        result['ai_ml_metrics']['features_used'],
+                        result['ai_ml_metrics'].get('model_verification', {}).get('training_samples', 'N/A'),
+                        result['ai_ml_metrics'].get('model_verification', {}).get('isolation_forest_anomalies', 'N/A'),
+                        result['ai_ml_metrics'].get('model_verification', {}).get('lof_anomalies', 'N/A'),
+                        result['ai_ml_metrics'].get('model_verification', {}).get('svm_anomalies', 'N/A'),
+                        result['ai_ml_metrics'].get('model_verification', {}).get('dbscan_anomalies', 'N/A')
+                    ]
+                }
+                
+                df_ml = pd.DataFrame(ml_data)
+                df_ml.to_excel(writer, sheet_name='AI_ML_Performance', index=False)
+        
+        output.seek(0)
+        
+        # Generate filename with timestamp
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f'Anomaly_Detection_Report_{timestamp}.xlsx'
+        
+        return send_file(
+            output,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            download_name=filename
+        )
+        
+    except Exception as e:
+        logger.error(f"Error generating anomaly report: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': f'Failed to generate report: {str(e)}'
+        }), 500
+
+@app.route('/test-ml-models', methods=['GET'])
+def test_ml_models():
+    """
+    Test endpoint to verify ML models are working
+    """
+    try:
+        # Create test data
+        test_data = pd.DataFrame({
+            'Amount': [1000, 2000, 3000, 50000, 100000, 2000, 3000, 4000, 5000, 6000],
+            'Description': ['Test1', 'Test2', 'Test3', 'Test4', 'Test5', 'Test6', 'Test7', 'Test8', 'Test9', 'Test10'],
+            'Date': pd.date_range('2024-01-01', periods=10),
+            'Type': ['Debit', 'Credit', 'Debit', 'Credit', 'Debit', 'Credit', 'Debit', 'Credit', 'Debit', 'Credit']
+        })
+        
+        # Test ML training
+        ml_trained = advanced_detector.train_models(test_data)
+        
+        if ml_trained:
+            # Test anomaly detection
+            ml_anomalies = advanced_detector.detect_anomalies_ml(test_data)
+            
+            return jsonify({
+                'status': 'success',
+                'ml_available': ML_AVAILABLE,
+                'ts_available': TS_AVAILABLE,
+                'models_trained': ml_trained,
+                'models_used': list(advanced_detector.models.keys()),
+                'features_used': len(advanced_detector.feature_names) if hasattr(advanced_detector, 'feature_names') else 0,
+                'anomalies_detected': len(ml_anomalies),
+                'test_data_size': len(test_data),
+                'message': 'ML models are working correctly!'
+            })
+        else:
+            return jsonify({
+                'status': 'error',
+                'ml_available': ML_AVAILABLE,
+                'ts_available': TS_AVAILABLE,
+                'message': 'ML models failed to train'
+            })
+            
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'ml_available': ML_AVAILABLE,
+            'ts_available': TS_AVAILABLE,
+            'error': str(e),
+            'message': 'Error testing ML models'
+        })
 
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=False)

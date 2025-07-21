@@ -1,0 +1,494 @@
+Amount,Description,Date,Type,Source,Balance
+372067.5,Payment to Vendor,2025-03-01,Debit,Bank,4627932.5
+115489.32,Water Utility,2025-03-01,Debit,Bank,4512443.18
+55735.11,Scrap Sale,2025-03-01,Credit,Bank,4568178.29
+297293.79,Raw Material Purchase,2025-03-02,Debit,Bank,4270884.5
+19749.62,Payment to Vendor,2025-03-02,Debit,Bank,4251134.88
+120167.14,Water Utility,2025-03-02,Debit,Bank,4130967.74
+18135.3,Bank Charges,2025-03-02,Debit,Bank,4112832.44
+359429.71,Water Utility,2025-03-02,Debit,Bank,3753402.73
+274746.03,Scrap Sale,2025-03-02,Credit,Bank,4028148.76
+227358.48,Water Utility,2025-03-02,Debit,Bank,3800790.28
+435303.66,Machinery Maintenance,2025-03-03,Debit,Bank,3365486.62
+403880.53,Machinery Maintenance,2025-03-03,Debit,Bank,2961606.09
+214194.13,Scrap Sale,2025-03-03,Credit,Bank,3175800.22
+81962.35,Loan EMI,2025-03-03,Debit,Bank,3093837.87
+171614.3,Machinery Maintenance,2025-03-03,Debit,Bank,2922223.57
+52874.61,Steel Sale - Client A,2025-03-04,Credit,Bank,2975098.18
+175258.08,Insurance Premium,2025-03-04,Debit,Bank,2799840.1
+404528.5,Loan EMI,2025-03-04,Debit,Bank,2395311.6
+66788.95,Tax Payment,2025-03-05,Debit,Bank,2328522.65
+44006.1,Steel Sale - Client A,2025-03-05,Credit,Bank,2372528.75
+415555.31,Loan EMI,2025-03-05,Debit,Bank,1956973.44
+443298.62,Bank Charges,2025-03-05,Debit,Bank,1513674.82
+290789.31,Salary Payment,2025-03-05,Debit,Bank,1222885.51
+39429.8,Scrap Sale,2025-03-05,Credit,Bank,1262315.31
+148247.04,Machinery Maintenance,2025-03-06,Debit,Bank,1114068.27
+428382.27,Raw Material Purchase,2025-03-06,Debit,Bank,685686
+54995.71,Insurance Premium,2025-03-06,Debit,Bank,630690.29
+229438.1,Loan EMI,2025-03-06,Debit,Bank,401252.19
+188239.58,Electricity Bill,2025-03-07,Debit,Bank,213012.61
+336736.71,Water Utility,2025-03-07,Debit,Bank,-123724.1
+468644.02,Scrap Sale,2025-03-07,Credit,Bank,344919.92
+40344.24,Freight Charges,2025-03-07,Debit,Bank,304575.68
+89713.63,Freight Charges,2025-03-07,Debit,Bank,214862.05
+233818.8,Electricity Bill,2025-03-08,Debit,Bank,-18956.75
+494814.06,Loan EMI,2025-03-08,Debit,Bank,-513770.81
+345640.17,Freight Charges,2025-03-08,Debit,Bank,-859410.98
+343884.05,Water Utility,2025-03-08,Debit,Bank,-1203295.03
+411792.28,Water Utility,2025-03-09,Debit,Bank,-1615087.31
+161149.26,Machinery Maintenance,2025-03-09,Debit,Bank,-1776236.57
+37763.36,Loan EMI,2025-03-09,Debit,Bank,-1813999.93
+160765.55,Scrap Sale,2025-03-10,Credit,Bank,-1653234.38
+252119.47,Freight Charges,2025-03-10,Debit,Bank,-1905353.85
+232131.67,Freight Charges,2025-03-10,Debit,Bank,-2137485.52
+74117.01,Loan EMI,2025-03-10,Debit,Bank,-2211602.53
+282877.23,Scrap Sale,2025-03-10,Credit,Bank,-1928725.3
+374771.84,Loan EMI,2025-03-10,Debit,Bank,-2303497.14
+449422.33,Steel Sale - Client A,2025-03-10,Credit,Bank,-1854074.81
+113563.78,Salary Payment,2025-03-11,Debit,Bank,-1967638.59
+257215.52,Electricity Bill,2025-03-11,Debit,Bank,-2224854.11
+379112.17,Raw Material Purchase,2025-03-11,Debit,Bank,-2603966.28
+59276.32,Insurance Premium,2025-03-11,Debit,Bank,-2663242.6
+84191.09,Freight Charges,2025-03-11,Debit,Bank,-2747433.69
+213969.18,Freight Charges,2025-03-11,Debit,Bank,-2961402.87
+193901.55,Steel Sale - Client A,2025-03-12,Credit,Bank,-2767501.32
+266911.6,Steel Sale - Client B,2025-03-12,Credit,Bank,-2500589.72
+431085.95,Tax Payment,2025-03-12,Debit,Bank,-2931675.67
+361757.3,Freight Charges,2025-03-13,Debit,Bank,-3293432.97
+442970.28,Freight Charges,2025-03-13,Debit,Bank,-3736403.25
+137078.47,Machinery Maintenance,2025-03-13,Debit,Bank,-3873481.72
+150282.56,Raw Material Purchase,2025-03-14,Debit,Bank,-4023764.28
+229593.23,Electricity Bill,2025-03-14,Debit,Bank,-4253357.51
+438547.21,Scrap Sale,2025-03-14,Credit,Bank,-3814810.3
+486084.61,Loan EMI,2025-03-14,Debit,Bank,-4300894.91
+93432.68,Machinery Maintenance,2025-03-14,Debit,Bank,-4394327.59
+314523.6,Insurance Premium,2025-03-15,Debit,Bank,-4708851.19
+321280,Insurance Premium,2025-03-15,Debit,Bank,-5030131.19
+103461,Bank Charges,2025-03-15,Debit,Bank,-5133592.19
+84966.77,Machinery Maintenance,2025-03-16,Debit,Bank,-5218558.96
+461604.87,Machinery Maintenance,2025-03-16,Debit,Bank,-5680163.83
+301477.57,Payment to Vendor,2025-03-16,Debit,Bank,-5981641.4
+14640.99,Steel Sale - Client B,2025-03-16,Credit,Bank,-5967000.41
+439967.33,Salary Payment,2025-03-16,Debit,Bank,-6406967.74
+33672.96,Water Utility,2025-03-17,Debit,Bank,-6440640.7
+473739.98,Bank Charges,2025-03-17,Debit,Bank,-6914380.68
+367294.26,Raw Material Purchase,2025-03-17,Debit,Bank,-7281674.94
+39260.2,Insurance Premium,2025-03-17,Debit,Bank,-7320935.14
+268689.55,Machinery Maintenance,2025-03-17,Debit,Bank,-7589624.69
+331576.66,Electricity Bill,2025-03-18,Debit,Bank,-7921201.35
+86737.84,Tax Payment,2025-03-18,Debit,Bank,-8007939.19
+436854.36,Tax Payment,2025-03-18,Debit,Bank,-8444793.55
+482359.64,Steel Sale - Client A,2025-03-18,Credit,Bank,-7962433.91
+366315.88,Machinery Maintenance,2025-03-19,Debit,Bank,-8328749.79
+357909.74,Water Utility,2025-03-19,Debit,Bank,-8686659.53
+497598.93,Steel Sale - Client A,2025-03-19,Credit,Bank,-8189060.6
+189843.15,Freight Charges,2025-03-19,Debit,Bank,-8378903.75
+228485.64,Tax Payment,2025-03-19,Debit,Bank,-8607389.39
+116225.18,Water Utility,2025-03-19,Debit,Bank,-8723614.57
+15411.96,Salary Payment,2025-03-19,Debit,Bank,-8739026.53
+296277.86,Water Utility,2025-03-20,Debit,Bank,-9035304.39
+40141.58,Payment to Vendor,2025-03-20,Debit,Bank,-9075445.97
+34142.51,Freight Charges,2025-03-20,Debit,Bank,-9109588.48
+453182.91,Raw Material Purchase,2025-03-20,Debit,Bank,-9562771.39
+168562.1,Insurance Premium,2025-03-20,Debit,Bank,-9731333.49
+122812.29,Tax Payment,2025-03-20,Debit,Bank,-9854145.78
+245280.18,Freight Charges,2025-03-20,Debit,Bank,-10099425.96
+363059.52,Electricity Bill,2025-03-21,Debit,Bank,-10462485.48
+290224.77,Bank Charges,2025-03-21,Debit,Bank,-10752710.25
+393386.62,Water Utility,2025-03-21,Debit,Bank,-11146096.87
+206494.68,Machinery Maintenance,2025-03-21,Debit,Bank,-11352591.55
+52980.75,Raw Material Purchase,2025-03-21,Debit,Bank,-11405572.3
+180377.3,Steel Sale - Client A,2025-03-21,Credit,Bank,-11225195
+236177.21,Steel Sale - Client A,2025-03-21,Credit,Bank,-10989017.79
+328460.47,Freight Charges,2025-03-22,Debit,Bank,-11317478.26
+53716.85,Freight Charges,2025-03-22,Debit,Bank,-11371195.11
+365465.73,Steel Sale - Client A,2025-03-22,Credit,Bank,-11005729.38
+99837.09,Water Utility,2025-03-23,Debit,Bank,-11105566.47
+227063.71,Tax Payment,2025-03-23,Debit,Bank,-11332630.18
+95826.58,Steel Sale - Client A,2025-03-23,Credit,Bank,-11236803.6
+437870.55,Water Utility,2025-03-24,Debit,Bank,-11674674.15
+224349.72,Raw Material Purchase,2025-03-24,Debit,Bank,-11899023.87
+428703.61,Insurance Premium,2025-03-24,Debit,Bank,-12327727.48
+30041.22,Raw Material Purchase,2025-03-24,Debit,Bank,-12357768.7
+418833.65,Tax Payment,2025-03-24,Debit,Bank,-12776602.35
+463551.66,Raw Material Purchase,2025-03-24,Debit,Bank,-13240154.01
+206174.96,Electricity Bill,2025-03-25,Debit,Bank,-13446328.97
+110804.91,Steel Sale - Client B,2025-03-25,Credit,Bank,-13335524.06
+451709.22,Steel Sale - Client A,2025-03-25,Credit,Bank,-12883814.84
+192591.69,Electricity Bill,2025-03-25,Debit,Bank,-13076406.53
+463626.45,Loan EMI,2025-03-26,Debit,Bank,-13540032.98
+230229.14,Machinery Maintenance,2025-03-26,Debit,Bank,-13770262.12
+349812.79,Steel Sale - Client A,2025-03-26,Credit,Bank,-13420449.33
+497734.23,Scrap Sale,2025-03-26,Credit,Bank,-12922715.1
+332626.3,Tax Payment,2025-03-26,Debit,Bank,-13255341.4
+81624.43,Steel Sale - Client B,2025-03-26,Credit,Bank,-13173716.97
+484511.14,Water Utility,2025-03-27,Debit,Bank,-13658228.11
+369189.9,Bank Charges,2025-03-27,Debit,Bank,-14027418.01
+375247.9,Payment to Vendor,2025-03-27,Debit,Bank,-14402665.91
+29820.46,Payment to Vendor,2025-03-27,Debit,Bank,-14432486.37
+253910.94,Steel Sale - Client B,2025-03-27,Credit,Bank,-14178575.43
+33155.39,Electricity Bill,2025-03-28,Debit,Bank,-14211730.82
+44655.18,Tax Payment,2025-03-28,Debit,Bank,-14256386
+38918.06,Electricity Bill,2025-03-28,Debit,Bank,-14295304.06
+339230.21,Raw Material Purchase,2025-03-28,Debit,Bank,-14634534.27
+204868.9,Water Utility,2025-03-28,Debit,Bank,-14839403.17
+126876.6,Bank Charges,2025-03-28,Debit,Bank,-14966279.77
+24672.12,Bank Charges,2025-03-28,Debit,Bank,-14990951.89
+330399.72,Steel Sale - Client A,2025-03-29,Credit,Bank,-14660552.17
+263777.44,Bank Charges,2025-03-29,Debit,Bank,-14924329.61
+106108.3,Loan EMI,2025-03-29,Debit,Bank,-15030437.91
+136479.18,Water Utility,2025-03-30,Debit,Bank,-15166917.09
+337486.66,Electricity Bill,2025-03-30,Debit,Bank,-15504403.75
+231326.16,Loan EMI,2025-03-30,Debit,Bank,-15735729.91
+468188.47,Machinery Maintenance,2025-03-30,Debit,Bank,-16203918.38
+231851.33,Payment to Vendor,2025-03-30,Debit,Bank,-16435769.71
+41264.06,Raw Material Purchase,2025-03-31,Debit,Bank,-16477033.77
+255412.92,Water Utility,2025-03-31,Debit,Bank,-16732446.69
+466963.39,Electricity Bill,2025-03-31,Debit,Bank,-17199410.08
+440238.77,Raw Material Purchase,2025-03-31,Debit,Bank,-17639648.85
+146068.76,Salary Payment,2025-03-31,Debit,Bank,-17785717.61
+417703.75,Steel Sale - Client B,2025-03-31,Credit,Bank,-17368013.86
+154745.99,Scrap Sale,2025-03-31,Credit,Bank,-17213267.87
+335592.29,Payment to Vendor,2025-04-01,Debit,Bank,-17548860.16
+153192.48,Tax Payment,2025-04-01,Debit,Bank,-17702052.64
+56275.32,Freight Charges,2025-04-01,Debit,Bank,-17758327.96
+135910.63,Electricity Bill,2025-04-01,Debit,Bank,-17894238.59
+372496.26,Raw Material Purchase,2025-04-01,Debit,Bank,-18266734.85
+139812.37,Electricity Bill,2025-04-01,Debit,Bank,-18406547.22
+109261.68,Bank Charges,2025-04-01,Debit,Bank,-18515808.9
+345311.08,Water Utility,2025-04-02,Debit,Bank,-18861119.98
+135672.03,Insurance Premium,2025-04-02,Debit,Bank,-18996792.01
+129305.02,Steel Sale - Client B,2025-04-02,Credit,Bank,-18867486.99
+30145.45,Insurance Premium,2025-04-02,Debit,Bank,-18897632.44
+214670.01,Freight Charges,2025-04-02,Debit,Bank,-19112302.45
+6755.12,Payment to Vendor,2025-04-03,Debit,Bank,-19119057.57
+69755.73,Machinery Maintenance,2025-04-03,Debit,Bank,-19188813.3
+84983.08,Loan EMI,2025-04-03,Debit,Bank,-19273796.38
+278081.81,Steel Sale - Client B,2025-04-03,Credit,Bank,-18995714.57
+282648.9,Steel Sale - Client A,2025-04-03,Credit,Bank,-18713065.67
+472800.21,Raw Material Purchase,2025-04-04,Debit,Bank,-19185865.88
+452444.64,Scrap Sale,2025-04-04,Credit,Bank,-18733421.24
+22833.93,Tax Payment,2025-04-04,Debit,Bank,-18756255.17
+278499.92,Bank Charges,2025-04-05,Debit,Bank,-19034755.09
+68085.53,Steel Sale - Client A,2025-04-05,Credit,Bank,-18966669.56
+185502.5,Loan EMI,2025-04-05,Debit,Bank,-19152172.06
+486237.15,Machinery Maintenance,2025-04-05,Debit,Bank,-19638409.21
+449967.7,Payment to Vendor,2025-04-05,Debit,Bank,-20088376.91
+128517.22,Freight Charges,2025-04-06,Debit,Bank,-20216894.13
+180070.92,Raw Material Purchase,2025-04-06,Debit,Bank,-20396965.05
+442646.68,Tax Payment,2025-04-06,Debit,Bank,-20839611.73
+487049.33,Steel Sale - Client A,2025-04-06,Credit,Bank,-20352562.4
+432979.82,Water Utility,2025-04-07,Debit,Bank,-20785542.22
+406332,Machinery Maintenance,2025-04-07,Debit,Bank,-21191874.22
+17269.25,Steel Sale - Client A,2025-04-07,Credit,Bank,-21174604.97
+462621.21,Scrap Sale,2025-04-07,Credit,Bank,-20711983.76
+336604.03,Machinery Maintenance,2025-04-08,Debit,Bank,-21048587.79
+406320.91,Scrap Sale,2025-04-08,Credit,Bank,-20642266.88
+83802.93,Loan EMI,2025-04-08,Debit,Bank,-20726069.81
+58507.34,Scrap Sale,2025-04-08,Credit,Bank,-20667562.47
+24168.68,Insurance Premium,2025-04-08,Debit,Bank,-20691731.15
+115104.69,Steel Sale - Client B,2025-04-08,Credit,Bank,-20576626.46
+156069.48,Salary Payment,2025-04-09,Debit,Bank,-20732695.94
+436304.9,Machinery Maintenance,2025-04-09,Debit,Bank,-21169000.84
+16713.9,Water Utility,2025-04-09,Debit,Bank,-21185714.74
+202240.66,Water Utility,2025-04-09,Debit,Bank,-21387955.4
+432854.71,Loan EMI,2025-04-09,Debit,Bank,-21820810.11
+143166.87,Machinery Maintenance,2025-04-09,Debit,Bank,-21963976.98
+341361.47,Steel Sale - Client A,2025-04-10,Credit,Bank,-21622615.51
+270426.79,Insurance Premium,2025-04-10,Debit,Bank,-21893042.3
+62094.17,Payment to Vendor,2025-04-10,Debit,Bank,-21955136.47
+93391.07,Loan EMI,2025-04-10,Debit,Bank,-22048527.54
+23937.31,Loan EMI,2025-04-10,Debit,Bank,-22072464.85
+220109.06,Bank Charges,2025-04-10,Debit,Bank,-22292573.91
+394281.95,Scrap Sale,2025-04-10,Credit,Bank,-21898291.96
+492196.75,Bank Charges,2025-04-11,Debit,Bank,-22390488.71
+195671.74,Raw Material Purchase,2025-04-11,Debit,Bank,-22586160.45
+99088.99,Bank Charges,2025-04-11,Debit,Bank,-22685249.44
+355848.72,Payment to Vendor,2025-04-11,Debit,Bank,-23041098.16
+262360.57,Payment to Vendor,2025-04-11,Debit,Bank,-23303458.73
+271533.74,Machinery Maintenance,2025-04-11,Debit,Bank,-23574992.47
+218492.21,Salary Payment,2025-04-12,Debit,Bank,-23793484.68
+460781.57,Freight Charges,2025-04-12,Debit,Bank,-24254266.25
+160388.24,Bank Charges,2025-04-12,Debit,Bank,-24414654.49
+66689.53,Insurance Premium,2025-04-12,Debit,Bank,-24481344.02
+158095.91,Tax Payment,2025-04-13,Debit,Bank,-24639439.93
+166460.54,Steel Sale - Client A,2025-04-13,Credit,Bank,-24472979.39
+151349.33,Scrap Sale,2025-04-13,Credit,Bank,-24321630.06
+99960.85,Electricity Bill,2025-04-13,Debit,Bank,-24421590.91
+470480.02,Freight Charges,2025-04-13,Debit,Bank,-24892070.93
+286707.1,Bank Charges,2025-04-14,Debit,Bank,-25178778.03
+276228.92,Steel Sale - Client A,2025-04-14,Credit,Bank,-24902549.11
+155418.1,Payment to Vendor,2025-04-14,Debit,Bank,-25057967.21
+217794.63,Water Utility,2025-04-14,Debit,Bank,-25275761.84
+329079.28,Bank Charges,2025-04-15,Debit,Bank,-25604841.12
+223684.08,Steel Sale - Client B,2025-04-15,Credit,Bank,-25381157.04
+110782.19,Freight Charges,2025-04-15,Debit,Bank,-25491939.23
+397899.02,Steel Sale - Client B,2025-04-15,Credit,Bank,-25094040.21
+369300.92,Machinery Maintenance,2025-04-15,Debit,Bank,-25463341.13
+46973.79,Freight Charges,2025-04-15,Debit,Bank,-25510314.92
+333607.65,Tax Payment,2025-04-15,Debit,Bank,-25843922.57
+51226.66,Salary Payment,2025-04-16,Debit,Bank,-25895149.23
+121259.96,Machinery Maintenance,2025-04-16,Debit,Bank,-26016409.19
+116197.13,Loan EMI,2025-04-16,Debit,Bank,-26132606.32
+77940.21,Water Utility,2025-04-16,Debit,Bank,-26210546.53
+126197.06,Payment to Vendor,2025-04-16,Debit,Bank,-26336743.59
+307580.62,Steel Sale - Client B,2025-04-16,Credit,Bank,-26029162.97
+41049.97,Machinery Maintenance,2025-04-16,Debit,Bank,-26070212.94
+289957.1,Freight Charges,2025-04-17,Debit,Bank,-26360170.04
+349695.35,Scrap Sale,2025-04-17,Credit,Bank,-26010474.69
+202828.17,Steel Sale - Client B,2025-04-17,Credit,Bank,-25807646.52
+329748.72,Electricity Bill,2025-04-17,Debit,Bank,-26137395.24
+446866.61,Payment to Vendor,2025-04-17,Debit,Bank,-26584261.85
+386172.86,Insurance Premium,2025-04-17,Debit,Bank,-26970434.71
+215447.37,Machinery Maintenance,2025-04-18,Debit,Bank,-27185882.08
+403034.38,Electricity Bill,2025-04-18,Debit,Bank,-27588916.46
+261389.09,Scrap Sale,2025-04-18,Credit,Bank,-27327527.37
+128353.15,Tax Payment,2025-04-19,Debit,Bank,-27455880.52
+65072.51,Insurance Premium,2025-04-19,Debit,Bank,-27520953.03
+401701.22,Electricity Bill,2025-04-19,Debit,Bank,-27922654.25
+299748.9,Tax Payment,2025-04-20,Debit,Bank,-28222403.15
+446255.83,Machinery Maintenance,2025-04-20,Debit,Bank,-28668658.98
+408428.22,Bank Charges,2025-04-20,Debit,Bank,-29077087.2
+216236.67,Tax Payment,2025-04-20,Debit,Bank,-29293323.87
+225727.24,Tax Payment,2025-04-20,Debit,Bank,-29519051.11
+373109.44,Electricity Bill,2025-04-20,Debit,Bank,-29892160.55
+227784.53,Steel Sale - Client B,2025-04-20,Credit,Bank,-29664376.02
+320642.41,Insurance Premium,2025-04-21,Debit,Bank,-29985018.43
+389949.04,Machinery Maintenance,2025-04-21,Debit,Bank,-30374967.47
+315240.48,Steel Sale - Client B,2025-04-21,Credit,Bank,-30059726.99
+222736.93,Loan EMI,2025-04-21,Debit,Bank,-30282463.92
+139498.98,Water Utility,2025-04-22,Debit,Bank,-30421962.9
+447048.28,Salary Payment,2025-04-22,Debit,Bank,-30869011.18
+73495.16,Raw Material Purchase,2025-04-22,Debit,Bank,-30942506.34
+194602.47,Water Utility,2025-04-22,Debit,Bank,-31137108.81
+354677.48,Electricity Bill,2025-04-22,Debit,Bank,-31491786.29
+206761.69,Steel Sale - Client A,2025-04-23,Credit,Bank,-31285024.6
+235632.53,Tax Payment,2025-04-23,Debit,Bank,-31520657.13
+107383.02,Payment to Vendor,2025-04-23,Debit,Bank,-31628040.15
+452895.05,Steel Sale - Client A,2025-04-24,Credit,Bank,-31175145.1
+473300.71,Bank Charges,2025-04-24,Debit,Bank,-31648445.81
+429082.36,Payment to Vendor,2025-04-24,Debit,Bank,-32077528.17
+289966.72,Machinery Maintenance,2025-04-24,Debit,Bank,-32367494.89
+7918.56,Steel Sale - Client B,2025-04-24,Credit,Bank,-32359576.33
+152813.26,Salary Payment,2025-04-24,Debit,Bank,-32512389.59
+446362.56,Insurance Premium,2025-04-25,Debit,Bank,-32958752.15
+212415.53,Insurance Premium,2025-04-25,Debit,Bank,-33171167.68
+368643.86,Scrap Sale,2025-04-25,Credit,Bank,-32802523.82
+303610.03,Machinery Maintenance,2025-04-25,Debit,Bank,-33106133.85
+246673.59,Water Utility,2025-04-25,Debit,Bank,-33352807.44
+220738.81,Loan EMI,2025-04-25,Debit,Bank,-33573546.25
+171384.12,Steel Sale - Client A,2025-04-26,Credit,Bank,-33402162.13
+400080.45,Freight Charges,2025-04-26,Debit,Bank,-33802242.58
+86697.14,Scrap Sale,2025-04-26,Credit,Bank,-33715545.44
+490457.38,Electricity Bill,2025-04-27,Debit,Bank,-34206002.82
+18348.39,Tax Payment,2025-04-27,Debit,Bank,-34224351.21
+297986.92,Steel Sale - Client A,2025-04-27,Credit,Bank,-33926364.29
+18415.51,Freight Charges,2025-04-27,Debit,Bank,-33944779.8
+217163.32,Freight Charges,2025-04-27,Debit,Bank,-34161943.12
+233540.73,Insurance Premium,2025-04-27,Debit,Bank,-34395483.85
+192656.41,Loan EMI,2025-04-28,Debit,Bank,-34588140.26
+230076.17,Water Utility,2025-04-28,Debit,Bank,-34818216.43
+381808.71,Salary Payment,2025-04-28,Debit,Bank,-35200025.14
+377244.86,Loan EMI,2025-04-29,Debit,Bank,-35577270
+213674.59,Insurance Premium,2025-04-29,Debit,Bank,-35790944.59
+45543.59,Insurance Premium,2025-04-29,Debit,Bank,-35836488.18
+375767.01,Payment to Vendor,2025-04-29,Debit,Bank,-36212255.19
+499954.38,Payment to Vendor,2025-04-29,Debit,Bank,-36712209.57
+115989.97,Salary Payment,2025-04-29,Debit,Bank,-36828199.54
+478856.37,Machinery Maintenance,2025-04-30,Debit,Bank,-37307055.91
+378345.44,Payment to Vendor,2025-04-30,Debit,Bank,-37685401.35
+103683.54,Water Utility,2025-04-30,Debit,Bank,-37789084.89
+80429.26,Bank Charges,2025-05-01,Debit,Bank,-37869514.15
+239412.73,Electricity Bill,2025-05-01,Debit,Bank,-38108926.88
+284164.94,Raw Material Purchase,2025-05-01,Debit,Bank,-38393091.82
+351235.16,Steel Sale - Client B,2025-05-02,Credit,Bank,-38041856.66
+187603.11,Machinery Maintenance,2025-05-02,Debit,Bank,-38229459.77
+305587.51,Bank Charges,2025-05-02,Debit,Bank,-38535047.28
+360586.83,Scrap Sale,2025-05-02,Credit,Bank,-38174460.45
+58508.88,Loan EMI,2025-05-03,Debit,Bank,-38232969.33
+464799.15,Payment to Vendor,2025-05-03,Debit,Bank,-38697768.48
+340286.91,Bank Charges,2025-05-03,Debit,Bank,-39038055.39
+201343.95,Steel Sale - Client A,2025-05-03,Credit,Bank,-38836711.44
+298088.44,Raw Material Purchase,2025-05-04,Debit,Bank,-39134799.88
+315484.99,Insurance Premium,2025-05-04,Debit,Bank,-39450284.87
+350110.54,Raw Material Purchase,2025-05-04,Debit,Bank,-39800395.41
+425895.15,Loan EMI,2025-05-04,Debit,Bank,-40226290.56
+64922.26,Machinery Maintenance,2025-05-05,Debit,Bank,-40291212.82
+392404.5,Bank Charges,2025-05-05,Debit,Bank,-40683617.32
+268708.9,Salary Payment,2025-05-05,Debit,Bank,-40952326.22
+188432.58,Freight Charges,2025-05-05,Debit,Bank,-41140758.8
+325533.91,Tax Payment,2025-05-05,Debit,Bank,-41466292.71
+425539.94,Payment to Vendor,2025-05-05,Debit,Bank,-41891832.65
+247649.84,Insurance Premium,2025-05-05,Debit,Bank,-42139482.49
+319614.63,Salary Payment,2025-05-06,Debit,Bank,-42459097.12
+232570.98,Insurance Premium,2025-05-06,Debit,Bank,-42691668.1
+220566.14,Electricity Bill,2025-05-06,Debit,Bank,-42912234.24
+263264.64,Scrap Sale,2025-05-06,Credit,Bank,-42648969.6
+138690.79,Freight Charges,2025-05-06,Debit,Bank,-42787660.39
+460210.74,Machinery Maintenance,2025-05-06,Debit,Bank,-43247871.13
+220609.37,Steel Sale - Client B,2025-05-07,Credit,Bank,-43027261.76
+298274.94,Scrap Sale,2025-05-07,Credit,Bank,-42728986.82
+426598.01,Salary Payment,2025-05-07,Debit,Bank,-43155584.83
+467637.83,Insurance Premium,2025-05-07,Debit,Bank,-43623222.66
+441407.44,Loan EMI,2025-05-07,Debit,Bank,-44064630.1
+376485.76,Water Utility,2025-05-07,Debit,Bank,-44441115.86
+335753.29,Bank Charges,2025-05-08,Debit,Bank,-44776869.15
+19206.5,Salary Payment,2025-05-08,Debit,Bank,-44796075.65
+165882.01,Insurance Premium,2025-05-08,Debit,Bank,-44961957.66
+109999.33,Steel Sale - Client B,2025-05-08,Credit,Bank,-44851958.33
+132884.44,Machinery Maintenance,2025-05-08,Debit,Bank,-44984842.77
+440758.39,Loan EMI,2025-05-08,Debit,Bank,-45425601.16
+440653.14,Scrap Sale,2025-05-08,Credit,Bank,-44984948.02
+260730.49,Payment to Vendor,2025-05-09,Debit,Bank,-45245678.51
+47378.42,Water Utility,2025-05-09,Debit,Bank,-45293056.93
+206181.92,Scrap Sale,2025-05-09,Credit,Bank,-45086875.01
+380291.5,Tax Payment,2025-05-09,Debit,Bank,-45467166.51
+240666.09,Scrap Sale,2025-05-09,Credit,Bank,-45226500.42
+247956.56,Scrap Sale,2025-05-09,Credit,Bank,-44978543.86
+13535.41,Machinery Maintenance,2025-05-09,Debit,Bank,-44992079.27
+205178.56,Water Utility,2025-05-10,Debit,Bank,-45197257.83
+156571.98,Water Utility,2025-05-10,Debit,Bank,-45353829.81
+187665.12,Bank Charges,2025-05-10,Debit,Bank,-45541494.93
+267806.36,Tax Payment,2025-05-10,Debit,Bank,-45809301.29
+498332.57,Steel Sale - Client A,2025-05-10,Credit,Bank,-45310968.72
+179146.21,Salary Payment,2025-05-11,Debit,Bank,-45490114.93
+139103.63,Steel Sale - Client B,2025-05-11,Credit,Bank,-45351011.3
+119116.33,Loan EMI,2025-05-11,Debit,Bank,-45470127.63
+100329.23,Scrap Sale,2025-05-11,Credit,Bank,-45369798.4
+372726.13,Raw Material Purchase,2025-05-11,Debit,Bank,-45742524.53
+346630.96,Machinery Maintenance,2025-05-11,Debit,Bank,-46089155.49
+112110.4,Water Utility,2025-05-11,Debit,Bank,-46201265.89
+363669.58,Loan EMI,2025-05-12,Debit,Bank,-46564935.47
+264695.25,Machinery Maintenance,2025-05-12,Debit,Bank,-46829630.72
+490352.76,Loan EMI,2025-05-12,Debit,Bank,-47319983.48
+101088.2,Insurance Premium,2025-05-12,Debit,Bank,-47421071.68
+183636.13,Water Utility,2025-05-12,Debit,Bank,-47604707.81
+12003.44,Loan EMI,2025-05-12,Debit,Bank,-47616711.25
+140784.11,Electricity Bill,2025-05-13,Debit,Bank,-47757495.36
+278912.69,Payment to Vendor,2025-05-13,Debit,Bank,-48036408.05
+472324.36,Scrap Sale,2025-05-13,Credit,Bank,-47564083.69
+434888.29,Freight Charges,2025-05-13,Debit,Bank,-47998971.98
+55780.89,Steel Sale - Client B,2025-05-13,Credit,Bank,-47943191.09
+289161.79,Payment to Vendor,2025-05-13,Debit,Bank,-48232352.88
+241963.53,Steel Sale - Client B,2025-05-13,Credit,Bank,-47990389.35
+482921.33,Electricity Bill,2025-05-14,Debit,Bank,-48473310.68
+470826.48,Loan EMI,2025-05-14,Debit,Bank,-48944137.16
+61473.13,Steel Sale - Client B,2025-05-14,Credit,Bank,-48882664.03
+203350.18,Raw Material Purchase,2025-05-14,Debit,Bank,-49086014.21
+290625.47,Raw Material Purchase,2025-05-14,Debit,Bank,-49376639.68
+78852.8,Electricity Bill,2025-05-15,Debit,Bank,-49455492.48
+474817.19,Bank Charges,2025-05-15,Debit,Bank,-49930309.67
+496989.47,Raw Material Purchase,2025-05-15,Debit,Bank,-50427299.14
+383399.51,Tax Payment,2025-05-16,Debit,Bank,-50810698.65
+300082.79,Bank Charges,2025-05-16,Debit,Bank,-51110781.44
+116715.13,Bank Charges,2025-05-16,Debit,Bank,-51227496.57
+228004.66,Steel Sale - Client A,2025-05-17,Credit,Bank,-50999491.91
+152189.8,Steel Sale - Client B,2025-05-17,Credit,Bank,-50847302.11
+495065.47,Bank Charges,2025-05-17,Debit,Bank,-51342367.58
+286471.59,Loan EMI,2025-05-17,Debit,Bank,-51628839.17
+306767.3,Payment to Vendor,2025-05-17,Debit,Bank,-51935606.47
+54120.62,Scrap Sale,2025-05-17,Credit,Bank,-51881485.85
+107855.01,Machinery Maintenance,2025-05-17,Debit,Bank,-51989340.86
+331911.93,Loan EMI,2025-05-18,Debit,Bank,-52321252.79
+123733.26,Electricity Bill,2025-05-18,Debit,Bank,-52444986.05
+42157.11,Tax Payment,2025-05-18,Debit,Bank,-52487143.16
+207216.2,Payment to Vendor,2025-05-18,Debit,Bank,-52694359.36
+149173.35,Steel Sale - Client B,2025-05-19,Credit,Bank,-52545186.01
+147611.92,Water Utility,2025-05-19,Debit,Bank,-52692797.93
+352978.84,Loan EMI,2025-05-19,Debit,Bank,-53045776.77
+40233.98,Steel Sale - Client B,2025-05-19,Credit,Bank,-53005542.79
+462335.97,Water Utility,2025-05-19,Debit,Bank,-53467878.76
+396667.63,Machinery Maintenance,2025-05-19,Debit,Bank,-53864546.39
+332285.61,Bank Charges,2025-05-19,Debit,Bank,-54196832
+61814.27,Steel Sale - Client A,2025-05-20,Credit,Bank,-54135017.73
+325579.19,Water Utility,2025-05-20,Debit,Bank,-54460596.92
+414182.42,Loan EMI,2025-05-20,Debit,Bank,-54874779.34
+34520.83,Raw Material Purchase,2025-05-20,Debit,Bank,-54909300.17
+375734.07,Bank Charges,2025-05-21,Debit,Bank,-55285034.24
+460990.3,Bank Charges,2025-05-21,Debit,Bank,-55746024.54
+66555.06,Steel Sale - Client B,2025-05-21,Credit,Bank,-55679469.48
+155525.14,Scrap Sale,2025-05-21,Credit,Bank,-55523944.34
+471624.74,Steel Sale - Client A,2025-05-21,Credit,Bank,-55052319.6
+249428.63,Tax Payment,2025-05-22,Debit,Bank,-55301748.23
+301028.15,Raw Material Purchase,2025-05-22,Debit,Bank,-55602776.38
+368594.29,Steel Sale - Client A,2025-05-22,Credit,Bank,-55234182.09
+128932.11,Bank Charges,2025-05-22,Debit,Bank,-55363114.2
+118317.59,Raw Material Purchase,2025-05-22,Debit,Bank,-55481431.79
+418799.51,Freight Charges,2025-05-22,Debit,Bank,-55900231.3
+295625.85,Bank Charges,2025-05-22,Debit,Bank,-56195857.15
+337779.38,Machinery Maintenance,2025-05-23,Debit,Bank,-56533636.53
+290242.26,Loan EMI,2025-05-23,Debit,Bank,-56823878.79
+379353.07,Machinery Maintenance,2025-05-23,Debit,Bank,-57203231.86
+327497.2,Tax Payment,2025-05-24,Debit,Bank,-57530729.06
+94837.13,Loan EMI,2025-05-24,Debit,Bank,-57625566.19
+220763.07,Bank Charges,2025-05-24,Debit,Bank,-57846329.26
+248404.27,Insurance Premium,2025-05-24,Debit,Bank,-58094733.53
+237655.15,Raw Material Purchase,2025-05-24,Debit,Bank,-58332388.68
+169987.65,Steel Sale - Client A,2025-05-24,Credit,Bank,-58162401.03
+84608.3,Insurance Premium,2025-05-25,Debit,Bank,-58247009.33
+348368.47,Steel Sale - Client A,2025-05-25,Credit,Bank,-57898640.86
+332978.85,Loan EMI,2025-05-25,Debit,Bank,-58231619.71
+381447.39,Insurance Premium,2025-05-26,Debit,Bank,-58613067.1
+230138.82,Payment to Vendor,2025-05-26,Debit,Bank,-58843205.92
+129937.43,Salary Payment,2025-05-26,Debit,Bank,-58973143.35
+485241.44,Raw Material Purchase,2025-05-26,Debit,Bank,-59458384.79
+433130.74,Steel Sale - Client A,2025-05-26,Credit,Bank,-59025254.05
+494119.01,Insurance Premium,2025-05-26,Debit,Bank,-59519373.06
+209557.55,Steel Sale - Client B,2025-05-27,Credit,Bank,-59309815.51
+261627.5,Water Utility,2025-05-27,Debit,Bank,-59571443.01
+379439.36,Bank Charges,2025-05-27,Debit,Bank,-59950882.37
+223810.27,Freight Charges,2025-05-27,Debit,Bank,-60174692.64
+105761.33,Payment to Vendor,2025-05-27,Debit,Bank,-60280453.97
+69851.55,Tax Payment,2025-05-27,Debit,Bank,-60350305.52
+221867.47,Loan EMI,2025-05-27,Debit,Bank,-60572172.99
+19290.37,Raw Material Purchase,2025-05-28,Debit,Bank,-60591463.36
+306391.48,Freight Charges,2025-05-28,Debit,Bank,-60897854.84
+356342.5,Water Utility,2025-05-28,Debit,Bank,-61254197.34
+277665.31,Loan EMI,2025-05-28,Debit,Bank,-61531862.65
+206955.39,Tax Payment,2025-05-28,Debit,Bank,-61738818.04
+496167.28,Water Utility,2025-05-28,Debit,Bank,-62234985.32
+473795.07,Steel Sale - Client B,2025-05-29,Credit,Bank,-61761190.25
+416910.87,Freight Charges,2025-05-29,Debit,Bank,-62178101.12
+466663.26,Steel Sale - Client B,2025-05-29,Credit,Bank,-61711437.86
+354178.76,Tax Payment,2025-05-30,Debit,Bank,-62065616.62
+418188.35,Steel Sale - Client A,2025-05-30,Credit,Bank,-61647428.27
+125646.8,Steel Sale - Client B,2025-05-30,Credit,Bank,-61521781.47
+76597.77,Tax Payment,2025-05-30,Debit,Bank,-61598379.24
+461324.73,Water Utility,2025-05-30,Debit,Bank,-62059703.97
+440266.5,Scrap Sale,2025-05-31,Credit,Bank,-61619437.47
+356342.5,Water Utility,2025-05-28,Debit,Bank,-61254197.34
+277665.31,Loan EMI,2025-05-28,Debit,Bank,-61531862.65
+206955.39,Tax Payment,2025-05-28,Debit,Bank,-61738818.04
+496167.28,Water Utility,2025-05-28,Debit,Bank,-62234985.32
+473795.07,Steel Sale - Client B,2025-05-29,Credit,Bank,-61761190.25
+416910.87,Freight Charges,2025-05-29,Debit,Bank,-62178101.12
+466663.26,Steel Sale - Client B,2025-05-29,Credit,Bank,-61711437.86
+354178.76,Tax Payment,2025-05-30,Debit,Bank,-62065616.62
+418188.35,Steel Sale - Client A,2025-05-30,Credit,Bank,-61647428.27
+125646.8,Steel Sale - Client B,2025-05-30,Credit,Bank,-61521781.47
+76597.77,Tax Payment,2025-05-30,Debit,Bank,-61598379.24
+461324.73,Water Utility,2025-05-30,Debit,Bank,-62059703.97
+440266.5,Scrap Sale,2025-05-31,Credit,Bank,-61619437.47
+39555.99,Insurance Premium,2025-05-31,Debit,Bank,-61658993.46
+396053.06,Machinery Maintenance,2025-05-31,Debit,Bank,-62055046.52
+173238.25,Steel Sale - Client A,2025-05-31,Credit,Bank,-61881808.27
+256330.15,Machinery Maintenance,2025-05-31,Debit,Bank,-62138138.42
+6269.8,Insurance Premium,2025-05-31,Debit,Bank,-62144408.22
+152785.15,Scrap Sale,2025-05-31,Credit,Bank,-61991623.07
+789,Insurance Premium,2025-05-31,Credit,Bank,-61990834.07
+7899,Scrap Sale,2025-05-31,Credit,Bank,-61982935.07
+8000,Scrap Sale,2025-05-31,Credit,Bank,-61974935.07
+800000,Steel Sale,2024-05-31,Credit,Bank,-61174935.07
+440266.5,Scrap Sale,2025-05-31,Credit,Bank,-61615201.57
+39555.99,Insurance Premium,2025-05-31,Debit,Bank,-61654757.56
+396053.06,Machinery Maintenance,2025-05-31,Debit,Bank,-62050810.62
+173238.25,Steel Sale - Client A,2025-05-31,Credit,Bank,-62224048.87
+256330.15,Machinery Maintenance,2025-05-31,Debit,Bank,-62480379.02
+6269.8,Insurance Premium,2025-05-31,Debit,Bank,-62486648.82
+152785.15,Scrap Sale,2025-05-31,Credit,Bank,-62639433.97
+789,Insurance Premium,2025-05-31,Credit,Bank,-62640222.97
+7899,Scrap Sale,2025-05-31,Credit,Bank,-62648121.97
+8000,Scrap Sale,2025-05-31,Credit,Bank,-62656121.97
+800000,Steel Sale,2024-05-31,Credit,Bank,-63456121.97
+75000,Bank Transfer to Unknown Party,2025-07-04,Debit,Bank,
