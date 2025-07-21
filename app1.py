@@ -53,56 +53,203 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 class AdvancedAnomalyDetector:
     """
-    Advanced AI/ML-powered anomaly detection system
-    Uses multiple algorithms for comprehensive detection
+    Advanced AI/ML-powered anomaly detection system with hyperparameter optimization
+    Uses multiple algorithms with ensemble voting for comprehensive detection
     """
     
     def __init__(self):
         self.models = {}
         self.scalers = {}
-        self.feature_encoders = {}
+        self.feature_names = []
         self.is_trained = False
+        self.best_params = {}
+        self.ensemble_weights = {}
+        self.performance_metrics = {}
         
     def prepare_features(self, df):
         """Prepare advanced features for ML models"""
-        features = df.copy()
-        
-        # Time-based features
-        features['hour'] = features['Date'].dt.hour
-        features['day_of_week'] = features['Date'].dt.dayofweek
-        features['day_of_month'] = features['Date'].dt.day
-        features['month'] = features['Date'].dt.month
-        features['is_weekend'] = features['day_of_week'].isin([5, 6])
-        features['is_month_end'] = features['Date'].dt.is_month_end
-        
-        # Amount-based features
-        features['amount_log'] = np.log1p(np.abs(features['Amount']))
-        features['amount_squared'] = features['Amount'] ** 2
-        features['amount_abs'] = np.abs(features['Amount'])
-        
-        # Transaction type encoding
-        features['is_debit'] = (features['Type'] == 'Debit').astype(int)
-        features['is_credit'] = (features['Type'] == 'Credit').astype(int)
-        
-        # Vendor frequency features
-        vendor_counts = features['Description'].value_counts()
-        features['vendor_frequency'] = features['Description'].map(vendor_counts)
-        features['vendor_frequency_log'] = np.log1p(features['vendor_frequency'])
-        
-        # Rolling statistics
-        features['amount_rolling_mean'] = features['Amount'].rolling(window=7, min_periods=1).mean()
-        features['amount_rolling_std'] = features['Amount'].rolling(window=7, min_periods=1).std()
-        features['amount_z_score'] = (features['Amount'] - features['amount_rolling_mean']) / features['amount_rolling_std']
-        
-        # Text features (simplified)
-        features['description_length'] = features['Description'].str.len()
-        features['has_numbers'] = features['Description'].str.contains(r'\d').astype(int)
-        features['has_special_chars'] = features['Description'].str.contains(r'[^a-zA-Z0-9\s]').astype(int)
-        
-        return features
+        if not ML_AVAILABLE:
+            return df
+            
+        try:
+            features = df.copy()
+            
+            # Time-based features
+            features['hour'] = pd.to_datetime(features['Date']).dt.hour
+            features['day_of_week'] = pd.to_datetime(features['Date']).dt.dayofweek
+            features['day_of_month'] = pd.to_datetime(features['Date']).dt.day
+            features['month'] = pd.to_datetime(features['Date']).dt.month
+            features['is_weekend'] = pd.to_datetime(features['Date']).dt.dayofweek.isin([5, 6]).astype(int)
+            features['is_month_end'] = pd.to_datetime(features['Date']).dt.is_month_end.astype(int)
+            
+            # Amount-based features
+            features['amount_log'] = np.log1p(np.abs(features['Amount']))
+            features['amount_squared'] = features['Amount'] ** 2
+            features['amount_abs'] = np.abs(features['Amount'])
+            features['is_debit'] = (features['Type'] == 'Debit').astype(int)
+            features['is_credit'] = (features['Type'] == 'Credit').astype(int)
+            
+            # Vendor frequency features
+            vendor_counts = features['Description'].value_counts()
+            features['vendor_frequency'] = features['Description'].map(vendor_counts)
+            features['vendor_frequency_log'] = np.log1p(features['vendor_frequency'])
+            
+            # Rolling statistics
+            features['amount_rolling_mean'] = features['Amount'].rolling(window=5, min_periods=1).mean()
+            features['amount_rolling_std'] = features['Amount'].rolling(window=5, min_periods=1).std()
+            features['amount_z_score'] = (features['Amount'] - features['amount_rolling_mean']) / (features['amount_rolling_std'] + 1e-8)
+            
+            # Text features
+            features['description_length'] = features['Description'].str.len()
+            features['has_numbers'] = features['Description'].str.contains(r'\d').astype(int)
+            features['has_special_chars'] = features['Description'].str.contains(r'[^a-zA-Z0-9\s]').astype(int)
+            
+            return features
+            
+        except Exception as e:
+            logger.error(f"Error preparing features: {e}")
+            return df
+    
+    def calculate_adaptive_contamination(self, df):
+        """Calculate adaptive contamination based on data characteristics"""
+        try:
+            # Statistical outlier detection for initial estimate
+            Q1 = df['Amount'].quantile(0.25)
+            Q3 = df['Amount'].quantile(0.75)
+            IQR = Q3 - Q1
+            lower_bound = Q1 - 1.5 * IQR
+            upper_bound = Q3 + 1.5 * IQR
+            
+            outliers = df[(df['Amount'] < lower_bound) | (df['Amount'] > upper_bound)]
+            outlier_ratio = len(outliers) / len(df)
+            
+            # Adaptive contamination with bounds
+            adaptive_contamination = min(0.25, max(0.05, outlier_ratio))
+            
+            logger.info(f"Adaptive contamination calculated: {adaptive_contamination:.3f} ({len(outliers)} outliers out of {len(df)} transactions)")
+            return adaptive_contamination
+            
+        except Exception as e:
+            logger.error(f"Error calculating adaptive contamination: {e}")
+            return 0.1  # Default fallback
+    
+    def optimize_hyperparameters(self, X, y=None):
+        """Optimize hyperparameters using grid search and cross-validation"""
+        try:
+            from sklearn.model_selection import GridSearchCV, TimeSeriesSplit
+            from sklearn.metrics import make_scorer, silhouette_score
+            
+            # Time series cross-validation for financial data
+            tscv = TimeSeriesSplit(n_splits=3)
+            
+            # Custom scoring function for anomaly detection
+            def anomaly_score(y_true, y_pred):
+                # Higher score for better anomaly detection
+                return silhouette_score(X, y_pred) if len(np.unique(y_pred)) > 1 else 0
+            
+            scorer = make_scorer(anomaly_score, greater_is_better=True)
+            
+            # Grid search parameters for each model
+            param_grids = {
+                'isolation_forest': {
+                    'contamination': [0.05, 0.1, 0.15, 0.2],
+                    'n_estimators': [50, 100, 200],
+                    'max_samples': ['auto', 100, 200],
+                    'random_state': [42]
+                },
+                'lof': {
+                    'contamination': [0.05, 0.1, 0.15, 0.2],
+                    'n_neighbors': [10, 20, 30, 50],
+                    'metric': ['euclidean', 'manhattan']
+                },
+                'one_class_svm': {
+                    'nu': [0.05, 0.1, 0.15, 0.2],
+                    'kernel': ['rbf', 'poly'],
+                    'gamma': ['scale', 'auto', 0.1, 0.01]
+                }
+            }
+            
+            best_params = {}
+            
+            # Optimize each model
+            for model_name, param_grid in param_grids.items():
+                logger.info(f"Optimizing {model_name} hyperparameters...")
+                
+                if model_name == 'isolation_forest':
+                    model = IsolationForest()
+                elif model_name == 'lof':
+                    model = LocalOutlierFactor(novelty=True)
+                elif model_name == 'one_class_svm':
+                    model = OneClassSVM()
+                
+                # Grid search with time series CV
+                grid_search = GridSearchCV(
+                    model, param_grid, 
+                    cv=tscv, 
+                    scoring=scorer,
+                    n_jobs=-1,  # Use all CPU cores
+                    verbose=0
+                )
+                
+                # Fit the grid search
+                grid_search.fit(X)
+                
+                best_params[model_name] = grid_search.best_params_
+                logger.info(f"{model_name} optimized: {grid_search.best_params_}")
+                logger.info(f"   Best score: {grid_search.best_score_:.4f}")
+            
+            return best_params
+            
+        except Exception as e:
+            logger.error(f"Error in hyperparameter optimization: {e}")
+            return {}
+    
+    def create_ensemble_models(self, X, best_params):
+        """Create ensemble of models with different hyperparameters"""
+        try:
+            ensemble_models = {}
+            
+            # Create multiple Isolation Forest models with different contamination
+            contamination_values = [0.05, 0.1, 0.15, 0.2]
+            for i, cont in enumerate(contamination_values):
+                model = IsolationForest(
+                    contamination=cont,
+                    n_estimators=best_params.get('isolation_forest', {}).get('n_estimators', 100),
+                    random_state=42 + i
+                )
+                model.fit(X)  # Train the model immediately
+                ensemble_models[f'if_cont_{cont}'] = model
+            
+            # Create multiple LOF models with different neighbors
+            neighbor_values = [10, 20, 30, 50]
+            for i, neighbors in enumerate(neighbor_values):
+                model = LocalOutlierFactor(
+                    contamination=best_params.get('lof', {}).get('contamination', 0.1),
+                    n_neighbors=neighbors,
+                    novelty=True
+                )
+                model.fit(X)  # Train the model immediately
+                ensemble_models[f'lof_neighbors_{neighbors}'] = model
+            
+            # Create multiple SVM models with different nu values
+            nu_values = [0.05, 0.1, 0.15, 0.2]
+            for i, nu in enumerate(nu_values):
+                model = OneClassSVM(
+                    nu=nu,
+                    kernel=best_params.get('one_class_svm', {}).get('kernel', 'rbf'),
+                    gamma=best_params.get('one_class_svm', {}).get('gamma', 'scale')
+                )
+                model.fit(X)  # Train the model immediately
+                ensemble_models[f'svm_nu_{nu}'] = model
+            
+            return ensemble_models
+            
+        except Exception as e:
+            logger.error(f"Error creating ensemble models: {e}")
+            return {}
     
     def train_models(self, df):
-        """Train multiple ML models for anomaly detection"""
+        """Train optimized ML models with hyperparameter tuning"""
         if not ML_AVAILABLE:
             return False
             
@@ -119,51 +266,141 @@ class AdvancedAnomalyDetector:
             
             X = features[ml_features].fillna(0)
             
+            # Calculate adaptive contamination
+            adaptive_contamination = self.calculate_adaptive_contamination(df)
+            
+            # Optimize hyperparameters
+            logger.info("Starting hyperparameter optimization...")
+            self.best_params = self.optimize_hyperparameters(X)
+            
             # Standardize features
             self.scalers['standard'] = StandardScaler()
             X_scaled = self.scalers['standard'].fit_transform(X)
             
-            # Train Isolation Forest (Unsupervised)
+            # Train optimized models
+            logger.info("Training optimized models...")
+            
+            # Isolation Forest with optimized parameters
+            if_params = self.best_params.get('isolation_forest', {})
             self.models['isolation_forest'] = IsolationForest(
-                contamination=0.1,  # Expect 10% anomalies
-                random_state=42,
-                n_estimators=100
+                contamination=if_params.get('contamination', adaptive_contamination),
+                n_estimators=if_params.get('n_estimators', 100),
+                max_samples=if_params.get('max_samples', 'auto'),
+                random_state=if_params.get('random_state', 42)
             )
             self.models['isolation_forest'].fit(X_scaled)
             
-            # Train Local Outlier Factor (Unsupervised)
+            # LOF with optimized parameters
+            lof_params = self.best_params.get('lof', {})
             self.models['lof'] = LocalOutlierFactor(
-                contamination=0.1,
-                n_neighbors=20,
+                contamination=lof_params.get('contamination', adaptive_contamination),
+                n_neighbors=lof_params.get('n_neighbors', 20),
+                metric=lof_params.get('metric', 'euclidean'),
                 novelty=True
             )
             self.models['lof'].fit(X_scaled)
             
-            # Train One-Class SVM (Unsupervised)
+            # One-Class SVM with optimized parameters
+            svm_params = self.best_params.get('one_class_svm', {})
             self.models['one_class_svm'] = OneClassSVM(
-                nu=0.1,  # Expected fraction of outliers
-                kernel='rbf',
-                gamma='scale'
+                nu=svm_params.get('nu', adaptive_contamination),
+                kernel=svm_params.get('kernel', 'rbf'),
+                gamma=svm_params.get('gamma', 'scale')
             )
             self.models['one_class_svm'].fit(X_scaled)
             
-            # Train DBSCAN for clustering
-            self.models['dbscan'] = DBSCAN(eps=0.5, min_samples=5)
+            # DBSCAN with optimized parameters
+            self.models['dbscan'] = DBSCAN(
+                eps=0.5, 
+                min_samples=min(5, len(X_scaled) // 20)  # Adaptive min_samples
+            )
             self.models['dbscan'].fit(X_scaled)
             
-            # Store feature names for later use
+            # Create ensemble models
+            logger.info("Creating ensemble models...")
+            ensemble_models = self.create_ensemble_models(X_scaled, self.best_params)
+            self.models.update(ensemble_models)
+            
+            # Calculate ensemble weights based on model diversity
+            self.ensemble_weights = self.calculate_ensemble_weights()
+            
+            # Store feature names and training info
             self.feature_names = ml_features
             self.is_trained = True
             
-            logger.info("✅ Advanced ML models trained successfully")
+            # Calculate performance metrics
+            self.performance_metrics = self.calculate_performance_metrics(X_scaled)
+            
+            logger.info("Advanced ML models trained with hyperparameter optimization")
+            logger.info(f"Models trained: {len(self.models)}")
+            logger.info(f"Best parameters: {self.best_params}")
+            logger.info(f"Ensemble weights: {self.ensemble_weights}")
+            
             return True
             
         except Exception as e:
-            logger.error(f"❌ Error training ML models: {e}")
+            logger.error(f"Error training optimized ML models: {e}")
             return False
     
+    def calculate_ensemble_weights(self):
+        """Calculate weights for ensemble models based on diversity"""
+        try:
+            weights = {}
+            base_models = ['isolation_forest', 'lof', 'one_class_svm', 'dbscan']
+            
+            # Base models get equal weight
+            for model in base_models:
+                weights[model] = 1.0
+            
+            # Ensemble models get reduced weight
+            ensemble_models = [k for k in self.models.keys() if k not in base_models]
+            for model in ensemble_models:
+                weights[model] = 0.5  # Half weight for ensemble models
+            
+            # Normalize weights
+            total_weight = sum(weights.values())
+            weights = {k: v/total_weight for k, v in weights.items()}
+            
+            return weights
+            
+        except Exception as e:
+            logger.error(f"Error calculating ensemble weights: {e}")
+            return {}
+    
+    def calculate_performance_metrics(self, X_scaled):
+        """Calculate performance metrics for trained models"""
+        try:
+            metrics = {}
+            
+            for name, model in self.models.items():
+                try:
+                    if hasattr(model, 'score_samples'):
+                        scores = model.score_samples(X_scaled)
+                        metrics[name] = {
+                            'mean_score': np.mean(scores),
+                            'std_score': np.std(scores),
+                            'min_score': np.min(scores),
+                            'max_score': np.max(scores)
+                        }
+                    elif hasattr(model, 'decision_function'):
+                        scores = model.decision_function(X_scaled)
+                        metrics[name] = {
+                            'mean_score': np.mean(scores),
+                            'std_score': np.std(scores),
+                            'min_score': np.min(scores),
+                            'max_score': np.max(scores)
+                        }
+                except Exception as e:
+                    logger.warning(f"Could not calculate metrics for {name}: {e}")
+            
+            return metrics
+            
+        except Exception as e:
+            logger.error(f"Error calculating performance metrics: {e}")
+            return {}
+    
     def detect_anomalies_ml(self, df):
-        """Detect anomalies using trained ML models"""
+        """Detect anomalies using optimized ML models with ensemble voting"""
         if not self.is_trained or not ML_AVAILABLE:
             return []
             
@@ -173,55 +410,59 @@ class AdvancedAnomalyDetector:
             X_scaled = self.scalers['standard'].transform(X)
             
             anomalies = []
+            model_predictions = {}
             
-            # Isolation Forest predictions
-            if_anomalies = self.models['isolation_forest'].predict(X_scaled)
-            if_scores = self.models['isolation_forest'].decision_function(X_scaled)
+            # Get predictions from all models
+            for name, model in self.models.items():
+                try:
+                    if hasattr(model, 'predict'):
+                        predictions = model.predict(X_scaled)
+                        model_predictions[name] = predictions
+                    elif hasattr(model, 'decision_function'):
+                        scores = model.decision_function(X_scaled)
+                        # Convert scores to predictions
+                        threshold = np.percentile(scores, 90)  # Top 10% as anomalies
+                        predictions = (scores < threshold).astype(int) * 2 - 1  # Convert to -1/1
+                        model_predictions[name] = predictions
+                except Exception as e:
+                    logger.warning(f"Error getting predictions from {name}: {e}")
+                    continue
             
-            # LOF predictions
-            lof_scores = self.models['lof'].decision_function(X_scaled)
-            
-            # One-Class SVM predictions
-            svm_predictions = self.models['one_class_svm'].predict(X_scaled)
-            svm_scores = self.models['one_class_svm'].decision_function(X_scaled)
-            
-            # DBSCAN clustering
-            dbscan_labels = self.models['dbscan'].fit_predict(X_scaled)
-            
-            # Combine predictions
+            # Ensemble voting with weights
             for idx, row in features.iterrows():
                 anomaly_score = 0
                 anomaly_reasons = []
+                model_agreement = 0
                 
-                # Isolation Forest
-                if if_anomalies[idx] == -1:
-                    anomaly_score += 2
-                    anomaly_reasons.append("ML: Isolation Forest detected outlier")
+                # Calculate weighted ensemble score
+                for model_name, predictions in model_predictions.items():
+                    if idx < len(predictions):
+                        weight = self.ensemble_weights.get(model_name, 1.0)
+                        if predictions[idx] == -1:  # Anomaly detected
+                            anomaly_score += weight
+                            model_agreement += 1
+                            anomaly_reasons.append(f"ML: {model_name} detected outlier")
                 
-                # LOF
-                if lof_scores[idx] < -0.5:
-                    anomaly_score += 1
-                    anomaly_reasons.append("ML: Local Outlier Factor detected anomaly")
+                # Normalize score by total weight
+                total_weight = sum(self.ensemble_weights.values())
+                normalized_score = anomaly_score / total_weight if total_weight > 0 else 0
                 
-                # One-Class SVM
-                if svm_predictions[idx] == -1:
-                    anomaly_score += 1
-                    anomaly_reasons.append("ML: One-Class SVM detected outlier")
-                
-                # DBSCAN (noise points)
-                if dbscan_labels[idx] == -1:
-                    anomaly_score += 1
-                    anomaly_reasons.append("ML: DBSCAN detected noise point")
-                
-                # Determine severity based on ML consensus
-                if anomaly_score >= 3:
+                # Determine severity based on ensemble consensus
+                if normalized_score >= 0.6:  # 60% of models agree
                     severity = 'high'
-                elif anomaly_score >= 2:
+                elif normalized_score >= 0.4:  # 40% of models agree
                     severity = 'medium'
-                elif anomaly_score >= 1:
+                elif normalized_score >= 0.2:  # 20% of models agree
                     severity = 'low'
                 else:
                     continue
+                
+                # Add performance metrics to anomaly details
+                performance_info = []
+                for model_name in ['isolation_forest', 'lof', 'one_class_svm']:
+                    if model_name in self.performance_metrics:
+                        metrics = self.performance_metrics[model_name]
+                        performance_info.append(f"{model_name}: {metrics['mean_score']:.3f}")
                 
                 anomalies.append({
                     'type': 'ml_anomaly',
@@ -232,18 +473,18 @@ class AdvancedAnomalyDetector:
                         'description': str(row['Description']),
                         'date': str(row['Date']),
                         'type': str(row['Type']),
-                        'ml_score': anomaly_score,
-                        'if_score': float(if_scores[idx]),
-                        'lof_score': float(lof_scores[idx]),
-                        'svm_score': float(svm_scores[idx])
+                        'ensemble_score': normalized_score,
+                        'model_agreement': model_agreement,
+                        'total_models': len(self.models),
+                        'performance_metrics': performance_info
                     },
-                    'reason': " | ".join(anomaly_reasons)
+                    'reason': " | ".join(anomaly_reasons[:3])  # Top 3 reasons
                 })
             
             return anomalies
             
         except Exception as e:
-            logger.error(f"❌ Error in ML anomaly detection: {e}")
+            logger.error(f"Error in optimized ML anomaly detection: {e}")
             return []
 
 # Initialize the advanced detector
@@ -254,7 +495,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('cashflow_app.log'),
+        logging.FileHandler('cashflow_app.log', encoding='utf-8'),
         logging.StreamHandler()
     ]
 )
@@ -7103,27 +7344,33 @@ def detect_anomalies(df, vendor_data=None):
             }
         
         # ===== PHASE 1: TRAIN ADVANCED AI/ML MODELS =====
-        logger.info("🤖 Training advanced AI/ML models...")
+        logger.info("Training advanced AI/ML models...")
         ml_trained = advanced_detector.train_models(df)
         
         if ml_trained:
-            logger.info("✅ AI/ML models trained successfully")
+            logger.info("AI/ML models trained successfully")
             # Get AI/ML anomalies
             ml_anomalies = advanced_detector.detect_anomalies_ml(df)
             anomalies.extend(ml_anomalies)
-            logger.info(f"🤖 AI/ML detected {len(ml_anomalies)} anomalies")
+            logger.info(f"AI/ML detected {len(ml_anomalies)} anomalies")
             
-            # Add model verification data
+            # Add model verification data with hyperparameter optimization info
             model_verification = {
-                'isolation_forest_anomalies': len([a for a in ml_anomalies if 'Isolation Forest' in a['reason']]),
-                'lof_anomalies': len([a for a in ml_anomalies if 'Local Outlier Factor' in a['reason']]),
-                'svm_anomalies': len([a for a in ml_anomalies if 'One-Class SVM' in a['reason']]),
-                'dbscan_anomalies': len([a for a in ml_anomalies if 'DBSCAN' in a['reason']]),
+                'isolation_forest_anomalies': len([a for a in ml_anomalies if 'isolation_forest' in a['reason']]),
+                'lof_anomalies': len([a for a in ml_anomalies if 'lof' in a['reason']]),
+                'svm_anomalies': len([a for a in ml_anomalies if 'one_class_svm' in a['reason']]),
+                'dbscan_anomalies': len([a for a in ml_anomalies if 'dbscan' in a['reason']]),
                 'training_samples': len(df),
-                'feature_count': len(advanced_detector.feature_names) if hasattr(advanced_detector, 'feature_names') else 0
+                'feature_count': len(advanced_detector.feature_names) if hasattr(advanced_detector, 'feature_names') else 0,
+                'hyperparameter_optimization': {
+                    'best_params': advanced_detector.best_params,
+                    'ensemble_models': len(advanced_detector.models),
+                    'adaptive_contamination': advanced_detector.calculate_adaptive_contamination(df),
+                    'performance_metrics': advanced_detector.performance_metrics
+                }
             }
         else:
-            logger.info("⚠️ Using enhanced statistical methods (ML not available)")
+            logger.info("Using enhanced statistical methods (ML not available)")
             model_verification = {'error': 'ML libraries not available'}
         
         # Add business context columns
