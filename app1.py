@@ -139,6 +139,31 @@ class AdvancedAnomalyDetector:
             from sklearn.model_selection import GridSearchCV, TimeSeriesSplit
             from sklearn.metrics import make_scorer, silhouette_score
             
+            # FAST MODE: Skip heavy optimization for small datasets
+            if len(X) < 100:
+                logger.info(f"Fast mode: Using default hyperparameters for small dataset ({len(X)} samples)")
+                return {
+                    'isolation_forest': {
+                        'contamination': 0.1,
+                        'n_estimators': 100,
+                        'max_samples': 'auto',
+                        'random_state': 42
+                    },
+                    'lof': {
+                        'contamination': 0.1,
+                        'n_neighbors': 10,
+                        'metric': 'euclidean'
+                    },
+                    'one_class_svm': {
+                        'nu': 0.1,
+                        'kernel': 'rbf',
+                        'gamma': 'scale'
+                    }
+                }
+            
+            # FULL OPTIMIZATION for larger datasets
+            logger.info(f"Full optimization mode: Optimizing for {len(X)} samples")
+            
             # Time series cross-validation for financial data
             tscv = TimeSeriesSplit(n_splits=3)
             
@@ -269,9 +294,18 @@ class AdvancedAnomalyDetector:
             # Calculate adaptive contamination
             adaptive_contamination = self.calculate_adaptive_contamination(df)
             
-            # Optimize hyperparameters
-            logger.info("Starting hyperparameter optimization...")
-            self.best_params = self.optimize_hyperparameters(X)
+            # FAST MODE: Skip heavy optimization for small datasets
+            if len(df) < 100:
+                logger.info(f"Fast mode: Using optimized defaults for {len(df)} samples")
+                self.best_params = {
+                    'isolation_forest': {'contamination': adaptive_contamination, 'n_estimators': 100, 'random_state': 42},
+                    'lof': {'contamination': adaptive_contamination, 'n_neighbors': 10},
+                    'one_class_svm': {'nu': adaptive_contamination, 'kernel': 'rbf'}
+                }
+            else:
+                # Optimize hyperparameters for larger datasets
+                logger.info("Starting hyperparameter optimization...")
+                self.best_params = self.optimize_hyperparameters(X)
             
             # Standardize features
             self.scalers['standard'] = StandardScaler()
@@ -400,7 +434,7 @@ class AdvancedAnomalyDetector:
             return {}
     
     def detect_anomalies_ml(self, df):
-        """Detect anomalies using optimized ML models with ensemble voting"""
+        """Detect anomalies using optimized ML models with ensemble voting and business context filtering"""
         if not self.is_trained or not ML_AVAILABLE:
             return []
             
@@ -408,6 +442,9 @@ class AdvancedAnomalyDetector:
             features = self.prepare_features(df)
             X = features[self.feature_names].fillna(0)
             X_scaled = self.scalers['standard'].transform(X)
+            
+            # Dynamic business context detection - works for any dataset
+            normal_business_mask = self._detect_normal_business_transactions(features)
             
             anomalies = []
             model_predictions = {}
@@ -428,8 +465,12 @@ class AdvancedAnomalyDetector:
                     logger.warning(f"Error getting predictions from {name}: {e}")
                     continue
             
-            # Ensemble voting with weights
+            # Ensemble voting with weights - only for suspicious transactions
             for idx, row in features.iterrows():
+                # Skip if this is clearly normal business
+                if normal_business_mask.iloc[idx]:
+                    continue
+                
                 anomaly_score = 0
                 anomaly_reasons = []
                 model_agreement = 0
@@ -447,12 +488,12 @@ class AdvancedAnomalyDetector:
                 total_weight = sum(self.ensemble_weights.values())
                 normalized_score = anomaly_score / total_weight if total_weight > 0 else 0
                 
-                # Determine severity based on ensemble consensus
-                if normalized_score >= 0.6:  # 60% of models agree
+                # Higher threshold for business context - only flag if strongly suspicious
+                if normalized_score >= 0.7:  # 70% of models agree (increased from 60%)
                     severity = 'high'
-                elif normalized_score >= 0.4:  # 40% of models agree
+                elif normalized_score >= 0.5:  # 50% of models agree (increased from 40%)
                     severity = 'medium'
-                elif normalized_score >= 0.2:  # 20% of models agree
+                elif normalized_score >= 0.3:  # 30% of models agree (increased from 20%)
                     severity = 'low'
                 else:
                     continue
@@ -481,12 +522,146 @@ class AdvancedAnomalyDetector:
                     'reason': " | ".join(anomaly_reasons[:3])  # Top 3 reasons
                 })
             
+            logger.info(f"ML detected {len(anomalies)} anomalies (filtered for business context)")
             return anomalies
             
         except Exception as e:
             logger.error(f"Error in optimized ML anomaly detection: {e}")
             return []
-
+    
+    def _detect_normal_business_transactions(self, df):
+        """Dynamically detect normal business transactions for any dataset"""
+        try:
+            # Get the most common transaction descriptions (likely normal business)
+            desc_counts = df['Description'].value_counts()
+            
+            # Identify normal business patterns
+            normal_business_mask = pd.Series([False] * len(df), index=df.index)
+            
+            # 1. High-frequency descriptions (appear many times) = likely normal business
+            high_freq_threshold = max(3, len(df) * 0.01)  # At least 3 times or 1% of transactions
+            high_freq_descriptions = desc_counts[desc_counts >= high_freq_threshold].index
+            
+            # 2. Enhanced universal business keywords (covers multiple industries)
+            common_business_keywords = [
+                # Core Business Operations
+                'sale', 'purchase', 'payment', 'revenue', 'income', 'expense', 'cost',
+                'fee', 'charge', 'commission', 'service', 'product', 'material',
+                
+                # Financial Operations
+                'credit', 'debit', 'transfer', 'deposit', 'withdrawal', 'refund',
+                'invoice', 'receipt', 'bill', 'loan', 'interest', 'tax',
+                
+                # Personnel & Operations
+                'salary', 'wage', 'bonus', 'employee', 'staff', 'personnel',
+                'rent', 'utility', 'maintenance', 'repair', 'cleaning', 'security',
+                
+                # Business Services
+                'insurance', 'legal', 'accounting', 'audit', 'consulting', 'advertising',
+                'marketing', 'promotion', 'training', 'education', 'certification',
+                
+                # Technology & Infrastructure
+                'software', 'hardware', 'license', 'subscription', 'cloud', 'server',
+                'internet', 'phone', 'communication', 'data', 'system', 'equipment',
+                
+                # Industry-Specific (Universal)
+                'supply', 'vendor', 'supplier', 'contractor', 'partner', 'client',
+                'customer', 'patient', 'student', 'member', 'subscriber', 'user',
+                
+                # Healthcare Specific
+                'medical', 'health', 'patient', 'treatment', 'medicine', 'hospital',
+                'clinic', 'doctor', 'nurse', 'pharmacy', 'prescription', 'therapy',
+                
+                # Technology Specific
+                'development', 'programming', 'coding', 'app', 'website', 'platform',
+                'api', 'database', 'hosting', 'domain', 'ssl', 'certificate',
+                
+                # Education Specific
+                'tuition', 'course', 'class', 'seminar', 'workshop', 'degree',
+                'certificate', 'diploma', 'textbook', 'library', 'research',
+                
+                # Manufacturing Specific
+                'production', 'manufacturing', 'assembly', 'quality', 'inventory',
+                'raw material', 'finished goods', 'work in progress', 'scrap',
+                
+                # Retail Specific
+                'retail', 'wholesale', 'inventory', 'stock', 'merchandise', 'display',
+                'point of sale', 'pos', 'cash register', 'shopping', 'store',
+                
+                # Real Estate Specific
+                'property', 'real estate', 'building', 'construction', 'renovation',
+                'mortgage', 'lease', 'tenant', 'landlord', 'property tax',
+                
+                # Transportation Specific
+                'transport', 'shipping', 'delivery', 'freight', 'logistics', 'fuel',
+                'vehicle', 'car', 'truck', 'maintenance', 'parking', 'toll'
+            ]
+            
+            # 3. Adaptive amount-based patterns (adjusts to dataset characteristics)
+            amount_stats = df['Amount'].describe()
+            
+            # Adaptive thresholds based on dataset size and amount distribution
+            if len(df) > 1000:  # Large dataset
+                regular_amount_threshold = df['Amount'].quantile(0.8)  # 80th percentile
+            elif len(df) > 100:  # Medium dataset
+                regular_amount_threshold = df['Amount'].quantile(0.75)  # 75th percentile
+            else:  # Small dataset
+                regular_amount_threshold = df['Amount'].quantile(0.9)  # 90th percentile
+            
+            # Currency detection and normalization
+            currency_indicators = ['₹', '$', '€', '£', '¥', 'CAD', 'AUD', 'USD', 'EUR', 'GBP', 'INR']
+            
+            # Detect if amounts are in different scale (e.g., cents vs dollars)
+            amount_range = amount_stats['max'] - amount_stats['min']
+            if amount_range > 1000000:  # Large amounts (like USD)
+                amount_multiplier = 1
+            elif amount_range > 10000:  # Medium amounts (like EUR)
+                amount_multiplier = 1
+            else:  # Small amounts (like cents or small currency)
+                amount_multiplier = 100  # Adjust threshold
+            
+            # Apply filters
+            for idx, row in df.iterrows():
+                desc = str(row['Description']).lower()
+                amount = abs(row['Amount'])
+                
+                # Check if this is normal business
+                is_normal = False
+                
+                # High frequency description
+                if row['Description'] in high_freq_descriptions:
+                    is_normal = True
+                
+                # Contains common business keywords
+                elif any(keyword in desc for keyword in common_business_keywords):
+                    is_normal = True
+                
+                # Regular amount (not unusually high/low)
+                elif amount <= regular_amount_threshold:
+                    is_normal = True
+                
+                # Time-based patterns (regular intervals suggest normal business)
+                elif hasattr(row, 'Hour') and row['Hour'] in [0, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]:
+                    is_normal = True
+                
+                # Pattern-based detection (recurring descriptions)
+                elif desc_counts.get(row['Description'], 0) > 2:  # Appears more than twice
+                    is_normal = True
+                
+                # Amount-based normalization
+                elif amount <= regular_amount_threshold * amount_multiplier:
+                    is_normal = True
+                
+                normal_business_mask.iloc[idx] = is_normal
+            
+            logger.info(f"Detected {normal_business_mask.sum()} normal business transactions out of {len(df)} total")
+            return normal_business_mask
+            
+        except Exception as e:
+            logger.error(f"Error in business context detection: {e}")
+            # Fallback: return all False (no filtering)
+            return pd.Series([False] * len(df), index=df.index)
+    
 # Initialize the advanced detector
 advanced_detector = AdvancedAnomalyDetector()
 
@@ -627,7 +802,7 @@ Think deeply about the economic substance and business impact of this transactio
         else:
             print(f"❌ AI API returned empty response - using rules")
             return rule_based_categorize(description, amount)
-            
+    
     except Exception as e:
         print(f"❌ AI Error: {e} - using rules for: {description[:30]}...")
         return rule_based_categorize(description, amount)
@@ -3338,7 +3513,7 @@ def enhanced_standardize_columns(df):
     df_standardized = df.copy()
     column_analysis = {}
     
-    # DYNAMIC CONTENT ANALYSIS for each column
+    # ENHANCED DYNAMIC CONTENT ANALYSIS for each column
     for col in df.columns:
         analysis = {
             'name': col,
@@ -3349,8 +3524,10 @@ def enhanced_standardize_columns(df):
             'is_numeric': False,
             'is_text': False,
             'is_date': False,
+            'is_currency': False,
             'text_variety_score': 0,
-            'avg_text_length': 0
+            'avg_text_length': 0,
+            'column_score': 0
         }
         
         # Test if column is numeric
@@ -3371,7 +3548,6 @@ def enhanced_standardize_columns(df):
                 analysis['avg_text_length'] = text_data.str.len().mean()
                 analysis['text_variety_score'] = len(text_data.unique()) / len(text_data)
         
-        # Test if column contains dates
         # Test if column contains dates or years
         try:
             if df[col].dtype in ['int64', 'int32']:
@@ -3387,6 +3563,21 @@ def enhanced_standardize_columns(df):
                     analysis['is_year_data'] = False
         except:
             pass
+        
+        # Test if column is currency-related
+        col_lower = str(col).lower()
+        currency_keywords = ['amount', 'value', 'price', 'cost', 'total', 'sum', 'balance', 'credit', 'debit', 'payment', 'receipt', 'invoice', 'money', 'currency', 'dollar', 'rupee', 'euro', 'pound']
+        if any(keyword in col_lower for keyword in currency_keywords):
+            analysis['is_currency'] = True
+            analysis['column_score'] += 10  # Boost score for currency-like columns
+        
+        # Enhanced column name scoring
+        if any(word in col_lower for word in ['description', 'detail', 'particular', 'item', 'transaction', 'note', 'comment', 'remark']):
+            analysis['column_score'] += 15  # High priority for description-like columns
+        elif any(word in col_lower for word in ['date', 'time', 'period', 'year', 'month', 'day']):
+            analysis['column_score'] += 12  # High priority for date-like columns
+        elif any(word in col_lower for word in ['type', 'category', 'class', 'group', 'status']):
+            analysis['column_score'] += 8   # Medium priority for type-like columns
         
         column_analysis[col] = analysis
     
@@ -7388,15 +7579,25 @@ def detect_anomalies(df, vendor_data=None):
         lower_bound = q1 - 1.5 * iqr
         upper_bound = q3 + 1.5 * iqr
         
+        # Dynamic business context detection
+        normal_business_mask = advanced_detector._detect_normal_business_transactions(df)
+        
         # Find amount outliers with vendor context
         amount_outliers = df[
             (df['Amount'] < lower_bound) | (df['Amount'] > upper_bound)
         ]
         
         for _, row in amount_outliers.iterrows():
+            # Check if this is normal business
+            is_normal_business = normal_business_mask.iloc[row.name]
+            
             # Check if vendor is known
             vendor_known = vendor_data and any(vendor.lower() in str(row['Description']).lower() 
                                              for vendor in vendor_data.keys())
+            
+            # Skip normal business operations
+            if is_normal_business:
+                continue
             
             # Determine severity based on context
             if vendor_known:
@@ -7498,11 +7699,19 @@ def detect_anomalies(df, vendor_data=None):
             })
         
         # 4. SMART PATTERN ANOMALIES (Business Rules)
+        # Dynamic business context detection
+        normal_business_mask = advanced_detector._detect_normal_business_transactions(df)
+        
         # Check for duplicate descriptions with same amount
         desc_amount_pairs = df.groupby(['Description', 'Amount']).size()
         duplicates = desc_amount_pairs[desc_amount_pairs > 1]
         
         for (desc, amount), count in duplicates.items():
+            # Skip normal business operations
+            desc_transactions = df[df['Description'] == desc]
+            if desc_transactions.index.isin(normal_business_mask[normal_business_mask].index).any():
+                continue
+            
             # Check if this is an expected duplicate (monthly payments, etc.)
             is_expected = any(keyword in str(desc).lower() for keyword in 
                             ['emi', 'loan', 'insurance', 'rent', 'salary', 'monthly'])
@@ -7533,7 +7742,15 @@ def detect_anomalies(df, vendor_data=None):
             known_vendors = set(vendor_data.keys())
             unknown_vendors = []
             
+            # Dynamic business context detection
+            normal_business_mask = advanced_detector._detect_normal_business_transactions(df)
+            
             for desc in df['Description'].unique():
+                # Skip normal business operations
+                desc_transactions = df[df['Description'] == desc]
+                if desc_transactions.index.isin(normal_business_mask[normal_business_mask].index).any():
+                    continue
+                    
                 if not any(vendor.lower() in desc.lower() for vendor in known_vendors):
                     unknown_vendors.append(desc)
             
@@ -7645,8 +7862,8 @@ def detect_anomalies(df, vendor_data=None):
 @app.route('/anomaly-detection', methods=['GET', 'POST'])
 def anomaly_detection_endpoint():
     """
-    New endpoint for anomaly detection
-    Uses your existing Bank_Statement_Combined.xlsx data
+    UNIVERSAL anomaly detection endpoint
+    Works with ANY uploaded dataset (bank, SAP, or any financial data)
     """
     try:
         start_time = time.time()
@@ -7654,41 +7871,96 @@ def anomaly_detection_endpoint():
         # Check if files have been uploaded and processed
         data_folder = os.path.join(BASE_DIR, "data")
         bank_processed_file = os.path.join(data_folder, "bank_data_processed.xlsx")
+        sap_processed_file = os.path.join(data_folder, "sap_data_processed.xlsx")
         
-        if not os.path.exists(bank_processed_file):
-            return jsonify({
-                'status': 'error',
-                'message': 'Please upload and process files first before running anomaly detection'
-            }), 400
+        # UNIVERSAL DATA DETECTION - works with any uploaded file
+        df_to_analyze = None
+        data_source = "Unknown"
         
-        # Load your existing bank data
-        bank_file = os.path.join(BASE_DIR, 'Bank_Statement_Combined.xlsx')
-        if not os.path.exists(bank_file):
-            return jsonify({
-                'status': 'error',
-                'message': 'Bank_Statement_Combined.xlsx not found'
-            }), 404
+        # Priority 1: Use uploaded and processed bank data
+        if os.path.exists(bank_processed_file):
+            df_to_analyze = pd.read_excel(bank_processed_file)
+            data_source = "Uploaded Bank Data"
+            print(f"✅ Using uploaded bank data: {len(df_to_analyze)} transactions")
         
-        # Load bank data
-        bank_df = pd.read_excel(bank_file)
+        # Priority 2: Use uploaded and processed SAP data
+        elif os.path.exists(sap_processed_file):
+            df_to_analyze = pd.read_excel(sap_processed_file)
+            data_source = "Uploaded SAP Data"
+            print(f"✅ Using uploaded SAP data: {len(df_to_analyze)} transactions")
         
-        # Load vendor data if available
+        # Priority 3: Use any uploaded file from uploads folder
+        else:
+            uploads_folder = os.path.join(BASE_DIR, "uploads")
+            if os.path.exists(uploads_folder):
+                uploaded_files = [f for f in os.listdir(uploads_folder) if f.endswith(('.xlsx', '.xls', '.csv'))]
+                if uploaded_files:
+                    # Use the most recent uploaded file
+                    latest_file = max(uploaded_files, key=lambda x: os.path.getctime(os.path.join(uploads_folder, x)))
+                    file_path = os.path.join(uploads_folder, latest_file)
+                    df_to_analyze = pd.read_excel(file_path) if file_path.endswith(('.xlsx', '.xls')) else pd.read_csv(file_path)
+                    data_source = f"Uploaded File: {latest_file}"
+                    print(f"✅ Using uploaded file: {latest_file} with {len(df_to_analyze)} transactions")
+        
+        # Priority 4: Fallback to default bank data (for testing)
+        if df_to_analyze is None:
+            bank_file = os.path.join(BASE_DIR, 'Bank_Statement_Combined.xlsx')
+            if os.path.exists(bank_file):
+                df_to_analyze = pd.read_excel(bank_file)
+                data_source = "Default Bank Data (Fallback)"
+                print(f"⚠️ Using fallback bank data: {len(df_to_analyze)} transactions")
+            else:
+                return jsonify({
+                    'status': 'error',
+                    'message': 'No data found. Please upload a file first before running anomaly detection.'
+                }), 400
+        
+        # UNIVERSAL COLUMN STANDARDIZATION
+        print(f"🔍 Standardizing columns for: {data_source}")
+        df_to_analyze = enhanced_standardize_columns(df_to_analyze)
+        
+        # Load vendor data if available (try multiple sources)
         vendor_data = None
         try:
-            master_data_file = os.path.join(BASE_DIR, 'steel_plant_master_data.xlsx')
-            if os.path.exists(master_data_file):
-                vendor_df = pd.read_excel(master_data_file, sheet_name='Vendors')
-                vendor_data = {}
-                for _, row in vendor_df.iterrows():
-                    vendor_data[row['Vendor Name']] = {
-                        'category': row['Category'],
-                        'payment_terms': row['Payment Terms']
-                    }
+            # Try uploaded master data first
+            uploads_folder = os.path.join(BASE_DIR, "uploads")
+            if os.path.exists(uploads_folder):
+                master_files = [f for f in os.listdir(uploads_folder) if 'master' in f.lower() or 'vendor' in f.lower()]
+                if master_files:
+                    master_file = os.path.join(uploads_folder, master_files[0])
+                    vendor_df = pd.read_excel(master_file)
+                    vendor_data = {}
+                    # Try different possible column names
+                    vendor_col = None
+                    for col in vendor_df.columns:
+                        if any(word in col.lower() for word in ['vendor', 'name', 'supplier', 'party']):
+                            vendor_col = col
+                            break
+                    if vendor_col:
+                        for _, row in vendor_df.iterrows():
+                            vendor_data[row[vendor_col]] = {
+                                'category': row.get('Category', 'Unknown'),
+                                'payment_terms': row.get('Payment Terms', 'Standard')
+                            }
+                    print(f"✅ Loaded vendor data from: {master_files[0]}")
+            
+            # Fallback to default master data
+            if vendor_data is None:
+                master_data_file = os.path.join(BASE_DIR, 'steel_plant_master_data.xlsx')
+                if os.path.exists(master_data_file):
+                    vendor_df = pd.read_excel(master_data_file, sheet_name='Vendors')
+                    vendor_data = {}
+                    for _, row in vendor_df.iterrows():
+                        vendor_data[row['Vendor Name']] = {
+                            'category': row['Category'],
+                            'payment_terms': row['Payment Terms']
+                        }
+                    print(f"✅ Loaded fallback vendor data")
         except Exception as e:
             logger.warning(f"Could not load vendor data: {e}")
         
-        # Run anomaly detection
-        result = detect_anomalies(bank_df, vendor_data)
+        # Run UNIVERSAL anomaly detection
+        result = detect_anomalies(df_to_analyze, vendor_data)
         
         # Add performance metrics
         processing_time = time.time() - start_time
@@ -7722,33 +7994,88 @@ def download_anomaly_report():
         # Get the latest anomaly detection results from session or cache
         # For now, we'll create a sample report based on the last detection
         
-        # Load your existing bank data
-        bank_file = os.path.join(BASE_DIR, 'Bank_Statement_Combined.xlsx')
-        if not os.path.exists(bank_file):
-            return jsonify({
-                'status': 'error',
-                'message': 'Bank data not found. Please run anomaly detection first.'
-            }), 404
+        # UNIVERSAL DATA DETECTION for report generation
+        df_to_analyze = None
+        data_source = "Unknown"
         
-        bank_df = pd.read_excel(bank_file)
+        # Priority 1: Use uploaded and processed bank data
+        data_folder = os.path.join(BASE_DIR, "data")
+        bank_processed_file = os.path.join(data_folder, "bank_data_processed.xlsx")
+        if os.path.exists(bank_processed_file):
+            df_to_analyze = pd.read_excel(bank_processed_file)
+            data_source = "Uploaded Bank Data"
         
-        # Load vendor data if available
+        # Priority 2: Use uploaded and processed SAP data
+        elif os.path.exists(os.path.join(data_folder, "sap_data_processed.xlsx")):
+            df_to_analyze = pd.read_excel(os.path.join(data_folder, "sap_data_processed.xlsx"))
+            data_source = "Uploaded SAP Data"
+        
+        # Priority 3: Use any uploaded file
+        else:
+            uploads_folder = os.path.join(BASE_DIR, "uploads")
+            if os.path.exists(uploads_folder):
+                uploaded_files = [f for f in os.listdir(uploads_folder) if f.endswith(('.xlsx', '.xls', '.csv'))]
+                if uploaded_files:
+                    latest_file = max(uploaded_files, key=lambda x: os.path.getctime(os.path.join(uploads_folder, x)))
+                    file_path = os.path.join(uploads_folder, latest_file)
+                    df_to_analyze = pd.read_excel(file_path) if file_path.endswith(('.xlsx', '.xls')) else pd.read_csv(file_path)
+                    data_source = f"Uploaded File: {latest_file}"
+        
+        # Priority 4: Fallback to default bank data
+        if df_to_analyze is None:
+            bank_file = os.path.join(BASE_DIR, 'Bank_Statement_Combined.xlsx')
+            if os.path.exists(bank_file):
+                df_to_analyze = pd.read_excel(bank_file)
+                data_source = "Default Bank Data"
+            else:
+                return jsonify({
+                    'status': 'error',
+                    'message': 'No data found. Please upload a file first.'
+                }), 404
+        
+        # Standardize columns
+        df_to_analyze = enhanced_standardize_columns(df_to_analyze)
+        
+        # Load vendor data if available (try multiple sources)
         vendor_data = None
         try:
-            master_data_file = os.path.join(BASE_DIR, 'steel_plant_master_data.xlsx')
-            if os.path.exists(master_data_file):
-                vendor_df = pd.read_excel(master_data_file, sheet_name='Vendors')
-                vendor_data = {}
-                for _, row in vendor_df.iterrows():
-                    vendor_data[row['Vendor Name']] = {
-                        'category': row['Category'],
-                        'payment_terms': row['Payment Terms']
-                    }
+            # Try uploaded master data first
+            uploads_folder = os.path.join(BASE_DIR, "uploads")
+            if os.path.exists(uploads_folder):
+                master_files = [f for f in os.listdir(uploads_folder) if 'master' in f.lower() or 'vendor' in f.lower()]
+                if master_files:
+                    master_file = os.path.join(uploads_folder, master_files[0])
+                    vendor_df = pd.read_excel(master_file)
+                    vendor_data = {}
+                    # Try different possible column names
+                    vendor_col = None
+                    for col in vendor_df.columns:
+                        if any(word in col.lower() for word in ['vendor', 'name', 'supplier', 'party']):
+                            vendor_col = col
+                            break
+                    if vendor_col:
+                        for _, row in vendor_df.iterrows():
+                            vendor_data[row[vendor_col]] = {
+                                'category': row.get('Category', 'Unknown'),
+                                'payment_terms': row.get('Payment Terms', 'Standard')
+                            }
+            
+            # Fallback to default master data
+            if vendor_data is None:
+                master_data_file = os.path.join(BASE_DIR, 'steel_plant_master_data.xlsx')
+                if os.path.exists(master_data_file):
+                    vendor_df = pd.read_excel(master_data_file, sheet_name='Vendors')
+                    vendor_data = {}
+                    for _, row in vendor_df.iterrows():
+                        vendor_data[row['Vendor Name']] = {
+                            'category': row['Category'],
+                            'payment_terms': row['Payment Terms']
+                        }
         except Exception as e:
             logger.warning(f"Could not load vendor data: {e}")
         
         # Run anomaly detection to get current results
-        result = detect_anomalies(bank_df, vendor_data)
+        result = detect_anomalies(df_to_analyze, vendor_data)
         
         if result['status'] != 'success':
             return jsonify({
@@ -7846,9 +8173,10 @@ def download_anomaly_report():
         
         output.seek(0)
         
-        # Generate filename with timestamp
+        # Generate filename with timestamp and data source
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        filename = f'Anomaly_Detection_Report_{timestamp}.xlsx'
+        data_source_clean = data_source.replace(" ", "_").replace("(", "").replace(")", "").replace(":", "").replace("-", "_")
+        filename = f'Anomaly_Detection_Report_{data_source_clean}_{timestamp}.xlsx'
         
         return send_file(
             output,
