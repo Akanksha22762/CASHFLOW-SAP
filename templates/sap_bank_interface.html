@@ -2703,7 +2703,7 @@
                     </div>
                 </div>
 
-                                <div class="text-center mt-4">
+                <div class="text-center mt-4">
                     <button class="btn btn-primary" id="uploadBtn" onclick="uploadFiles()" disabled>
                         <i class="fas fa-upload"></i>
                         Upload & Process Files
@@ -3577,7 +3577,8 @@
                 if (response.ok && data.status === 'success') {
                     // Display anomaly results in predictions dashboard
                     displayPredictionsResults('anomaly_detection', data);
-                    showAlert(`Anomaly detection completed! Found ${data.total_anomalies} anomalies.`, 'success');
+                    const anomalyCount = data.total_unique_anomalies || data.anomalies?.length || 0;
+                    showAlert(`Anomaly detection completed! Found ${anomalyCount} anomalies.`, 'success');
                 } else {
                     showAlert(`Anomaly Detection Error: ${data.message || 'Unknown error'}`, 'error');
                 }
@@ -3603,45 +3604,43 @@
                 console.log('Cash flow forecast response:', data);
                 
                 if (data.status === 'success') {
-                    if (data.forecast) {
-                        // Test if elements exist
-                        const resultsArea = document.getElementById('dashboardResultsArea');
-                        const resultsContent = document.getElementById('resultsContent');
-                        const resultsHeader = document.getElementById('resultsHeader');
-                        const resultsTitle = document.getElementById('resultsTitle');
-                        
-                        console.log('Elements found:', {
+                    // The forecast data is directly in the response, not nested under 'forecast'
+                    const forecastData = data;
+                    
+                    // Test if elements exist
+                    const resultsArea = document.getElementById('dashboardResultsArea');
+                    const resultsContent = document.getElementById('resultsContent');
+                    const resultsHeader = document.getElementById('resultsHeader');
+                    const resultsTitle = document.getElementById('resultsTitle');
+                    
+                    console.log('Elements found:', {
+                        resultsArea: !!resultsArea,
+                        resultsContent: !!resultsContent,
+                        resultsHeader: !!resultsHeader,
+                        resultsTitle: !!resultsTitle
+                    });
+                    
+                    if (resultsArea && resultsContent && resultsHeader && resultsTitle) {
+                        console.log('All elements found, displaying results...');
+                        displayCashFlowResults(forecastData);
+                        showAlert('✅ Enhanced cash flow forecast generated successfully!', 'success');
+                    } else {
+                        console.error('Required elements not found:', {
                             resultsArea: !!resultsArea,
                             resultsContent: !!resultsContent,
                             resultsHeader: !!resultsHeader,
                             resultsTitle: !!resultsTitle
                         });
-                        
-                        if (resultsArea && resultsContent && resultsHeader && resultsTitle) {
-                            console.log('All elements found, displaying results...');
-                            displayCashFlowResults(data.forecast);
-                            showAlert('✅ Enhanced cash flow forecast generated successfully!', 'success');
-                        } else {
-                            console.error('Required elements not found:', {
-                                resultsArea: !!resultsArea,
-                                resultsContent: !!resultsContent,
-                                resultsHeader: !!resultsHeader,
-                                resultsTitle: !!resultsTitle
-                            });
-                            // Fallback: Display in a simple alert or create a temporary display
-                            const forecastSummary = data.forecast.summary;
-                            const summaryText = `
+                        // Fallback: Display in a simple alert or create a temporary display
+                        const forecastSummary = forecastData.summary;
+                        const summaryText = `
 7 Days: ₹${((forecastSummary.total_7_days || 0) / 10000000).toFixed(2)} Cr
 4 Weeks: ₹${((forecastSummary.total_4_weeks || 0) / 10000000).toFixed(2)} Cr
 3 Months: ₹${((forecastSummary.total_3_months || 0) / 10000000).toFixed(2)} Cr
 Risk Level: ${forecastSummary.overall_risk || 'MEDIUM'}
-                            `.trim();
-                            
-                            showAlert(`✅ Forecast Generated!\n\n${summaryText}`, 'success');
-                        }
-                    } else {
-                        console.error('No forecast data in response:', data);
-                        showAlert('❌ No forecast data received from server', 'error');
+                        `.trim();
+                        
+                        showAlert(`✅ Forecast Generated!\n\n${summaryText}`, 'success');
                     }
                 } else {
                     showAlert(`❌ Forecast failed: ${data.message || 'Unknown error'}`, 'error');
@@ -3978,7 +3977,19 @@ Risk Level: ${forecastSummary.overall_risk || 'MEDIUM'}
             }
         }
 
+        function countAnomaliesBySeverity(anomalies, severity) {
+            if (!anomalies || !Array.isArray(anomalies)) return 0;
+            return anomalies.filter(anomaly => anomaly.severity === severity).length;
+        }
+
         function displayPredictionsResults(type, data) {
+            // Add defensive programming to handle missing data
+            if (!data) {
+                console.error('No data received for predictions results');
+                showAlert('Error: No data received from server', 'error');
+                return;
+            }
+            
             const resultsArea = document.getElementById('dashboardResultsArea');
             const resultsContent = document.getElementById('resultsContent');
             const resultsHeader = document.getElementById('resultsHeader');
@@ -3988,17 +3999,25 @@ Risk Level: ${forecastSummary.overall_risk || 'MEDIUM'}
                 // Store anomaly data globally for modal access
                 window.currentAnomalyData = data;
                 
+                // Ensure we have the required data structure
+                if (!data.anomalies) {
+                    data.anomalies = [];
+                }
+                if (!data.total_unique_anomalies) {
+                    data.total_unique_anomalies = data.anomalies.length || 0;
+                }
+                
                 // Create beautiful anomaly dashboard
                 let anomalyHtml = `
                     <div class="anomaly-dashboard" style="font-family: Arial, sans-serif; max-width: 100%; overflow-x: hidden;">
                         <!-- Main Summary Cards -->
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">
-                            <div onclick="showAnomalyDetails('high', ${data.severity_breakdown.high || 0})" 
+                            <div onclick="showAnomalyDetails('high', ${countAnomaliesBySeverity(data.anomalies, 'high')})" 
                                  style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); color: white; padding: 25px; border-radius: 15px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.3s ease;"
                                  onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 15px 35px rgba(0,0,0,0.15)'"
                                  onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(0,0,0,0.1)'">
                                 <div style="font-size: 24px; margin-bottom: 10px;">🚨</div>
-                                <div style="font-size: 28px; font-weight: bold; margin-bottom: 5px;">${data.severity_breakdown.high || 0}</div>
+                                <div style="font-size: 28px; font-weight: bold; margin-bottom: 5px;">${countAnomaliesBySeverity(data.anomalies, 'high')}</div>
                                 <div style="font-size: 16px; opacity: 0.9;">High Risk Anomalies</div>
                                 <div style="background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; margin-top: 10px; font-size: 12px;">
                                     CRITICAL
@@ -4006,12 +4025,12 @@ Risk Level: ${forecastSummary.overall_risk || 'MEDIUM'}
                                 <div style="font-size: 10px; opacity: 0.8; margin-top: 8px;">👆 Click for details</div>
                             </div>
                             
-                            <div onclick="showAnomalyDetails('medium', ${data.severity_breakdown.medium || 0})" 
+                            <div onclick="showAnomalyDetails('medium', ${countAnomaliesBySeverity(data.anomalies, 'medium')})" 
                                  style="background: linear-gradient(135deg, #feca57 0%, #ff9ff3 100%); color: white; padding: 25px; border-radius: 15px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.3s ease;"
                                  onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 15px 35px rgba(0,0,0,0.15)'"
                                  onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(0,0,0,0.1)'">
                                 <div style="font-size: 24px; margin-bottom: 10px;">⚠️</div>
-                                <div style="font-size: 28px; font-weight: bold; margin-bottom: 5px;">${data.severity_breakdown.medium || 0}</div>
+                                <div style="font-size: 28px; font-weight: bold; margin-bottom: 5px;">${countAnomaliesBySeverity(data.anomalies, 'medium')}</div>
                                 <div style="font-size: 16px; opacity: 0.9;">Medium Risk Anomalies</div>
                                 <div style="background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; margin-top: 10px; font-size: 12px;">
                                     WARNING
@@ -4019,12 +4038,12 @@ Risk Level: ${forecastSummary.overall_risk || 'MEDIUM'}
                                 <div style="font-size: 10px; opacity: 0.8; margin-top: 8px;">👆 Click for details</div>
                             </div>
                             
-                            <div onclick="showAnomalyDetails('low', ${data.severity_breakdown.low || 0})" 
+                            <div onclick="showAnomalyDetails('low', ${countAnomaliesBySeverity(data.anomalies, 'low')})" 
                                  style="background: linear-gradient(135deg, #48dbfb 0%, #0abde3 100%); color: white; padding: 25px; border-radius: 15px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.3s ease;"
                                  onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 15px 35px rgba(0,0,0,0.15)'"
                                  onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(0,0,0,0.1)'">
                                 <div style="font-size: 24px; margin-bottom: 10px;">ℹ️</div>
-                                <div style="font-size: 28px; font-weight: bold; margin-bottom: 5px;">${data.severity_breakdown.low || 0}</div>
+                                <div style="font-size: 28px; font-weight: bold; margin-bottom: 5px;">${countAnomaliesBySeverity(data.anomalies, 'low')}</div>
                                 <div style="font-size: 16px; opacity: 0.9;">Low Risk Anomalies</div>
                                 <div style="background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; margin-top: 10px; font-size: 12px;">
                                     INFO
@@ -4041,7 +4060,7 @@ Risk Level: ${forecastSummary.overall_risk || 'MEDIUM'}
                             </div>
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <span style="font-size: 18px;">📊</span>
-                                <span style="font-weight: 500;">${data.total_anomalies || 0} Total Anomalies</span>
+                                <span style="font-weight: 500;">${data.total_unique_anomalies || data.anomalies?.length || 0} Total Anomalies</span>
                             </div>
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <span style="font-size: 18px;">⚡</span>
@@ -4049,7 +4068,7 @@ Risk Level: ${forecastSummary.overall_risk || 'MEDIUM'}
                             </div>
                         </div>
                         
-                        ${(data.total_anomalies || 0) > 0 ? `
+                        ${(data.total_unique_anomalies || data.anomalies?.length || 0) > 0 ? `
                         <!-- Where to Check Guidance -->
                         <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%); border: 1px solid #ffc107; border-radius: 10px; padding: 15px; margin-bottom: 20px;">
                             <div style="display: flex; align-items: center; margin-bottom: 10px;">
@@ -4102,15 +4121,15 @@ Risk Level: ${forecastSummary.overall_risk || 'MEDIUM'}
                             <div class="grid grid-cols-2 gap-4 text-sm">
                                 <div class="bg-white p-3 rounded shadow-sm">
                                     <div class="font-semibold text-gray-700 mb-1">Total Anomalies</div>
-                                    <div class="text-2xl font-bold text-blue-600">${data.total_anomalies}</div>
+                                    <div class="text-2xl font-bold text-blue-600">${data.total_unique_anomalies || data.anomalies?.length || 0}</div>
                                 </div>
                                 <div class="bg-white p-3 rounded shadow-sm">
                                     <div class="font-semibold text-gray-700 mb-1">Total Transactions</div>
-                                    <div class="text-2xl font-bold text-green-600">${data.analysis_summary.total_transactions}</div>
+                                    <div class="text-2xl font-bold text-green-600">${data.total_transactions || data.transactions_analyzed || 0}</div>
                                 </div>
                                 <div class="bg-white p-3 rounded shadow-sm">
                                     <div class="font-semibold text-gray-700 mb-1">Amount Range</div>
-                                    <div class="text-sm text-gray-600">${data.analysis_summary.amount_range}</div>
+                                    <div class="text-sm text-gray-600">${data.amount_range || 'N/A'}</div>
                                 </div>
                                 <div class="bg-white p-3 rounded shadow-sm">
                                     <div class="font-semibold text-gray-700 mb-1">Processing Time</div>
@@ -4120,7 +4139,14 @@ Risk Level: ${forecastSummary.overall_risk || 'MEDIUM'}
                         </div>
                         
                         <!-- AI/ML Performance -->
-                        ${data.ai_ml_metrics && data.ai_ml_metrics.ai_powered ? `
+                        ${(() => {
+                            console.log('AI/ML Debug:', {
+                                hasAiMlMetrics: !!data.ai_ml_metrics,
+                                aiPowered: data.ai_ml_metrics?.ai_powered,
+                                fullAiMlMetrics: data.ai_ml_metrics
+                            });
+                            return data.ai_ml_metrics && data.ai_ml_metrics.ai_powered === true;
+                        })() ? `
                         <div class="mt-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border">
                             <h5 class="mb-3 font-bold text-gray-800">
                                 <i class="fas fa-robot text-purple-600"></i> AI/ML Performance with Hyperparameter Optimization
@@ -6181,31 +6207,31 @@ async function downloadOrphanedPaymentsEnhanced() {
             }
             
             try {
-                summaryStats.innerHTML = `
-                    <div class="stat-card">
-                        <i class="fas fa-link stat-icon"></i>
+            summaryStats.innerHTML = `
+                <div class="stat-card">
+                    <i class="fas fa-link stat-icon"></i>
                         <span class="stat-number">${data.summary?.matched_pairs || 0}</span>
-                        <span class="stat-label">Matched Pairs</span>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-exclamation-triangle stat-icon"></i>
+                    <span class="stat-label">Matched Pairs</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-exclamation-triangle stat-icon"></i>
                         <span class="stat-number">${data.summary?.unmatched_invoices || 0}</span>
-                        <span class="stat-label">Outstanding Invoices</span>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-question-circle stat-icon"></i>
+                    <span class="stat-label">Outstanding Invoices</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-question-circle stat-icon"></i>
                         <span class="stat-number">${data.summary?.unmatched_payments || 0}</span>
-                        <span class="stat-label">Orphaned Payments</span>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-percentage stat-icon"></i>
+                    <span class="stat-label">Orphaned Payments</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-percentage stat-icon"></i>
                         <span class="stat-number">${data.summary?.efficiency_percentage || 0}%</span>
-                        <span class="stat-label">Payment Efficiency</span>
-                    </div>
-                `;
-                
+                    <span class="stat-label">Payment Efficiency</span>
+                </div>
+            `;
+            
                 if (dashboardSection) {
-                    dashboardSection.classList.remove('hidden');
+            dashboardSection.classList.remove('hidden');
                 }
             } catch (error) {
                 console.error('Error displaying invoice payment dashboard:', error);
@@ -6237,20 +6263,20 @@ async function downloadOrphanedPaymentsEnhanced() {
             let title = 'Invoice-Payment Analysis';
             
             try {
-                if (data.type === 'invoice_payment_breakdown') {
-                    content = generateInvoicePaymentBreakdownHTML(data, matchType);
-                    title = 'Invoice-Payment Matched Pairs';
-                } else if (data.type === 'unmatched_invoices_breakdown') {
-                    content = generateUnmatchedInvoicesHTML(data);
-                    title = 'Outstanding Invoices';
-                } else if (data.type === 'unmatched_payments_breakdown') {
-                    content = generateUnmatchedPaymentsHTML(data);
-                    title = 'Orphaned Payments';
-                } else if (data.type === 'efficiency_dashboard') {
-                    content = generateEfficiencyDashboardHTML(data);
-                    title = 'Payment Efficiency Dashboard';
-                } else {
-                    content = `<div class="alert alert-success"><i class="fas fa-check-circle"></i>Invoice-payment ${matchType} analysis completed successfully.</div>`;
+            if (data.type === 'invoice_payment_breakdown') {
+                content = generateInvoicePaymentBreakdownHTML(data, matchType);
+                title = 'Invoice-Payment Matched Pairs';
+            } else if (data.type === 'unmatched_invoices_breakdown') {
+                content = generateUnmatchedInvoicesHTML(data);
+                title = 'Outstanding Invoices';
+            } else if (data.type === 'unmatched_payments_breakdown') {
+                content = generateUnmatchedPaymentsHTML(data);
+                title = 'Orphaned Payments';
+            } else if (data.type === 'efficiency_dashboard') {
+                content = generateEfficiencyDashboardHTML(data);
+                title = 'Payment Efficiency Dashboard';
+            } else {
+                content = `<div class="alert alert-success"><i class="fas fa-check-circle"></i>Invoice-payment ${matchType} analysis completed successfully.</div>`;
                 }
             } catch (error) {
                 console.error('Error generating content:', error);
@@ -6259,18 +6285,18 @@ async function downloadOrphanedPaymentsEnhanced() {
             }
             
             try {
-                resultsTitle.textContent = title;
-                resultsContent.innerHTML = content;
-                resultsHeader.style.display = 'flex';
-                
-                const backdrop = document.getElementById('dashboardBackdrop');
+            resultsTitle.textContent = title;
+            resultsContent.innerHTML = content;
+            resultsHeader.style.display = 'flex';
+            
+            const backdrop = document.getElementById('dashboardBackdrop');
                 if (backdrop) {
-                    backdrop.classList.add('show');
+            backdrop.classList.add('show');
                 }
-                resultsArea.classList.add('show');
-                
+            resultsArea.classList.add('show');
+            
                 if (typeof initializeInvoicePaymentTabs === 'function') {
-                    initializeInvoicePaymentTabs();
+            initializeInvoicePaymentTabs();
                 }
             } catch (error) {
                 console.error('Error displaying invoice payment results:', error);
@@ -6691,8 +6717,8 @@ function generateInvoicePaymentBreakdownHTML(data, matchType) {
     // Safety checks for data
     if (!data || typeof data !== 'object') {
         return '<div class="alert alert-error">Invalid data received</div>';
-    }
-    
+}
+
     const breakdown = data.breakdown || {};
     const summary = data.summary || {};
     

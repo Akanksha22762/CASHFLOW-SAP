@@ -94,7 +94,11 @@ def categorize_transaction(description):
             "If unsure, return 'Other'.\n\n"
             f"Description: {description}"
         )
-        response = openai.ChatCompletion.create(
+        # Use OpenAI API (updated for v1.0.0+)
+        from openai import OpenAI
+        client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+        
+        response = client.chat.completions.create(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant that classifies transaction descriptions."},
@@ -103,7 +107,7 @@ def categorize_transaction(description):
             max_tokens=10,
             temperature=0.0
         )
-        gpt_category = response['choices'][0]['message']['content'].strip()
+        gpt_category = response.choices[0].message.content.strip()
         print(f"🔍 GPT predicted category: '{gpt_category}'")
 
         log_gpt_result(description, gpt_category)
