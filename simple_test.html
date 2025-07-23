@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple JavaScript Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .btn { 
+            padding: 10px 20px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            margin: 5px;
+            background-color: #007bff; 
+            color: white;
+        }
+        .btn:disabled { 
+            background-color: #ccc; 
+            cursor: not-allowed; 
+        }
+    </style>
+</head>
+<body>
+    <h1>JavaScript Functionality Test</h1>
+    
+    <div>
+        <button class="btn" onclick="testFunction()">Test Basic Function</button>
+        <button class="btn" id="testBtn" onclick="testButton()" disabled>Test Button (Disabled)</button>
+        <button class="btn" onclick="enableButton()">Enable Button</button>
+    </div>
+    
+    <div id="output" style="margin-top: 20px; padding: 10px; background: #f0f0f0;"></div>
+
+    <script>
+        function testFunction() {
+            console.log('Basic function called');
+            document.getElementById('output').innerHTML = 'Basic function works!';
+            alert('Basic JavaScript is working!');
+        }
+        
+        function testButton() {
+            console.log('Test button clicked');
+            document.getElementById('output').innerHTML = 'Test button works!';
+        }
+        
+        function enableButton() {
+            console.log('Enable button clicked');
+            const btn = document.getElementById('testBtn');
+            btn.disabled = false;
+            document.getElementById('output').innerHTML = 'Button enabled!';
+            console.log('Button disabled state:', btn.disabled);
+        }
+        
+        // Test on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded successfully');
+            document.getElementById('output').innerHTML = 'Page loaded - JavaScript is working!';
+        });
+    </script>
+</body>
+</html> 

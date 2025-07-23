@@ -1986,6 +1986,7 @@
                 width: 100vw;
                 height: 100vh;
                 border-radius: 0;
+                max-height: 100vh;
             }
 
             .dashboard-results-content {
@@ -2014,6 +2015,8 @@
 
             .results-content {
                 padding: 1rem;
+                max-height: calc(100vh - 200px);
+                overflow-y: auto;
             }
 
             .table-responsive {
@@ -2099,9 +2102,9 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 90%;
-            max-width: 1200px;
-            max-height: 80vh;
+            width: 95%;
+            max-width: 1400px;
+            max-height: 90vh;
             background: var(--bg-primary);
             border-radius: var(--border-radius-xl);
             box-shadow: var(--shadow-xl);
@@ -2163,8 +2166,9 @@
 
         .results-content {
             padding: 2rem;
-            max-height: 600px;
+            max-height: 70vh;
             overflow-y: auto;
+            overflow-x: hidden;
         }
 
         .results-content::-webkit-scrollbar {
@@ -2182,6 +2186,17 @@
 
         .results-content::-webkit-scrollbar-thumb:hover {
             background: var(--text-light);
+        }
+
+        /* Ensure content doesn't overflow horizontally */
+        .cashflow-dashboard {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        .cashflow-dashboard > div {
+            max-width: 100%;
+            overflow-x: hidden;
         }
 
         /* Recent Transactions Section */
@@ -2688,7 +2703,7 @@
                     </div>
                 </div>
 
-                <div class="text-center mt-4">
+                                <div class="text-center mt-4">
                     <button class="btn btn-primary" id="uploadBtn" onclick="uploadFiles()" disabled>
                         <i class="fas fa-upload"></i>
                         Upload & Process Files
@@ -2978,13 +2993,17 @@
                         <h3 class="font-semibold mb-2">Cash Flow Forecasting</h3>
                         <p class="text-sm text-secondary mb-3">Predict future cash flows</p>
                         <div class="btn-group">
-                            <button class="btn btn-primary btn-sm" id="cashflowForecastBtn" onclick="runCashflowForecast()" disabled>
+                            <button class="btn btn-primary btn-sm" id="cashflowForecastBtn" onclick="runCashflowForecast()">
                                 <i class="fas fa-crystal-ball"></i>
                                 Forecast Cash Flow
                             </button>
                             <button class="btn btn-outline btn-sm" onclick="downloadPredictions('cashflow_forecast')">
                                 <i class="fas fa-download"></i>
                                 Export Report
+                            </button>
+                            <button class="btn btn-secondary btn-sm" onclick="debugForecast()">
+                                <i class="fas fa-bug"></i>
+                                Debug
                             </button>
                         </div>
                     </div>
@@ -3349,11 +3368,7 @@
         let bankFileUploaded = false;
         let filesProcessed = false;
 
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeEventListeners();
-            showWelcomeMessage();
-        });
+
 
         function initializeEventListeners() {
             // File input change listeners
@@ -3407,6 +3422,8 @@
 
         function handleFileSelect(event, type) {
             const file = event.target.files[0];
+            console.log('handleFileSelect called with type:', type, 'file:', file ? file.name : 'none');
+            
             if (!file) {
                 // File was deselected
                 if (type === 'sap') {
@@ -3436,6 +3453,7 @@
                 bankFileUploaded = true;
                 document.getElementById('bankFileName').textContent = `${file.name} (${formatFileSize(file.size)})`;
                 document.getElementById('bankFileInfo').classList.add('show');
+                console.log('Bank file selected:', file.name, 'bankFileUploaded set to:', bankFileUploaded);
             }
             updateUploadButton();
         }
@@ -3451,7 +3469,12 @@
         function updateUploadButton() {
             const uploadBtn = document.getElementById('uploadBtn');
             uploadBtn.disabled = !bankFileUploaded; // Only bank file is required
+            console.log('Upload button state:', { bankFileUploaded, disabled: uploadBtn.disabled });
         }
+        
+
+        
+
 
         function enablePredictionButtons() {
             // Enable all prediction buttons after reconciliation is completed
@@ -3571,7 +3594,300 @@
         }
 
         async function runCashflowForecast() {
-            showAlert('Cash Flow Forecasting - Coming in Phase 1!', 'info');
+            try {
+                showAlert('🔄 Generating enhanced cash flow forecast...', 'info');
+                
+                const response = await fetch('/cash-flow-forecast?use_ml=true');
+                const data = await response.json();
+                
+                console.log('Cash flow forecast response:', data);
+                
+                if (data.status === 'success') {
+                    if (data.forecast) {
+                        // Test if elements exist
+                        const resultsArea = document.getElementById('dashboardResultsArea');
+                        const resultsContent = document.getElementById('resultsContent');
+                        const resultsHeader = document.getElementById('resultsHeader');
+                        const resultsTitle = document.getElementById('resultsTitle');
+                        
+                        console.log('Elements found:', {
+                            resultsArea: !!resultsArea,
+                            resultsContent: !!resultsContent,
+                            resultsHeader: !!resultsHeader,
+                            resultsTitle: !!resultsTitle
+                        });
+                        
+                        if (resultsArea && resultsContent && resultsHeader && resultsTitle) {
+                            console.log('All elements found, displaying results...');
+                            displayCashFlowResults(data.forecast);
+                            showAlert('✅ Enhanced cash flow forecast generated successfully!', 'success');
+                        } else {
+                            console.error('Required elements not found:', {
+                                resultsArea: !!resultsArea,
+                                resultsContent: !!resultsContent,
+                                resultsHeader: !!resultsHeader,
+                                resultsTitle: !!resultsTitle
+                            });
+                            // Fallback: Display in a simple alert or create a temporary display
+                            const forecastSummary = data.forecast.summary;
+                            const summaryText = `
+7 Days: ₹${((forecastSummary.total_7_days || 0) / 10000000).toFixed(2)} Cr
+4 Weeks: ₹${((forecastSummary.total_4_weeks || 0) / 10000000).toFixed(2)} Cr
+3 Months: ₹${((forecastSummary.total_3_months || 0) / 10000000).toFixed(2)} Cr
+Risk Level: ${forecastSummary.overall_risk || 'MEDIUM'}
+                            `.trim();
+                            
+                            showAlert(`✅ Forecast Generated!\n\n${summaryText}`, 'success');
+                        }
+                    } else {
+                        console.error('No forecast data in response:', data);
+                        showAlert('❌ No forecast data received from server', 'error');
+                    }
+                } else {
+                    showAlert(`❌ Forecast failed: ${data.message || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                console.error('Cash flow forecast error:', error);
+                showAlert('❌ Cash flow forecast failed. Please try again.', 'error');
+            }
+        }
+
+        function debugForecast() {
+            console.log('=== DEBUG FORECAST START ===');
+            
+            // Enable the button for testing
+            const cashflowBtn = document.getElementById('cashflowForecastBtn');
+            if (cashflowBtn) {
+                cashflowBtn.disabled = false;
+                console.log('Enabled cash flow forecast button');
+            }
+            
+            // Test API call directly
+            fetch('/cash-flow-forecast?use_ml=true')
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    console.log('Response ok:', response.ok);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Full API response:', data);
+                    console.log('Status:', data.status);
+                    console.log('Has forecast:', !!data.forecast);
+                    if (data.forecast) {
+                        console.log('Forecast keys:', Object.keys(data.forecast));
+                        console.log('Summary keys:', Object.keys(data.forecast.summary || {}));
+                    }
+                    
+                    // Test element existence
+                    const resultsArea = document.getElementById('dashboardResultsArea');
+                    const resultsContent = document.getElementById('resultsContent');
+                    const resultsHeader = document.getElementById('resultsHeader');
+                    const resultsTitle = document.getElementById('resultsTitle');
+                    const backdrop = document.getElementById('dashboardBackdrop');
+                    
+                    console.log('Elements found:', {
+                        resultsArea: !!resultsArea,
+                        resultsContent: !!resultsContent,
+                        resultsHeader: !!resultsHeader,
+                        resultsTitle: !!resultsTitle,
+                        backdrop: !!backdrop
+                    });
+                    
+                    if (data.status === 'success' && data.forecast) {
+                        showAlert('✅ Debug: API working, data received successfully!', 'success');
+                        // Try to display the results
+                        displayCashFlowResults(data.forecast);
+                    } else {
+                        showAlert(`❌ Debug: API issue - ${data.message || 'Unknown error'}`, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Debug error:', error);
+                    showAlert(`❌ Debug: Network error - ${error.message}`, 'error');
+                });
+        }
+
+        function displayCashFlowResults(forecast) {
+            console.log('Displaying cash flow results:', forecast);
+            
+            const resultsArea = document.getElementById('dashboardResultsArea');
+            const resultsContent = document.getElementById('resultsContent');
+            const resultsHeader = document.getElementById('resultsHeader');
+            const resultsTitle = document.getElementById('resultsTitle');
+            const backdrop = document.getElementById('dashboardBackdrop');
+            
+            // Validate forecast data
+            if (!forecast || !forecast.summary) {
+                console.error('Invalid forecast data:', forecast);
+                showAlert('❌ Invalid forecast data received', 'error');
+                return;
+            }
+            
+            // Show backdrop and results area
+            if (backdrop) backdrop.classList.add('show');
+            resultsArea.classList.add('show');
+            resultsHeader.style.display = 'flex';
+            resultsTitle.innerHTML = '<i class="fas fa-chart-line text-primary"></i> Cash Flow Forecast Dashboard';
+            
+                        // Format amounts for display
+            const formatAmount = (amount) => {
+                if (!amount || amount === 0) return '₹0.00';
+                const crore = amount / 10000000;
+                if (crore >= 1) {
+                    return `₹${crore.toFixed(2)} Cr`;
+                } else {
+                    return `₹${(amount / 100000).toFixed(2)} L`;
+                }
+            };
+            
+            let html = `
+                <div class="cashflow-dashboard" style="font-family: Arial, sans-serif; max-width: 100%; overflow-x: hidden;">
+                    <!-- Main Summary Cards -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">
+                        <div onclick="showSummaryDetails('7 Days', ${forecast.summary.total_7_days || 0}, '${forecast.summary.overall_risk || 'MEDIUM'}')" 
+                             style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 15px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.3s ease;"
+                             onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 15px 35px rgba(0,0,0,0.15)'"
+                             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(0,0,0,0.1)'">
+                            <div style="font-size: 24px; margin-bottom: 10px;">📅</div>
+                            <div style="font-size: 28px; font-weight: bold; margin-bottom: 5px;">${formatAmount(forecast.summary.total_7_days || 0)}</div>
+                            <div style="font-size: 16px; opacity: 0.9;">Next 7 Days</div>
+                            <div style="background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; margin-top: 10px; font-size: 12px;">
+                                ${forecast.summary.overall_risk || 'MEDIUM'} Risk
+                            </div>
+                            <div style="font-size: 10px; opacity: 0.8; margin-top: 8px;">👆 Click for details</div>
+                        </div>
+                        
+                        <div onclick="showSummaryDetails('4 Weeks', ${forecast.summary.total_4_weeks || 0}, '${forecast.summary.overall_risk || 'MEDIUM'}')" 
+                             style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 25px; border-radius: 15px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.3s ease;"
+                             onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 15px 35px rgba(0,0,0,0.15)'"
+                             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(0,0,0,0.1)'">
+                            <div style="font-size: 24px; margin-bottom: 10px;">📊</div>
+                            <div style="font-size: 28px; font-weight: bold; margin-bottom: 5px;">${formatAmount(forecast.summary.total_4_weeks || 0)}</div>
+                            <div style="font-size: 16px; opacity: 0.9;">Next 4 Weeks</div>
+                            <div style="background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; margin-top: 10px; font-size: 12px;">
+                                ${forecast.summary.overall_risk || 'MEDIUM'} Risk
+                            </div>
+                            <div style="font-size: 10px; opacity: 0.8; margin-top: 8px;">👆 Click for details</div>
+                        </div>
+                        
+                        <div onclick="showSummaryDetails('3 Months', ${forecast.summary.total_3_months || 0}, '${forecast.summary.overall_risk || 'MEDIUM'}')" 
+                             style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 25px; border-radius: 15px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.3s ease;"
+                             onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 15px 35px rgba(0,0,0,0.15)'"
+                             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(0,0,0,0.1)'">
+                            <div style="font-size: 24px; margin-bottom: 10px;">📈</div>
+                            <div style="font-size: 28px; font-weight: bold; margin-bottom: 5px;">${formatAmount(forecast.summary.total_3_months || 0)}</div>
+                            <div style="font-size: 16px; opacity: 0.9;">Next 3 Months</div>
+                            <div style="background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; margin-top: 10px; font-size: 12px;">
+                                ${forecast.summary.overall_risk || 'MEDIUM'} Risk
+                            </div>
+                            <div style="font-size: 10px; opacity: 0.8; margin-top: 8px;">👆 Click for details</div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Info Bar -->
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 30px; display: flex; justify-content: space-around; flex-wrap: wrap; gap: 20px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 18px;">📊</span>
+                            <span style="font-weight: 500;">${forecast.summary.data_source || 'Bank Data'}</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 18px;">✅</span>
+                            <span style="font-weight: 500;">${forecast.summary.data_quality || 'GOOD'} Quality</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 18px;">📋</span>
+                            <span style="font-weight: 500;">${forecast.summary.data_points || 0} Transactions</span>
+                        </div>
+                    </div>
+            `;
+
+            // Add Daily Forecast - Simple Version
+            if (forecast.daily_forecast && forecast.daily_forecast.forecasts && Array.isArray(forecast.daily_forecast.forecasts)) {
+                html += `
+                    <div style="margin-bottom: 30px;">
+                        <h3 style="font-size: 20px; font-weight: bold; margin-bottom: 15px; color: #333; border-bottom: 2px solid #667eea; padding-bottom: 5px;">
+                            📅 Daily Forecast (Next 7 Days)
+                        </h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
+                `;
+                
+                forecast.daily_forecast.forecasts.slice(0, 7).forEach((day, index) => {
+                    const riskColor = day.risk_level === 'HIGH' ? '#ff6b6b' : day.risk_level === 'MEDIUM' ? '#ffd93d' : '#6bcf7f';
+                    html += `
+                        <div onclick="showDayDetails('${day.day_name}', ${day.predicted_amount}, ${day.confidence}, '${day.risk_level}', ${index})" 
+                             style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-left: 4px solid ${riskColor}; cursor: pointer; transition: all 0.3s ease;"
+                             onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.15)'"
+                             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 15px rgba(0,0,0,0.1)'">
+                            <div style="font-weight: bold; font-size: 16px; margin-bottom: 8px;">${day.day_name}</div>
+                            <div style="font-size: 20px; font-weight: bold; color: #667eea; margin-bottom: 5px;">${formatAmount(day.predicted_amount)}</div>
+                            <div style="font-size: 12px; color: #666;">${(day.confidence * 100).toFixed(0)}% confidence</div>
+                            <div style="font-size: 10px; color: #999; margin-top: 5px;">👆 Click for details</div>
+                        </div>
+                    `;
+                });
+                
+                html += `
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Add Weekly Forecast - Simple Version
+            if (forecast.weekly_forecast && forecast.weekly_forecast.forecasts && Array.isArray(forecast.weekly_forecast.forecasts)) {
+                html += `
+                    <div style="margin-bottom: 30px;">
+                        <h3 style="font-size: 20px; font-weight: bold; margin-bottom: 15px; color: #333; border-bottom: 2px solid #f093fb; padding-bottom: 5px;">
+                            📊 Weekly Forecast (Next 4 Weeks)
+                        </h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
+                `;
+                
+                forecast.weekly_forecast.forecasts.slice(0, 4).forEach((week, index) => {
+                    const riskColor = week.risk_level === 'HIGH' ? '#ff6b6b' : week.risk_level === 'MEDIUM' ? '#ffd93d' : '#6bcf7f';
+                    html += `
+                        <div onclick="showWeekDetails(${week.week_number}, ${week.predicted_amount}, ${week.confidence}, '${week.risk_level}', ${index})" 
+                             style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-left: 4px solid ${riskColor}; cursor: pointer; transition: all 0.3s ease;"
+                             onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.15)'"
+                             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 15px rgba(0,0,0,0.1)'">
+                            <div style="font-weight: bold; font-size: 16px; margin-bottom: 8px;">Week ${week.week_number}</div>
+                            <div style="font-size: 20px; font-weight: bold; color: #f093fb; margin-bottom: 5px;">${formatAmount(week.predicted_amount)}</div>
+                            <div style="font-size: 12px; color: #666;">${(week.confidence * 100).toFixed(0)}% confidence</div>
+                            <div style="font-size: 10px; color: #999; margin-top: 5px;">👆 Click for details</div>
+                        </div>
+                    `;
+                });
+                
+                html += `
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Add Key Insights
+            html += `
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 15px; margin-top: 30px;">
+                        <h3 style="font-size: 20px; font-weight: bold; margin-bottom: 15px;">💡 Key Insights</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+                            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px;">
+                                <div style="font-weight: bold; margin-bottom: 5px;">Forecast Method</div>
+                                <div style="font-size: 14px; opacity: 0.9;">${forecast.summary.forecast_method || 'Statistical + ML Enhanced'}</div>
+                            </div>
+                            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px;">
+                                <div style="font-weight: bold; margin-bottom: 5px;">Generated On</div>
+                                <div style="font-size: 14px; opacity: 0.9;">${forecast.summary.forecast_generated_at || new Date().toLocaleString()}</div>
+                            </div>
+                            ${forecast.summary.risk_factors && forecast.summary.risk_factors.length > 0 ? `
+                            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px;">
+                                <div style="font-weight: bold; margin-bottom: 5px;">Risk Factors</div>
+                                <div style="font-size: 14px; opacity: 0.9;">${forecast.summary.risk_factors.slice(0, 2).join(', ')}</div>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            resultsContent.innerHTML = html;
         }
 
         async function runPaymentDelayPrediction() {
@@ -3582,6 +3898,46 @@
             showAlert(`${type.replace('_', ' ').toUpperCase()} - Download coming soon!`, 'info');
         }
 
+        async function downloadForecastReport() {
+            try {
+                showAlert('📊 Generating forecast report...', 'info');
+                
+                const response = await fetch('/download-forecast-report');
+                
+                if (response.ok) {
+                    // Get the filename from the response headers
+                    const contentDisposition = response.headers.get('content-disposition');
+                    let filename = 'Cash_Flow_Forecast_Report.xlsx';
+                    
+                    if (contentDisposition) {
+                        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+                        if (filenameMatch) {
+                            filename = filenameMatch[1];
+                        }
+                    }
+                    
+                    // Create blob and download
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    
+                    showAlert(`✅ Forecast report downloaded: ${filename}`, 'success');
+                } else {
+                    const errorData = await response.json();
+                    showAlert(`❌ Download failed: ${errorData.message}`, 'error');
+                }
+            } catch (error) {
+                console.error('Download error:', error);
+                showAlert('❌ Download failed. Please try again.', 'error');
+            }
+        }
+
         function displayPredictionsResults(type, data) {
             const resultsArea = document.getElementById('dashboardResultsArea');
             const resultsContent = document.getElementById('resultsContent');
@@ -3589,106 +3945,87 @@
             const resultsTitle = document.getElementById('resultsTitle');
             
             if (type === 'anomaly_detection') {
-                // Create clean anomaly results section
+                // Store anomaly data globally for modal access
+                window.currentAnomalyData = data;
+                
+                // Create beautiful anomaly dashboard
                 let anomalyHtml = `
-                    <div class="anomaly-results">
-                        <!-- Summary Stats -->
-                        <div class="stats-grid-horizontal mb-4">
-                            <div class="stat-card bg-danger text-white shadow-lg" onclick="filterAnomalies('high')" style="cursor: pointer;">
-                                <div class="stat-icon mb-2">
-                                    <i class="fas fa-exclamation-triangle fa-2x"></i>
+                    <div class="anomaly-dashboard" style="font-family: Arial, sans-serif; max-width: 100%; overflow-x: hidden;">
+                        <!-- Main Summary Cards -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">
+                            <div onclick="showAnomalyDetails('high', ${data.severity_breakdown.high || 0})" 
+                                 style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); color: white; padding: 25px; border-radius: 15px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.3s ease;"
+                                 onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 15px 35px rgba(0,0,0,0.15)'"
+                                 onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(0,0,0,0.1)'">
+                                <div style="font-size: 24px; margin-bottom: 10px;">🚨</div>
+                                <div style="font-size: 28px; font-weight: bold; margin-bottom: 5px;">${data.severity_breakdown.high || 0}</div>
+                                <div style="font-size: 16px; opacity: 0.9;">High Risk Anomalies</div>
+                                <div style="background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; margin-top: 10px; font-size: 12px;">
+                                    CRITICAL
                                 </div>
-                                <div class="stat-value text-2xl font-bold">${data.severity_breakdown.high || 0}</div>
-                                <div class="stat-label font-semibold">High Risk</div>
+                                <div style="font-size: 10px; opacity: 0.8; margin-top: 8px;">👆 Click for details</div>
                             </div>
-                            <div class="stat-card bg-warning text-white shadow-lg" onclick="filterAnomalies('medium')" style="cursor: pointer;">
-                                <div class="stat-icon mb-2">
-                                    <i class="fas fa-exclamation-circle fa-2x"></i>
+                            
+                            <div onclick="showAnomalyDetails('medium', ${data.severity_breakdown.medium || 0})" 
+                                 style="background: linear-gradient(135deg, #feca57 0%, #ff9ff3 100%); color: white; padding: 25px; border-radius: 15px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.3s ease;"
+                                 onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 15px 35px rgba(0,0,0,0.15)'"
+                                 onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(0,0,0,0.1)'">
+                                <div style="font-size: 24px; margin-bottom: 10px;">⚠️</div>
+                                <div style="font-size: 28px; font-weight: bold; margin-bottom: 5px;">${data.severity_breakdown.medium || 0}</div>
+                                <div style="font-size: 16px; opacity: 0.9;">Medium Risk Anomalies</div>
+                                <div style="background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; margin-top: 10px; font-size: 12px;">
+                                    WARNING
                                 </div>
-                                <div class="stat-value text-2xl font-bold">${data.severity_breakdown.medium || 0}</div>
-                                <div class="stat-label font-semibold">Medium Risk</div>
+                                <div style="font-size: 10px; opacity: 0.8; margin-top: 8px;">👆 Click for details</div>
                             </div>
-                            <div class="stat-card bg-info text-white shadow-lg" onclick="filterAnomalies('low')" style="cursor: pointer;">
-                                <div class="stat-icon mb-2">
-                                    <i class="fas fa-info-circle fa-2x"></i>
+                            
+                            <div onclick="showAnomalyDetails('low', ${data.severity_breakdown.low || 0})" 
+                                 style="background: linear-gradient(135deg, #48dbfb 0%, #0abde3 100%); color: white; padding: 25px; border-radius: 15px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.3s ease;"
+                                 onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 15px 35px rgba(0,0,0,0.15)'"
+                                 onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(0,0,0,0.1)'">
+                                <div style="font-size: 24px; margin-bottom: 10px;">ℹ️</div>
+                                <div style="font-size: 28px; font-weight: bold; margin-bottom: 5px;">${data.severity_breakdown.low || 0}</div>
+                                <div style="font-size: 16px; opacity: 0.9;">Low Risk Anomalies</div>
+                                <div style="background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; margin-top: 10px; font-size: 12px;">
+                                    INFO
                                 </div>
-                                <div class="stat-value text-2xl font-bold">${data.severity_breakdown.low || 0}</div>
-                                <div class="stat-label font-semibold">Low Risk</div>
+                                <div style="font-size: 10px; opacity: 0.8; margin-top: 8px;">👆 Click for details</div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Info Bar -->
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-around; flex-wrap: wrap; gap: 20px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 18px;">🤖</span>
+                                <span style="font-weight: 500;">AI-Powered Detection</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 18px;">📊</span>
+                                <span style="font-weight: 500;">${data.total_anomalies || 0} Total Anomalies</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 18px;">⚡</span>
+                                <span style="font-weight: 500;">${data.processing_time || 'Fast'} Processing</span>
                             </div>
                         </div>
                         
-                        <!-- Anomalies List -->
-                        <div class="anomaly-list">
-                            <div class="anomaly-filters mb-4 flex gap-2">
-                                <button class="btn btn-danger btn-sm font-bold" onclick="filterAnomalies('high')">
-                                    <i class="fas fa-exclamation-triangle"></i> High Risk
-                                </button>
-                                <button class="btn btn-warning btn-sm font-bold" onclick="filterAnomalies('medium')">
-                                    <i class="fas fa-exclamation-circle"></i> Medium Risk
-                                </button>
-                                <button class="btn btn-info btn-sm font-bold" onclick="filterAnomalies('low')">
-                                    <i class="fas fa-info-circle"></i> Low Risk
-                                </button>
+                        ${(data.total_anomalies || 0) > 0 ? `
+                        <!-- Where to Check Guidance -->
+                        <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%); border: 1px solid #ffc107; border-radius: 10px; padding: 15px; margin-bottom: 20px;">
+                            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                                <span style="font-size: 20px; margin-right: 10px;">🔍</span>
+                                <span style="font-weight: bold; color: #856404; font-size: 16px;">Where to Check for Anomalies:</span>
                             </div>
-                            
-                            <div id="anomaliesContainer">
-                `;
-
-                // Add each anomaly with data attributes for filtering
-                data.anomalies.forEach((anomaly, index) => {
-                    const severityClass = anomaly.severity === 'high' ? 'text-danger' : 
-                                        anomaly.severity === 'medium' ? 'text-warning' : 'text-info';
-                    const severityBg = anomaly.severity === 'high' ? 'bg-danger' : 
-                                     anomaly.severity === 'medium' ? 'bg-warning' : 'bg-info';
-                    
-                    // Format transaction details
-                    let transactionDetails = '';
-                    if (anomaly.transaction) {
-                        if (anomaly.transaction.amount) {
-                            transactionDetails += `<div><strong>Amount:</strong> ₹${anomaly.transaction.amount.toLocaleString()}</div>`;
-                        }
-                        if (anomaly.transaction.date) {
-                            transactionDetails += `<div><strong>Date:</strong> ${anomaly.transaction.date}</div>`;
-                        }
-                        if (anomaly.transaction.vendor) {
-                            transactionDetails += `<div><strong>Vendor:</strong> ${anomaly.transaction.vendor}</div>`;
-                        }
-                        if (anomaly.transaction.total_amount) {
-                            transactionDetails += `<div><strong>Total Amount:</strong> ₹${anomaly.transaction.total_amount.toLocaleString()}</div>`;
-                        }
-                        if (anomaly.transaction.transaction_count) {
-                            transactionDetails += `<div><strong>Transactions:</strong> ${anomaly.transaction.transaction_count}</div>`;
-                        }
-                    }
-                    
-                    anomalyHtml += `
-                        <div class="anomaly-item p-4 mb-3 border rounded-lg shadow-sm ${severityClass}" 
-                             data-severity="${anomaly.severity}" 
-                             data-type="${anomaly.type}">
-                            <div class="anomaly-header flex justify-between items-start mb-3">
-                                <div class="flex-1">
-                                    <div class="font-bold text-lg mb-1">${anomaly.description}</div>
-                                    <div class="text-sm opacity-75">${anomaly.reason}</div>
-                                </div>
-                                <div class="anomaly-badge ${severityBg} text-white px-3 py-1 rounded-full text-xs font-bold ml-3">
-                                    ${anomaly.severity.toUpperCase()}
-                                </div>
-                            </div>
-                            <div class="anomaly-details bg-gray-50 p-3 rounded text-sm">
-                                <div class="grid grid-cols-2 gap-2">
-                                    <div class="text-gray-600">
-                                        <strong>Type:</strong> ${anomaly.type.replace('_', ' ').toUpperCase()}
-                                    </div>
-                                    ${transactionDetails ? `<div class="col-span-2">${transactionDetails}</div>` : ''}
-                                </div>
+                            <div style="color: #856404; font-size: 14px; line-height: 1.5;">
+                                <div style="margin-bottom: 8px;"><strong>📋 SAP System:</strong> Check vendor master data, transaction history, and chart of accounts</div>
+                                <div style="margin-bottom: 8px;"><strong>🏦 Bank Statements:</strong> Verify transactions match with bank records</div>
+                                <div style="margin-bottom: 8px;"><strong>📊 Reports:</strong> Review AP/AR reports and reconciliation statements</div>
+                                <div><strong>👥 Departments:</strong> Contact Finance, Procurement, and IT teams for verification</div>
                             </div>
                         </div>
-                    `;
-                });
+                        ` : ''}
+                        
 
-                anomalyHtml += `
-                            </div>
-                        </div>
                         
                         <!-- Analysis Summary -->
                         <div class="mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border">
@@ -3984,36 +4321,66 @@ async function downloadOrphanedPaymentsEnhanced() {
             const dashboard = document.getElementById('summaryDashboard');
             const statsContainer = document.getElementById('summaryStats');
             
+            // Safety check for required elements
+            if (!statsContainer) {
+                console.error('summaryStats element not found');
+                return;
+            }
+            
             statsContainer.innerHTML = `
-                <div class="stat-card">
+                <div onclick="showSAPDetails('SAP Transactions', ${summary.sap_transactions}, 'sap')" 
+                     class="stat-card" style="cursor: pointer; transition: all 0.3s ease;"
+                     onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.15)'"
+                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 15px rgba(0,0,0,0.1)'">
                     <i class="fas fa-database stat-icon"></i>
                     <span class="stat-number">${summary.sap_transactions}</span>
                     <span class="stat-label">SAP Transactions</span>
+                    <div style="font-size: 10px; opacity: 0.8; margin-top: 5px;">👆 Click for details</div>
                 </div>
-                <div class="stat-card">
+                <div onclick="showBankDetails('Bank Transactions', ${summary.bank_transactions}, 'bank')" 
+                     class="stat-card" style="cursor: pointer; transition: all 0.3s ease;"
+                     onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.15)'"
+                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 15px rgba(0,0,0,0.1)'">
                     <i class="fas fa-university stat-icon"></i>
                     <span class="stat-number">${summary.bank_transactions}</span>
                     <span class="stat-label">Bank Transactions</span>
+                    <div style="font-size: 10px; opacity: 0.8; margin-top: 5px;">👆 Click for details</div>
                 </div>
-                <div class="stat-card">
+                <div onclick="showMatchDetails('Exact Matches', ${summary.exact_matches}, 'exact')" 
+                     class="stat-card" style="cursor: pointer; transition: all 0.3s ease;"
+                     onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.15)'"
+                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 15px rgba(0,0,0,0.1)'">
                     <i class="fas fa-check-double stat-icon"></i>
                     <span class="stat-number">${summary.exact_matches}</span>
                     <span class="stat-label">Exact Matches</span>
+                    <div style="font-size: 10px; opacity: 0.8; margin-top: 5px;">👆 Click for details</div>
                 </div>
-                <div class="stat-card">
+                <div onclick="showMatchDetails('Fuzzy Matches', ${summary.fuzzy_matches}, 'fuzzy')" 
+                     class="stat-card" style="cursor: pointer; transition: all 0.3s ease;"
+                     onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.15)'"
+                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 15px rgba(0,0,0,0.1)'">
                     <i class="fas fa-search stat-icon"></i>
                     <span class="stat-number">${summary.fuzzy_matches}</span>
                     <span class="stat-label">Fuzzy Matches</span>
+                    <div style="font-size: 10px; opacity: 0.8; margin-top: 5px;">👆 Click for details</div>
                 </div>
-                <div class="stat-card">
+                <div onclick="showMatchRateDetails('Match Rate', ${summary.match_rate}, 'rate')" 
+                     class="stat-card" style="cursor: pointer; transition: all 0.3s ease;"
+                     onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.15)'"
+                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 15px rgba(0,0,0,0.1)'">
                     <i class="fas fa-percentage stat-icon"></i>
                     <span class="stat-number">${summary.match_rate}%</span>
                     <span class="stat-label">Match Rate</span>
+                    <div style="font-size: 10px; opacity: 0.8; margin-top: 5px;">👆 Click for details</div>
                 </div>
-                <div class="stat-card">
+                <div onclick="showAICategorizedDetails('AI Categorized', ${summary.ai_usage_stats?.ai_categorized || 0}, 'ai')" 
+                     class="stat-card" style="cursor: pointer; transition: all 0.3s ease;"
+                     onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.15)'"
+                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 15px rgba(0,0,0,0.1)'">
                     <i class="fas fa-robot stat-icon"></i>
                     <span class="stat-number">${summary.ai_usage_stats?.ai_categorized || 0}</span>
                     <span class="stat-label">AI Categorized</span>
+                    <div style="font-size: 10px; opacity: 0.8; margin-top: 5px;">👆 Click for details</div>
                 </div>
             `;
             
@@ -4438,6 +4805,987 @@ async function downloadOrphanedPaymentsEnhanced() {
             });
         }
 
+        function showDayDetails(dayName, amount, confidence, riskLevel, index) {
+            const riskColor = riskLevel === 'HIGH' ? '#ff6b6b' : riskLevel === 'MEDIUM' ? '#ffd93d' : '#6bcf7f';
+            const riskEmoji = riskLevel === 'HIGH' ? '🔴' : riskLevel === 'MEDIUM' ? '🟡' : '🟢';
+            
+            const modalHtml = `
+                <div id="detailModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; border-radius: 15px; padding: 30px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h2 style="color: #333; margin: 0;">📅 ${dayName} Details</h2>
+                            <button onclick="closeDetailModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">&times;</button>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 20px; text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; margin-bottom: 10px;">₹${(amount / 10000000).toFixed(2)} Cr</div>
+                            <div style="font-size: 16px; opacity: 0.9;">Predicted Cash Flow</div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; text-align: center;">
+                                <div style="font-size: 24px; margin-bottom: 5px;">📊</div>
+                                <div style="font-weight: bold; color: #333;">${(confidence * 100).toFixed(0)}%</div>
+                                <div style="font-size: 12px; color: #666;">Confidence</div>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; text-align: center;">
+                                <div style="font-size: 24px; margin-bottom: 5px;">${riskEmoji}</div>
+                                <div style="font-weight: bold; color: #333;">${riskLevel}</div>
+                                <div style="font-size: 12px; color: #666;">Risk Level</div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                            <h3 style="margin-bottom: 15px; color: #333;">📈 Analysis</h3>
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">🎯 <strong>Position:</strong> Day ${index + 1} of the week</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">💰 <strong>Amount:</strong> ₹${(amount / 10000000).toFixed(2)} Crores</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📊 <strong>Confidence:</strong> ${confidence < 0.3 ? 'Low' : confidence < 0.7 ? 'Medium' : 'High'} reliability</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">⚠️ <strong>Risk:</strong> ${riskLevel} risk level</li>
+                                <li style="padding: 8px 0;">📅 <strong>Day Type:</strong> ${['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].includes(dayName) ? 'Weekday' : 'Weekend'}</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 10px;">
+                            <h3 style="margin-bottom: 10px;">💡 Recommendations</h3>
+                            <div style="font-size: 14px; line-height: 1.6;">
+                                ${confidence < 0.3 ? '⚠️ Consider this forecast with caution due to low confidence. Review historical data for similar days.' : 
+                                  confidence < 0.7 ? '📊 Moderate confidence level. Monitor actual vs predicted performance.' : 
+                                  '✅ High confidence forecast. Plan cash management accordingly.'}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            showModal(modalHtml);
+        }
+
+        function showWeekDetails(weekNumber, amount, confidence, riskLevel, index) {
+            const riskColor = riskLevel === 'HIGH' ? '#ff6b6b' : riskLevel === 'MEDIUM' ? '#ffd93d' : '#6bcf7f';
+            const riskEmoji = riskLevel === 'HIGH' ? '🔴' : riskLevel === 'MEDIUM' ? '🟡' : '🟢';
+            
+            const modalHtml = `
+                <div id="detailModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; border-radius: 15px; padding: 30px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h2 style="color: #333; margin: 0;">📊 Week ${weekNumber} Details</h2>
+                            <button onclick="closeDetailModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">&times;</button>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 20px; text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; margin-bottom: 10px;">₹${(amount / 10000000).toFixed(2)} Cr</div>
+                            <div style="font-size: 16px; opacity: 0.9;">Weekly Cash Flow Forecast</div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; text-align: center;">
+                                <div style="font-size: 24px; margin-bottom: 5px;">📊</div>
+                                <div style="font-weight: bold; color: #333;">${(confidence * 100).toFixed(0)}%</div>
+                                <div style="font-size: 12px; color: #666;">Confidence</div>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; text-align: center;">
+                                <div style="font-size: 24px; margin-bottom: 5px;">${riskEmoji}</div>
+                                <div style="font-weight: bold; color: #333;">${riskLevel}</div>
+                                <div style="font-size: 12px; color: #666;">Risk Level</div>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; text-align: center;">
+                                <div style="font-size: 24px; margin-bottom: 5px;">📅</div>
+                                <div style="font-weight: bold; color: #333;">Week ${weekNumber}</div>
+                                <div style="font-size: 12px; color: #666;">Period</div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                            <h3 style="margin-bottom: 15px; color: #333;">📈 Weekly Analysis</h3>
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">🎯 <strong>Week Position:</strong> ${index + 1} of 4 weeks</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">💰 <strong>Total Amount:</strong> ₹${(amount / 10000000).toFixed(2)} Crores</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📊 <strong>Confidence:</strong> ${confidence < 0.3 ? 'Low' : confidence < 0.7 ? 'Medium' : 'High'} reliability</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">⚠️ <strong>Risk:</strong> ${riskLevel} risk level</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📅 <strong>Daily Average:</strong> ₹${((amount / 7) / 10000000).toFixed(2)} Cr per day</li>
+                                <li style="padding: 8px 0;">📊 <strong>Trend:</strong> ${index === 0 ? 'First week' : index === 1 ? 'Second week' : index === 2 ? 'Third week' : 'Fourth week'} of forecast</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 20px; border-radius: 10px;">
+                            <h3 style="margin-bottom: 10px;">💡 Strategic Insights</h3>
+                            <div style="font-size: 14px; line-height: 1.6;">
+                                ${confidence >= 0.8 ? '✅ High confidence forecast - Plan major cash operations for this week.' : 
+                                  confidence >= 0.6 ? '📊 Moderate confidence - Monitor daily performance and adjust plans.' : 
+                                  '⚠️ Lower confidence - Review historical patterns and consider conservative planning.'}
+                                <br><br>
+                                <strong>Cash Management Tips:</strong><br>
+                                • Plan for ₹${((amount / 7) / 10000000).toFixed(2)} Cr daily average<br>
+                                • Monitor actual vs predicted performance<br>
+                                • Adjust strategies based on ${riskLevel.toLowerCase()} risk level
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            showModal(modalHtml);
+        }
+
+        function closeDetailModal() {
+            const modal = document.getElementById('detailModal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        // Helper function to safely show modals
+        function showModal(modalHtml) {
+            try {
+                // Remove any existing modal first
+                closeDetailModal();
+                
+                // Add the new modal
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+                
+                // Add click outside to close functionality
+                const modal = document.getElementById('detailModal');
+                if (modal) {
+                    modal.addEventListener('click', function(e) {
+                        if (e.target === modal) {
+                            closeDetailModal();
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error showing modal:', error);
+                // Fallback: show a simple alert
+                alert('Unable to display detailed information. Please try again.');
+            }
+        }
+
+        // Simple test function to verify modals work
+        function testModal() {
+            const testModalHtml = `
+                <div id="detailModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; border-radius: 15px; padding: 30px; max-width: 400px; width: 90%; text-align: center;">
+                        <h2 style="color: #333; margin-bottom: 20px;">✅ Modal Test</h2>
+                        <p style="margin-bottom: 20px;">Modal system is working correctly!</p>
+                        <button onclick="closeDetailModal()" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Close</button>
+                    </div>
+                </div>
+            `;
+            showModal(testModalHtml);
+        }
+
+
+
+        // AP/AR Detail Modal Functions
+        function showAPDetails(title, amount, transactionCount) {
+            // Safety checks for parameters
+            if (typeof amount !== 'number' || isNaN(amount)) {
+                amount = 0;
+            }
+            if (typeof transactionCount !== 'string' && typeof transactionCount !== 'number') {
+                transactionCount = '0';
+            }
+            const modalHtml = `
+                <div id="detailModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; border-radius: 15px; padding: 30px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h2 style="color: #333; margin: 0;">💳 ${title}</h2>
+                            <button onclick="closeDetailModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">&times;</button>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 20px; text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; margin-bottom: 10px;">₹${(amount / 10000000).toFixed(2)} Cr</div>
+                            <div style="font-size: 16px; opacity: 0.9;">Outstanding Amount</div>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                            <h3 style="margin-bottom: 15px; color: #333;">📊 AP Analysis</h3>
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">💳 <strong>Type:</strong> Accounts Payable</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">💰 <strong>Amount:</strong> ₹${(amount / 10000000).toFixed(2)} Crores</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📋 <strong>Transactions:</strong> ${transactionCount}</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📅 <strong>Status:</strong> Outstanding</li>
+                                <li style="padding: 8px 0;">⚠️ <strong>Action Required:</strong> Payment processing</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #ff9ff3 0%, #f368e0 100%); color: white; padding: 20px; border-radius: 10px;">
+                            <h3 style="margin-bottom: 10px;">💡 Recommendations</h3>
+                            <div style="font-size: 14px; line-height: 1.6;">
+                                • Prioritize payments based on due dates<br>
+                                • Monitor cash flow for payment capacity<br>
+                                • Review vendor payment terms<br>
+                                • Consider early payment discounts
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            showModal(modalHtml);
+        }
+
+        function showARDetails(title, amount, transactionCount) {
+            // Safety checks for parameters
+            if (typeof amount !== 'number' || isNaN(amount)) {
+                amount = 0;
+            }
+            if (typeof transactionCount !== 'string' && typeof transactionCount !== 'number') {
+                transactionCount = '0';
+            }
+            const modalHtml = `
+                <div id="detailModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; border-radius: 15px; padding: 30px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h2 style="color: #333; margin: 0;">💰 ${title}</h2>
+                            <button onclick="closeDetailModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">&times;</button>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #26de81 0%, #20bf6b 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 20px; text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; margin-bottom: 10px;">₹${(amount / 10000000).toFixed(2)} Cr</div>
+                            <div style="font-size: 16px; opacity: 0.9;">Receivable Amount</div>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                            <h3 style="margin-bottom: 15px; color: #333;">📊 AR Analysis</h3>
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">💰 <strong>Type:</strong> Accounts Receivable</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">💵 <strong>Amount:</strong> ₹${(amount / 10000000).toFixed(2)} Crores</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📋 <strong>Transactions:</strong> ${transactionCount}</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📅 <strong>Status:</strong> Outstanding</li>
+                                <li style="padding: 8px 0;">🎯 <strong>Action Required:</strong> Collection follow-up</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #a8e6cf 0%, #88d8c0 100%); color: white; padding: 20px; border-radius: 10px;">
+                            <h3 style="margin-bottom: 10px;">💡 Recommendations</h3>
+                            <div style="font-size: 14px; line-height: 1.6;">
+                                • Implement collection strategies<br>
+                                • Send payment reminders<br>
+                                • Review credit policies<br>
+                                • Monitor aging reports
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            showModal(modalHtml);
+        }
+
+        function showTotalOutstandingDetails(title, amount, transactionCount) {
+            const modalHtml = `
+                <div id="detailModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; border-radius: 15px; padding: 30px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h2 style="color: #333; margin: 0;">🧮 ${title}</h2>
+                            <button onclick="closeDetailModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">&times;</button>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 20px; text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; margin-bottom: 10px;">₹${(amount / 10000000).toFixed(2)} Cr</div>
+                            <div style="font-size: 16px; opacity: 0.9;">Combined Outstanding</div>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                            <h3 style="margin-bottom: 15px; color: #333;">📊 Total Analysis</h3>
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">🧮 <strong>Type:</strong> Combined AP + AR</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">💰 <strong>Amount:</strong> ₹${(amount / 10000000).toFixed(2)} Crores</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📋 <strong>Transactions:</strong> ${transactionCount}</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📊 <strong>Net Position:</strong> AP vs AR balance</li>
+                                <li style="padding: 8px 0;">⚖️ <strong>Impact:</strong> Working capital</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 10px;">
+                            <h3 style="margin-bottom: 10px;">💡 Strategic Insights</h3>
+                            <div style="font-size: 14px; line-height: 1.6;">
+                                • Monitor working capital position<br>
+                                • Balance payment and collection cycles<br>
+                                • Optimize cash flow timing<br>
+                                • Review credit and payment terms
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            showModal(modalHtml);
+        }
+
+        function showEfficiencyDetails(title, percentage, type) {
+            // Safety checks for parameters
+            if (typeof percentage !== 'number' || isNaN(percentage)) {
+                percentage = 0;
+            }
+            if (typeof type !== 'string') {
+                type = 'collection';
+            }
+            const modalHtml = `
+                <div id="detailModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; border-radius: 15px; padding: 30px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h2 style="color: #333; margin: 0;">📊 ${title}</h2>
+                            <button onclick="closeDetailModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">&times;</button>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 20px; text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; margin-bottom: 10px;">${percentage.toFixed(1)}%</div>
+                            <div style="font-size: 16px; opacity: 0.9;">${type === 'collection' ? 'Collection' : 'Payment'} Efficiency</div>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                            <h3 style="margin-bottom: 15px; color: #333;">📈 Performance Analysis</h3>
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📊 <strong>Metric:</strong> ${type === 'collection' ? 'Collection' : 'Payment'} Efficiency</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📈 <strong>Score:</strong> ${percentage.toFixed(1)}%</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">🎯 <strong>Status:</strong> ${percentage >= 80 ? 'Excellent' : percentage >= 60 ? 'Good' : percentage >= 40 ? 'Fair' : 'Poor'}</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📅 <strong>Type:</strong> ${type === 'collection' ? 'Receivables' : 'Payables'} management</li>
+                                <li style="padding: 8px 0;">💡 <strong>Focus:</strong> Process optimization</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #a8e6cf 0%, #88d8c0 100%); color: white; padding: 20px; border-radius: 10px;">
+                            <h3 style="margin-bottom: 10px;">💡 Improvement Strategies</h3>
+                            <div style="font-size: 14px; line-height: 1.6;">
+                                ${type === 'collection' ? 
+                                    '• Implement automated reminders<br>• Review credit policies<br>• Optimize collection processes<br>• Monitor aging reports' :
+                                    '• Streamline payment processes<br>• Negotiate better terms<br>• Optimize cash flow timing<br>• Monitor payment cycles'
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            showModal(modalHtml);
+        }
+
+        function showOverdueDetails(title, amount, transactionCount) {
+            const modalHtml = `
+                <div id="detailModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; border-radius: 15px; padding: 30px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h2 style="color: #333; margin: 0;">⚠️ ${title}</h2>
+                            <button onclick="closeDetailModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">&times;</button>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 20px; text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; margin-bottom: 10px;">₹${(amount / 10000000).toFixed(2)} Cr</div>
+                            <div style="font-size: 16px; opacity: 0.9;">Overdue Amount</div>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                            <h3 style="margin-bottom: 15px; color: #333;">🚨 Risk Analysis</h3>
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">⚠️ <strong>Risk Level:</strong> High</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">💰 <strong>Amount:</strong> ₹${(amount / 10000000).toFixed(2)} Crores</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📋 <strong>Transactions:</strong> ${transactionCount}</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📅 <strong>Age:</strong> 90+ days overdue</li>
+                                <li style="padding: 8px 0;">🚨 <strong>Action:</strong> Immediate attention required</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #ff9ff3 0%, #f368e0 100%); color: white; padding: 20px; border-radius: 10px;">
+                            <h3 style="margin-bottom: 10px;">🚨 Urgent Actions</h3>
+                            <div style="font-size: 14px; line-height: 1.6;">
+                                • Immediate collection follow-up<br>
+                                • Legal action consideration<br>
+                                • Credit limit review<br>
+                                • Process improvement
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            showModal(modalHtml);
+        }
+
+        // Vendor Cash Flow Detail Modal Functions
+        function showVendorDetails(title, count, type) {
+            const modalHtml = `
+                <div id="detailModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; border-radius: 15px; padding: 30px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h2 style="color: #333; margin: 0;">👥 ${title}</h2>
+                            <button onclick="closeDetailModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">&times;</button>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 20px; text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; margin-bottom: 10px;">${count}</div>
+                            <div style="font-size: 16px; opacity: 0.9;">Total Vendors</div>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                            <h3 style="margin-bottom: 15px; color: #333;">📊 Vendor Analysis</h3>
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">👥 <strong>Total Vendors:</strong> ${count}</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📋 <strong>Type:</strong> Vendor relationships</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📊 <strong>Status:</strong> Active analysis</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">🎯 <strong>Focus:</strong> Cash flow patterns</li>
+                                <li style="padding: 8px 0;">💡 <strong>Insight:</strong> Vendor performance tracking</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #a8e6cf 0%, #88d8c0 100%); color: white; padding: 20px; border-radius: 10px;">
+                            <h3 style="margin-bottom: 10px;">💡 Vendor Management</h3>
+                            <div style="font-size: 14px; line-height: 1.6;">
+                                • Monitor vendor performance<br>
+                                • Analyze payment patterns<br>
+                                • Optimize vendor relationships<br>
+                                • Track cash flow impact
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            showModal(modalHtml);
+        }
+
+        function showTransactionDetails(title, count, type) {
+            const modalHtml = `
+                <div id="detailModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; border-radius: 15px; padding: 30px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h2 style="color: #333; margin: 0;">📊 ${title}</h2>
+                            <button onclick="closeDetailModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">&times;</button>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 20px; text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; margin-bottom: 10px;">${count}</div>
+                            <div style="font-size: 16px; opacity: 0.9;">Total Transactions</div>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                            <h3 style="margin-bottom: 15px; color: #333;">📊 Transaction Analysis</h3>
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📊 <strong>Total Transactions:</strong> ${count}</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📋 <strong>Type:</strong> Vendor transactions</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📊 <strong>Status:</strong> Analyzed</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">🎯 <strong>Focus:</strong> Pattern analysis</li>
+                                <li style="padding: 8px 0;">💡 <strong>Insight:</strong> Transaction volume</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 20px; border-radius: 10px;">
+                            <h3 style="margin-bottom: 10px;">💡 Transaction Insights</h3>
+                            <div style="font-size: 14px; line-height: 1.6;">
+                                • Analyze transaction patterns<br>
+                                • Monitor volume trends<br>
+                                • Identify peak periods<br>
+                                • Optimize processing
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            showModal(modalHtml);
+        }
+
+        function showAmountDetails(title, amount, type) {
+            const modalHtml = `
+                <div id="detailModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; border-radius: 15px; padding: 30px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h2 style="color: #333; margin: 0;">💰 ${title}</h2>
+                            <button onclick="closeDetailModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">&times;</button>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #26de81 0%, #20bf6b 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 20px; text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; margin-bottom: 10px;">₹${(amount / 10000000).toFixed(2)} Cr</div>
+                            <div style="font-size: 16px; opacity: 0.9;">Total Amount</div>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                            <h3 style="margin-bottom: 15px; color: #333;">💰 Amount Analysis</h3>
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">💰 <strong>Total Amount:</strong> ₹${(amount / 10000000).toFixed(2)} Crores</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📋 <strong>Type:</strong> Vendor transactions</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📊 <strong>Status:</strong> Analyzed</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">🎯 <strong>Focus:</strong> Financial impact</li>
+                                <li style="padding: 8px 0;">💡 <strong>Insight:</strong> Cash flow magnitude</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #ffd93d 0%, #ff6b6b 100%); color: white; padding: 20px; border-radius: 10px;">
+                            <h3 style="margin-bottom: 10px;">💡 Financial Insights</h3>
+                            <div style="font-size: 14px; line-height: 1.6;">
+                                • Monitor total vendor spend<br>
+                                • Analyze amount distribution<br>
+                                • Track financial trends<br>
+                                • Optimize cash flow
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            showModal(modalHtml);
+        }
+
+        function showAIDetails(title, status, type) {
+            const modalHtml = `
+                <div id="detailModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; border-radius: 15px; padding: 30px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h2 style="color: #333; margin: 0;">🤖 ${title}</h2>
+                            <button onclick="closeDetailModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">&times;</button>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 20px; text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; margin-bottom: 10px;">${status}</div>
+                            <div style="font-size: 16px; opacity: 0.9;">AI Status</div>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                            <h3 style="margin-bottom: 15px; color: #333;">🤖 AI Analysis</h3>
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">🤖 <strong>AI Status:</strong> ${status}</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📋 <strong>Type:</strong> Machine learning</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📊 <strong>Function:</strong> Pattern recognition</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">🎯 <strong>Focus:</strong> Data analysis</li>
+                                <li style="padding: 8px 0;">💡 <strong>Benefit:</strong> Enhanced insights</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #a8e6cf 0%, #88d8c0 100%); color: white; padding: 20px; border-radius: 10px;">
+                            <h3 style="margin-bottom: 10px;">💡 AI Capabilities</h3>
+                            <div style="font-size: 14px; line-height: 1.6;">
+                                • Automated pattern recognition<br>
+                                • Intelligent categorization<br>
+                                • Predictive analytics<br>
+                                • Enhanced accuracy
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            showModal(modalHtml);
+        }
+
+        // Summary Dashboard Detail Modal Functions
+        function showSAPDetails(title, count, type) {
+            const modalHtml = `
+                <div id="detailModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; border-radius: 15px; padding: 30px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h2 style="color: #333; margin: 0;">🗄️ ${title}</h2>
+                            <button onclick="closeDetailModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">&times;</button>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 20px; text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; margin-bottom: 10px;">${count}</div>
+                            <div style="font-size: 16px; opacity: 0.9;">SAP Transactions</div>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                            <h3 style="margin-bottom: 15px; color: #333;">🗄️ SAP Analysis</h3>
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">🗄️ <strong>Source:</strong> SAP System</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📊 <strong>Transactions:</strong> ${count}</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📋 <strong>Type:</strong> ERP Data</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">🎯 <strong>Status:</strong> Processed</li>
+                                <li style="padding: 8px 0;">💡 <strong>Purpose:</strong> Reconciliation</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #a8e6cf 0%, #88d8c0 100%); color: white; padding: 20px; border-radius: 10px;">
+                            <h3 style="margin-bottom: 10px;">💡 SAP Insights</h3>
+                            <div style="font-size: 14px; line-height: 1.6;">
+                                • ERP transaction data<br>
+                                • Financial records<br>
+                                • System integration<br>
+                                • Data accuracy
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            showModal(modalHtml);
+        }
+
+        function showBankDetails(title, count, type) {
+            const modalHtml = `
+                <div id="detailModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; border-radius: 15px; padding: 30px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h2 style="color: #333; margin: 0;">🏦 ${title}</h2>
+                            <button onclick="closeDetailModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">&times;</button>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #26de81 0%, #20bf6b 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 20px; text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; margin-bottom: 10px;">${count}</div>
+                            <div style="font-size: 16px; opacity: 0.9;">Bank Transactions</div>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                            <h3 style="margin-bottom: 15px; color: #333;">🏦 Bank Analysis</h3>
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">🏦 <strong>Source:</strong> Bank Statement</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📊 <strong>Transactions:</strong> ${count}</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📋 <strong>Type:</strong> Banking Data</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">🎯 <strong>Status:</strong> Processed</li>
+                                <li style="padding: 8px 0;">💡 <strong>Purpose:</strong> Reconciliation</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 20px; border-radius: 10px;">
+                            <h3 style="margin-bottom: 10px;">💡 Bank Insights</h3>
+                            <div style="font-size: 14px; line-height: 1.6;">
+                                • Banking transaction data<br>
+                                • Cash flow records<br>
+                                • Financial reconciliation<br>
+                                • Data verification
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            showModal(modalHtml);
+        }
+
+        function showMatchDetails(title, count, type) {
+            const modalHtml = `
+                <div id="detailModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; border-radius: 15px; padding: 30px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h2 style="color: #333; margin: 0;">🔗 ${title}</h2>
+                            <button onclick="closeDetailModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">&times;</button>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, ${type === 'exact' ? '#26de81 0%, #20bf6b 100%' : '#f093fb 0%, #f5576c 100%'}); color: white; padding: 25px; border-radius: 15px; margin-bottom: 20px; text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; margin-bottom: 10px;">${count}</div>
+                            <div style="font-size: 16px; opacity: 0.9;">${type === 'exact' ? 'Exact' : 'Fuzzy'} Matches</div>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                            <h3 style="margin-bottom: 15px; color: #333;">🔗 Match Analysis</h3>
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">🔗 <strong>Type:</strong> ${type === 'exact' ? 'Exact' : 'Fuzzy'} Match</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📊 <strong>Count:</strong> ${count}</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📋 <strong>Method:</strong> ${type === 'exact' ? 'Perfect match' : 'Similarity match'}</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">🎯 <strong>Confidence:</strong> ${type === 'exact' ? '100%' : 'High'}</li>
+                                <li style="padding: 8px 0;">💡 <strong>Status:</strong> Reconciled</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #ffd93d 0%, #ff6b6b 100%); color: white; padding: 20px; border-radius: 10px;">
+                            <h3 style="margin-bottom: 10px;">💡 Match Insights</h3>
+                            <div style="font-size: 14px; line-height: 1.6;">
+                                ${type === 'exact' ? 
+                                    '• Perfect data alignment<br>• High confidence matches<br>• Automated reconciliation<br>• Zero manual intervention' :
+                                    '• Intelligent matching<br>• Pattern recognition<br>• Similarity scoring<br>• Enhanced accuracy'
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            showModal(modalHtml);
+        }
+
+        function showMatchRateDetails(title, rate, type) {
+            const modalHtml = `
+                <div id="detailModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; border-radius: 15px; padding: 30px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h2 style="color: #333; margin: 0;">📊 ${title}</h2>
+                            <button onclick="closeDetailModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">&times;</button>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 20px; text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; margin-bottom: 10px;">${rate}%</div>
+                            <div style="font-size: 16px; opacity: 0.9;">Match Rate</div>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                            <h3 style="margin-bottom: 15px; color: #333;">📊 Rate Analysis</h3>
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📊 <strong>Match Rate:</strong> ${rate}%</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📈 <strong>Performance:</strong> ${rate >= 80 ? 'Excellent' : rate >= 60 ? 'Good' : rate >= 40 ? 'Fair' : 'Poor'}</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📋 <strong>Type:</strong> Reconciliation success</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">🎯 <strong>Target:</strong> High accuracy</li>
+                                <li style="padding: 8px 0;">💡 <strong>Impact:</strong> Data quality</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #a8e6cf 0%, #88d8c0 100%); color: white; padding: 20px; border-radius: 10px;">
+                            <h3 style="margin-bottom: 10px;">💡 Performance Insights</h3>
+                            <div style="font-size: 14px; line-height: 1.6;">
+                                • Reconciliation accuracy<br>
+                                • Data quality metrics<br>
+                                • Process efficiency<br>
+                                • Continuous improvement
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            showModal(modalHtml);
+        }
+
+        function showAICategorizedDetails(title, count, type) {
+            const modalHtml = `
+                <div id="detailModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; border-radius: 15px; padding: 30px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h2 style="color: #333; margin: 0;">🤖 ${title}</h2>
+                            <button onclick="closeDetailModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">&times;</button>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 20px; text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; margin-bottom: 10px;">${count}</div>
+                            <div style="font-size: 16px; opacity: 0.9;">AI Categorized</div>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                            <h3 style="margin-bottom: 15px; color: #333;">🤖 AI Analysis</h3>
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">🤖 <strong>AI Categorized:</strong> ${count}</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📋 <strong>Type:</strong> Machine learning</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📊 <strong>Function:</strong> Auto-categorization</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">🎯 <strong>Accuracy:</strong> High</li>
+                                <li style="padding: 8px 0;">💡 <strong>Benefit:</strong> Time savings</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #a8e6cf 0%, #88d8c0 100%); color: white; padding: 20px; border-radius: 10px;">
+                            <h3 style="margin-bottom: 10px;">💡 AI Benefits</h3>
+                            <div style="font-size: 14px; line-height: 1.6;">
+                                • Automated categorization<br>
+                                • Intelligent processing<br>
+                                • Time efficiency<br>
+                                • Enhanced accuracy
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            showModal(modalHtml);
+        }
+
+        function showSummaryDetails(period, amount, riskLevel) {
+            const riskEmoji = riskLevel === 'HIGH' ? '🔴' : riskLevel === 'MEDIUM' ? '🟡' : '🟢';
+            
+            const modalHtml = `
+                <div id="detailModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; border-radius: 15px; padding: 30px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h2 style="color: #333; margin: 0;">📊 ${period} Summary</h2>
+                            <button onclick="closeDetailModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">&times;</button>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 20px; text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; margin-bottom: 10px;">₹${(amount / 10000000).toFixed(2)} Cr</div>
+                            <div style="font-size: 16px; opacity: 0.9;">Total Cash Flow Forecast</div>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                            <h3 style="margin-bottom: 15px; color: #333;">📈 Period Analysis</h3>
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📅 <strong>Period:</strong> ${period}</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">💰 <strong>Total Amount:</strong> ₹${(amount / 10000000).toFixed(2)} Crores</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">⚠️ <strong>Risk Level:</strong> ${riskLevel} ${riskEmoji}</li>
+                                <li style="padding: 8px 0; border-bottom: 1px solid #e9ecef;">📊 <strong>Daily Average:</strong> ₹${((amount / (period.includes('7') ? 7 : period.includes('4') ? 28 : 90)) / 10000000).toFixed(2)} Cr per day</li>
+                                <li style="padding: 8px 0;">🎯 <strong>Forecast Type:</strong> ${period.includes('7') ? 'Short-term' : period.includes('4') ? 'Medium-term' : 'Long-term'} planning</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 10px;">
+                            <h3 style="margin-bottom: 10px;">💡 Strategic Recommendations</h3>
+                            <div style="font-size: 14px; line-height: 1.6;">
+                                ${period.includes('7') ? '📅 Short-term cash management focus. Plan daily operations and immediate cash needs.' : 
+                                  period.includes('4') ? '📊 Medium-term planning period. Balance short and long-term cash requirements.' : 
+                                  '📈 Long-term strategic planning. Focus on major investments and growth initiatives.'}
+                                <br><br>
+                                <strong>Action Items:</strong><br>
+                                • Monitor daily cash flow vs forecast<br>
+                                • Adjust plans based on ${riskLevel.toLowerCase()} risk level<br>
+                                • Review performance weekly
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            showModal(modalHtml);
+        }
+
+        function showAnomalyDetails(severity, count) {
+            // Get the anomaly data from the global scope or fetch it
+            const anomalyData = window.currentAnomalyData || { anomalies: [] };
+            const filteredAnomalies = anomalyData.anomalies.filter(anomaly => anomaly.severity === severity);
+            
+            const severityInfo = {
+                'high': {
+                    title: 'High Risk Anomalies',
+                    icon: '🚨',
+                    color: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)',
+                    description: 'Critical issues requiring immediate attention',
+                    bgColor: '#fff5f5',
+                    borderColor: '#fed7d7'
+                },
+                'medium': {
+                    title: 'Medium Risk Anomalies',
+                    icon: '⚠️',
+                    color: 'linear-gradient(135deg, #feca57 0%, #ff9ff3 100%)',
+                    description: 'Suspicious patterns that need investigation',
+                    bgColor: '#fffbeb',
+                    borderColor: '#fef3c7'
+                },
+                'low': {
+                    title: 'Low Risk Anomalies',
+                    icon: 'ℹ️',
+                    color: 'linear-gradient(135deg, #48dbfb 0%, #0abde3 100%)',
+                    description: 'Minor deviations that may be normal',
+                    bgColor: '#f0f9ff',
+                    borderColor: '#bfdbfe'
+                }
+            };
+
+            const info = severityInfo[severity];
+            
+            // Generate anomaly list HTML
+            let anomaliesListHtml = '';
+            if (filteredAnomalies.length > 0) {
+                filteredAnomalies.forEach((anomaly, index) => {
+                    const severityBadge = anomaly.severity === 'high' ? '🔴 HIGH' : 
+                                        anomaly.severity === 'medium' ? '🟡 MEDIUM' : '🔵 LOW';
+                    
+                    let transactionDetails = '';
+                    if (anomaly.transaction) {
+                        if (anomaly.transaction.amount) {
+                            transactionDetails += `<div><strong>Amount:</strong> ₹${anomaly.transaction.amount.toLocaleString()}</div>`;
+                        }
+                        if (anomaly.transaction.date) {
+                            transactionDetails += `<div><strong>Date:</strong> ${anomaly.transaction.date}</div>`;
+                        }
+                        if (anomaly.transaction.vendor) {
+                            transactionDetails += `<div><strong>Vendor:</strong> ${anomaly.transaction.vendor}</div>`;
+                        }
+                        if (anomaly.transaction.frequency) {
+                            transactionDetails += `<div><strong>Frequency:</strong> ${anomaly.transaction.frequency} times</div>`;
+                        }
+                        if (anomaly.transaction.uncategorized_count) {
+                            transactionDetails += `<div><strong>Uncategorized:</strong> ${anomaly.transaction.uncategorized_count} transactions</div>`;
+                        }
+                        if (anomaly.transaction.percentage) {
+                            transactionDetails += `<div><strong>Percentage:</strong> ${anomaly.transaction.percentage} of total</div>`;
+                        }
+                    }
+                    
+                    anomaliesListHtml += `
+                        <div style="background: ${info.bgColor}; border: 1px solid ${info.borderColor}; border-radius: 10px; padding: 15px; margin-bottom: 15px;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: bold; font-size: 16px; color: #333; margin-bottom: 5px;">
+                                        ${anomaly.description}
+                                    </div>
+                                    <div style="font-size: 14px; color: #666; margin-bottom: 8px;">
+                                        ${anomaly.reason}
+                                    </div>
+                                </div>
+                                <div style="background: ${info.color}; color: white; padding: 4px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                    ${severityBadge}
+                                </div>
+                            </div>
+                            
+                            <div style="background: white; border-radius: 8px; padding: 12px; margin-top: 10px;">
+                                <div style="font-size: 13px; color: #555; line-height: 1.5;">
+                                    <div style="margin-bottom: 5px;"><strong>Type:</strong> ${anomaly.type.replace('_', ' ').toUpperCase()}</div>
+                                    ${transactionDetails}
+                                </div>
+                            </div>
+                            
+                            <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 10px; margin-top: 10px; border-radius: 0 8px 8px 0;">
+                                <div style="font-size: 12px; color: #1565c0; font-weight: bold; margin-bottom: 5px;">🔍 Where to Check:</div>
+                                <div style="font-size: 11px; color: #1976d2; line-height: 1.4;">
+                                    ${anomaly.type === 'frequency_anomaly' ? `
+                                        • Check vendor master data for ${anomaly.transaction?.vendor || 'this vendor'}<br>
+                                        • Review transaction history for unusual patterns<br>
+                                        • Verify if vendor is legitimate or needs blocking
+                                    ` : anomaly.type === 'time_anomaly' ? `
+                                        • Check system logs for ${anomaly.transaction?.date || 'this date'}<br>
+                                        • Review batch processing schedules<br>
+                                        • Verify if timing is normal for your operations
+                                    ` : anomaly.type === 'amount_anomaly' ? `
+                                        • Check transaction details for ₹${anomaly.transaction?.amount?.toLocaleString() || 'this amount'}<br>
+                                        • Review vendor invoices and contracts<br>
+                                        • Verify payment authorization
+                                    ` : anomaly.type === 'uncategorized_review' ? `
+                                        • Check SAP master data for vendor categorization<br>
+                                        • Review chart of accounts mapping<br>
+                                        • Update vendor master data with proper categories
+                                    ` : `
+                                        • Review transaction details in SAP system<br>
+                                        • Check vendor master data<br>
+                                        • Verify with relevant departments
+                                    `}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                anomaliesListHtml = `
+                    <div style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 10px; padding: 30px; text-align: center; color: #6c757d;">
+                        <div style="font-size: 48px; margin-bottom: 15px;">🎉</div>
+                        <div style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">No ${severity} Risk Anomalies Found!</div>
+                        <div style="font-size: 14px;">Your data looks clean and normal.</div>
+                    </div>
+                `;
+            }
+
+            const modalHtml = `
+                <div id="detailModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; border-radius: 15px; padding: 30px; max-width: 800px; width: 95%; max-height: 85vh; overflow-y: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h2 style="color: #333; margin: 0; font-size: 24px;">${info.icon} ${info.title}</h2>
+                            <button onclick="closeDetailModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">&times;</button>
+                        </div>
+                        
+                        <div style="background: ${info.color}; color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                            <h3 style="margin-bottom: 10px; font-size: 18px;">📊 Anomaly Summary</h3>
+                            <div style="font-size: 16px; line-height: 1.6;">
+                                <p><strong>Count:</strong> ${filteredAnomalies.length} anomalies</p>
+                                <p><strong>Risk Level:</strong> ${severity.toUpperCase()}</p>
+                                <p><strong>Status:</strong> ${info.description}</p>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <h3 style="margin-bottom: 15px; color: #333; font-size: 18px; border-bottom: 2px solid ${info.color.split(',')[0].replace('linear-gradient(135deg, ', '').replace(' 0%', '')}; padding-bottom: 5px;">
+                                🔍 Detailed Anomaly List
+                            </h3>
+                            <div style="max-height: 400px; overflow-y: auto;">
+                                ${anomaliesListHtml}
+                            </div>
+                        </div>
+                        
+                        <div style="background: #e8f5e8; padding: 20px; border-radius: 10px; border-left: 4px solid #28a745;">
+                            <h3 style="margin-bottom: 10px; color: #155724; font-size: 16px;">💡 Recommended Actions</h3>
+                            <div style="font-size: 14px; line-height: 1.6; color: #155724;">
+                                ${severity === 'high' ? `
+                                    <p>• <strong>Immediate Action Required:</strong> Review all high-risk transactions</p>
+                                    <p>• Investigate potential fraud, errors, or data quality issues</p>
+                                    <p>• Contact relevant departments for verification</p>
+                                    <p>• Consider blocking suspicious transactions if necessary</p>
+                                ` : severity === 'medium' ? `
+                                    <p>• <strong>Monitor Closely:</strong> Review these patterns regularly</p>
+                                    <p>• Check vendor relationships and data quality</p>
+                                    <p>• Update categorization rules if needed</p>
+                                    <p>• Document findings for future reference</p>
+                                ` : `
+                                    <p>• <strong>Review for Improvements:</strong> Consider data quality enhancements</p>
+                                    <p>• Update vendor master data if needed</p>
+                                    <p>• Monitor for pattern changes over time</p>
+                                    <p>• No immediate action required</p>
+                                `}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            showModal(modalHtml);
+        }
+
         async function downloadFile(fileType) {
             try {
                 const response = await fetch(`/download/${fileType}`);
@@ -4541,37 +5889,67 @@ async function downloadOrphanedPaymentsEnhanced() {
             const dashboardSection = document.getElementById('apArDashboard');
             const summaryStats = document.getElementById('apArSummaryStats');
             
-            // Display dashboard summary stats
+            // Safety check for required elements
+            if (!summaryStats) {
+                console.error('apArSummaryStats element not found');
+                return;
+            }
+            
+            // Display dashboard summary stats with clickable cards
             summaryStats.innerHTML = `
-                <div class="stat-card">
+                <div onclick="showAPDetails('AP Outstanding', ${data.dashboard_summary.ap_summary.outstanding}, '${data.dashboard_summary.ap_summary.count || 0} transactions')" 
+                     class="stat-card" style="cursor: pointer; transition: all 0.3s ease;"
+                     onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.15)'"
+                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 15px rgba(0,0,0,0.1)'">
                     <i class="fas fa-credit-card stat-icon"></i>
                     <span class="stat-number">${formatAmount(data.dashboard_summary.ap_summary.outstanding)}</span>
                     <span class="stat-label">Outstanding AP</span>
+                    <div style="font-size: 10px; opacity: 0.8; margin-top: 5px;">👆 Click for details</div>
                 </div>
-                <div class="stat-card">
+                <div onclick="showARDetails('AR Outstanding', ${data.dashboard_summary.ar_summary.outstanding}, '${data.dashboard_summary.ar_summary.count || 0} transactions')" 
+                     class="stat-card" style="cursor: pointer; transition: all 0.3s ease;"
+                     onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.15)'"
+                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 15px rgba(0,0,0,0.1)'">
                     <i class="fas fa-money-check-alt stat-icon"></i>
                     <span class="stat-number">${formatAmount(data.dashboard_summary.ar_summary.outstanding)}</span>
                     <span class="stat-label">Outstanding AR</span>
+                    <div style="font-size: 10px; opacity: 0.8; margin-top: 5px;">👆 Click for details</div>
                 </div>
-                <div class="stat-card">
+                <div onclick="showTotalOutstandingDetails('Total Outstanding', ${data.dashboard_summary.critical_metrics.total_outstanding}, '${data.dashboard_summary.critical_metrics.total_transactions || 0} transactions')" 
+                     class="stat-card" style="cursor: pointer; transition: all 0.3s ease;"
+                     onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.15)'"
+                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 15px rgba(0,0,0,0.1)'">
                     <i class="fas fa-calculator stat-icon"></i>
                     <span class="stat-number">${formatAmount(data.dashboard_summary.critical_metrics.total_outstanding)}</span>
                     <span class="stat-label">Total Outstanding</span>
+                    <div style="font-size: 10px; opacity: 0.8; margin-top: 5px;">👆 Click for details</div>
                 </div>
-                <div class="stat-card">
+                <div onclick="showEfficiencyDetails('Collection Efficiency', ${data.dashboard_summary.critical_metrics.collection_efficiency}, 'collection')" 
+                     class="stat-card" style="cursor: pointer; transition: all 0.3s ease;"
+                     onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.15)'"
+                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 15px rgba(0,0,0,0.1)'">
                     <i class="fas fa-percentage stat-icon"></i>
                     <span class="stat-number">${data.dashboard_summary.critical_metrics.collection_efficiency.toFixed(1)}%</span>
                     <span class="stat-label">Collection Efficiency</span>
+                    <div style="font-size: 10px; opacity: 0.8; margin-top: 5px;">👆 Click for details</div>
                 </div>
-                <div class="stat-card">
+                <div onclick="showEfficiencyDetails('Payment Efficiency', ${data.dashboard_summary.critical_metrics.payment_efficiency}, 'payment')" 
+                     class="stat-card" style="cursor: pointer; transition: all 0.3s ease;"
+                     onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.15)'"
+                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 15px rgba(0,0,0,0.1)'">
                     <i class="fas fa-percentage stat-icon"></i>
                     <span class="stat-number">${data.dashboard_summary.critical_metrics.payment_efficiency.toFixed(1)}%</span>
                     <span class="stat-label">Payment Efficiency</span>
+                    <div style="font-size: 10px; opacity: 0.8; margin-top: 5px;">👆 Click for details</div>
                 </div>
-                <div class="stat-card">
+                <div onclick="showOverdueDetails('90+ Days Overdue', ${data.dashboard_summary.critical_metrics.total_overdue_90plus}, '${data.dashboard_summary.critical_metrics.overdue_90plus_count || 0} transactions')" 
+                     class="stat-card" style="cursor: pointer; transition: all 0.3s ease;"
+                     onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.15)'"
+                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 15px rgba(0,0,0,0.1)'">
                     <i class="fas fa-exclamation-triangle stat-icon"></i>
                     <span class="stat-number">${formatAmount(data.dashboard_summary.critical_metrics.total_overdue_90plus)}</span>
                     <span class="stat-label">90+ Days Overdue</span>
+                    <div style="font-size: 10px; opacity: 0.8; margin-top: 5px;">👆 Click for details</div>
                 </div>
             `;
             
@@ -4684,16 +6062,16 @@ async function downloadOrphanedPaymentsEnhanced() {
         async function viewInvoicePayments(matchType) {
             try {
                 showLoading(true);
-                
                 const response = await fetch(`/view_invoice_payments/${matchType}`);
                 const data = await response.json();
 
                 if (response.ok) {
                     displayInvoicePaymentResults(data, matchType);
                 } else {
-                    showAlert(`Error: ${data.error}`, 'error');
+                    showAlert(`Error: ${data.error || 'Unknown error'}`, 'error');
                 }
             } catch (error) {
+                console.error('Error in viewInvoicePayments:', error);
                 showAlert(`Error: ${error.message}`, 'error');
             } finally {
                 showLoading(false);
@@ -4729,30 +6107,43 @@ async function downloadOrphanedPaymentsEnhanced() {
             const dashboardSection = document.getElementById('invoicePaymentDashboard');
             const summaryStats = document.getElementById('invoicePaymentSummaryStats');
             
-            summaryStats.innerHTML = `
-                <div class="stat-card">
-                    <i class="fas fa-link stat-icon"></i>
-                    <span class="stat-number">${data.summary.matched_pairs}</span>
-                    <span class="stat-label">Matched Pairs</span>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-exclamation-triangle stat-icon"></i>
-                    <span class="stat-number">${data.summary.unmatched_invoices}</span>
-                    <span class="stat-label">Outstanding Invoices</span>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-question-circle stat-icon"></i>
-                    <span class="stat-number">${data.summary.unmatched_payments}</span>
-                    <span class="stat-label">Orphaned Payments</span>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-percentage stat-icon"></i>
-                    <span class="stat-number">${data.summary.efficiency_percentage}%</span>
-                    <span class="stat-label">Payment Efficiency</span>
-                </div>
-            `;
+            // Safety check for required elements
+            if (!summaryStats) {
+                console.error('invoicePaymentSummaryStats element not found');
+                return;
+            }
             
-            dashboardSection.classList.remove('hidden');
+            try {
+                summaryStats.innerHTML = `
+                    <div class="stat-card">
+                        <i class="fas fa-link stat-icon"></i>
+                        <span class="stat-number">${data.summary?.matched_pairs || 0}</span>
+                        <span class="stat-label">Matched Pairs</span>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-exclamation-triangle stat-icon"></i>
+                        <span class="stat-number">${data.summary?.unmatched_invoices || 0}</span>
+                        <span class="stat-label">Outstanding Invoices</span>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-question-circle stat-icon"></i>
+                        <span class="stat-number">${data.summary?.unmatched_payments || 0}</span>
+                        <span class="stat-label">Orphaned Payments</span>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-percentage stat-icon"></i>
+                        <span class="stat-number">${data.summary?.efficiency_percentage || 0}%</span>
+                        <span class="stat-label">Payment Efficiency</span>
+                    </div>
+                `;
+                
+                if (dashboardSection) {
+                    dashboardSection.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error displaying invoice payment dashboard:', error);
+                showAlert('Error displaying dashboard. Please try again.', 'error');
+            }
         }
 
         function displayInvoicePaymentResults(data, matchType) {
@@ -4761,35 +6152,63 @@ async function downloadOrphanedPaymentsEnhanced() {
             const resultsHeader = document.getElementById('resultsHeader');
             const resultsTitle = document.getElementById('resultsTitle');
             
+            // Check if all required elements exist
+            if (!resultsArea || !resultsContent || !resultsHeader || !resultsTitle) {
+                console.error('Missing required elements for invoice payment display');
+                showAlert('Error: Required page elements not found. Please refresh the page.', 'error');
+                return;
+            }
+            
+            // Check if data is valid
+            if (!data || typeof data !== 'object') {
+                console.error('Invalid data received:', data);
+                showAlert('Error: Invalid data received from server. Please try again.', 'error');
+                return;
+            }
+            
             let content = '';
             let title = 'Invoice-Payment Analysis';
             
-            if (data.type === 'invoice_payment_breakdown') {
-                content = generateInvoicePaymentBreakdownHTML(data, matchType);
-                title = 'Invoice-Payment Matched Pairs';
-            } else if (data.type === 'unmatched_invoices_breakdown') {
-                content = generateUnmatchedInvoicesHTML(data);
-                title = 'Outstanding Invoices';
-            } else if (data.type === 'unmatched_payments_breakdown') {
-                content = generateUnmatchedPaymentsHTML(data);
-                title = 'Orphaned Payments';
-            } else if (data.type === 'efficiency_dashboard') {
-                content = generateEfficiencyDashboardHTML(data);
-                title = 'Payment Efficiency Dashboard';
-            } else {
-                content = `<div class="alert alert-success"><i class="fas fa-check-circle"></i>Invoice-payment ${matchType} analysis completed successfully.</div>`;
+            try {
+                if (data.type === 'invoice_payment_breakdown') {
+                    content = generateInvoicePaymentBreakdownHTML(data, matchType);
+                    title = 'Invoice-Payment Matched Pairs';
+                } else if (data.type === 'unmatched_invoices_breakdown') {
+                    content = generateUnmatchedInvoicesHTML(data);
+                    title = 'Outstanding Invoices';
+                } else if (data.type === 'unmatched_payments_breakdown') {
+                    content = generateUnmatchedPaymentsHTML(data);
+                    title = 'Orphaned Payments';
+                } else if (data.type === 'efficiency_dashboard') {
+                    content = generateEfficiencyDashboardHTML(data);
+                    title = 'Payment Efficiency Dashboard';
+                } else {
+                    content = `<div class="alert alert-success"><i class="fas fa-check-circle"></i>Invoice-payment ${matchType} analysis completed successfully.</div>`;
+                }
+            } catch (error) {
+                console.error('Error generating content:', error);
+                content = `<div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i>Error generating content. Please try again.</div>`;
+                title = 'Invoice-Payment Analysis';
             }
             
-            resultsTitle.textContent = title;
-            resultsContent.innerHTML = content;
-            resultsHeader.style.display = 'flex';
-            
-            const backdrop = document.getElementById('dashboardBackdrop');
-            backdrop.classList.add('show');
-            resultsArea.classList.add('show');
-            
-            // Initialize tabs
-            initializeInvoicePaymentTabs();
+            try {
+                resultsTitle.textContent = title;
+                resultsContent.innerHTML = content;
+                resultsHeader.style.display = 'flex';
+                
+                const backdrop = document.getElementById('dashboardBackdrop');
+                if (backdrop) {
+                    backdrop.classList.add('show');
+                }
+                resultsArea.classList.add('show');
+                
+                if (typeof initializeInvoicePaymentTabs === 'function') {
+                    initializeInvoicePaymentTabs();
+                }
+            } catch (error) {
+                console.error('Error displaying invoice payment results:', error);
+                showAlert('Error displaying results. Please try again.', 'error');
+            }
         }
 
         async function debugInvoiceMatching() {
@@ -5199,32 +6618,16 @@ async function downloadOrphanedPaymentsEnhanced() {
 
         // Add these functions right after initializeAPARTabs() function
 
-function displayInvoicePaymentResults(data, matchType) {
-    const resultsSection = document.getElementById('invoicePaymentResultsSection');
-    const resultsContainer = document.getElementById('invoicePaymentResultsContainer');
-    
-    let content = '';
-    
-    if (data.type === 'invoice_payment_breakdown') {
-        content = generateInvoicePaymentBreakdownHTML(data, matchType);
-    } else if (data.type === 'unmatched_invoices_breakdown') {
-        content = generateUnmatchedInvoicesHTML(data);
-    } else if (data.type === 'unmatched_payments_breakdown') {
-        content = generateUnmatchedPaymentsHTML(data);
-    } else if (data.type === 'efficiency_dashboard') {
-        content = generateEfficiencyDashboardHTML(data);
-    }
-    
-    resultsContainer.innerHTML = content;
-    resultsSection.classList.add('show');
-    // resultsSection.scrollIntoView({ behavior: 'smooth' });
-    
-    // Initialize tabs
-    initializeInvoicePaymentTabs();
-}
+
 
 function generateInvoicePaymentBreakdownHTML(data, matchType) {
-    const breakdown = data.breakdown;
+    // Safety checks for data
+    if (!data || typeof data !== 'object') {
+        return '<div class="alert alert-error">Invalid data received</div>';
+    }
+    
+    const breakdown = data.breakdown || {};
+    const summary = data.summary || {};
     
     return `
         <div class="tab-container">
@@ -5236,27 +6639,27 @@ function generateInvoicePaymentBreakdownHTML(data, matchType) {
                     <h4>📈 Matching Summary</h4>
                     <div class="stats-grid">
                         <div class="stat-card">
-                            <span class="stat-number">${data.summary.total_matched_pairs}</span>
+                            <span class="stat-number">${summary.total_matched_pairs || 0}</span>
                             <span class="stat-label">Total Matched Pairs</span>
                         </div>
                         <div class="stat-card">
-                            <span class="stat-number">${formatAmount(data.summary.total_amount)}</span>
+                            <span class="stat-number">${formatAmount(summary.total_amount || 0)}</span>
                             <span class="stat-label">Total Amount</span>
                         </div>
                         <div class="stat-card">
-                            <span class="stat-number">${data.summary.average_delay.toFixed(1)}</span>
+                            <span class="stat-number">${(summary.average_delay || 0).toFixed(1)}</span>
                             <span class="stat-label">Avg Delay (Days)</span>
                         </div>
                         <div class="stat-card">
-                            <span class="stat-number">${data.summary.operating_count}</span>
+                            <span class="stat-number">${summary.operating_count || 0}</span>
                             <span class="stat-label">Operating</span>
                         </div>
                         <div class="stat-card">
-                            <span class="stat-number">${data.summary.investing_count}</span>
+                            <span class="stat-number">${summary.investing_count || 0}</span>
                             <span class="stat-label">Investing</span>
                         </div>
                         <div class="stat-card">
-                            <span class="stat-number">${data.summary.financing_count}</span>
+                            <span class="stat-number">${summary.financing_count || 0}</span>
                             <span class="stat-label">Financing</span>
                         </div>
                     </div>
@@ -5636,28 +7039,50 @@ async function runVendorAnalysis() {
             const dashboardSection = document.getElementById('vendorCashFlowDashboard');
             const summaryStats = document.getElementById('vendorCashFlowSummaryStats');
             
+            // Safety check for required elements
+            if (!summaryStats) {
+                console.error('vendorCashFlowSummaryStats element not found');
+                return;
+            }
+            
             const summary = data.summary_stats;
             
             summaryStats.innerHTML = `
-                <div class="stat-card">
+                <div onclick="showVendorDetails('Total Vendors', ${summary.total_vendors_matched}, 'vendors')" 
+                     class="stat-card" style="cursor: pointer; transition: all 0.3s ease;"
+                     onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.15)'"
+                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 15px rgba(0,0,0,0.1)'">
                     <i class="fas fa-users stat-icon"></i>
                     <span class="stat-number">${summary.total_vendors_matched}</span>
                     <span class="stat-label">Total Vendors</span>
+                    <div style="font-size: 10px; opacity: 0.8; margin-top: 5px;">👆 Click for details</div>
                 </div>
-                <div class="stat-card">
+                <div onclick="showTransactionDetails('Total Transactions', ${summary.total_transactions_analyzed}, 'transactions')" 
+                     class="stat-card" style="cursor: pointer; transition: all 0.3s ease;"
+                     onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.15)'"
+                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 15px rgba(0,0,0,0.1)'">
                     <i class="fas fa-exchange-alt stat-icon"></i>
                     <span class="stat-number">${summary.total_transactions_analyzed}</span>
                     <span class="stat-label">Total Transactions</span>
+                    <div style="font-size: 10px; opacity: 0.8; margin-top: 5px;">👆 Click for details</div>
                 </div>
-                <div class="stat-card">
+                <div onclick="showAmountDetails('Total Amount', ${summary.total_amount_all_vendors}, 'amount')" 
+                     class="stat-card" style="cursor: pointer; transition: all 0.3s ease;"
+                     onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.15)'"
+                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 15px rgba(0,0,0,0.1)'">
                     <i class="fas fa-dollar-sign stat-icon"></i>
                     <span class="stat-number">${formatAmount(summary.total_amount_all_vendors)}</span>
                     <span class="stat-label">Total Amount</span>
+                    <div style="font-size: 10px; opacity: 0.8; margin-top: 5px;">👆 Click for details</div>
                 </div>
-                <div class="stat-card">
+                <div onclick="showAIDetails('AI Status', '${summary.ai_enabled ? 'Enabled' : 'Disabled'}', 'ai')" 
+                     class="stat-card" style="cursor: pointer; transition: all 0.3s ease;"
+                     onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.15)'"
+                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 15px rgba(0,0,0,0.1)'">
                     <i class="fas fa-robot stat-icon"></i>
                     <span class="stat-number">${summary.ai_enabled ? 'Yes' : 'No'}</span>
                     <span class="stat-label">AI Enabled</span>
+                    <div style="font-size: 10px; opacity: 0.8; margin-top: 5px;">👆 Click for details</div>
                 </div>
             `;
             
@@ -6500,6 +7925,11 @@ async function loadVendorList() {
 
         // Initialize all features when page loads
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize core functionality first
+            initializeEventListeners();
+            showWelcomeMessage();
+            
+            // Then initialize additional features
             initializeRealTimeUpdates();
             initializeLazyLoading();
             initializePerformanceMonitoring();

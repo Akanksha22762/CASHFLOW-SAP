@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Console Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { 
+            border: 1px solid #ccc; 
+            padding: 15px; 
+            margin: 10px 0; 
+            border-radius: 5px;
+        }
+        .btn { 
+            padding: 10px 20px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            margin: 5px;
+            background-color: #007bff; 
+            color: white;
+        }
+        .btn:disabled { 
+            background-color: #ccc; 
+            cursor: not-allowed; 
+        }
+        #console-output {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>JavaScript Debug Test</h1>
+    
+    <div class="test-section">
+        <h3>Basic JavaScript Test</h3>
+        <button class="btn" onclick="testBasicJS()">Test Basic JavaScript</button>
+        <button class="btn" onclick="testAlert()">Test Alert</button>
+        <button class="btn" onclick="testConsole()">Test Console Log</button>
+    </div>
+    
+    <div class="test-section">
+        <h3>File Upload Simulation</h3>
+        <input type="file" id="testFile" accept=".xlsx,.xls,.csv" style="display: none;">
+        <button class="btn" onclick="document.getElementById('testFile').click()">Select File</button>
+        <button class="btn" id="testUploadBtn" onclick="testUpload()" disabled>Test Upload (Disabled)</button>
+        <p id="fileInfo"></p>
+    </div>
+    
+    <div class="test-section">
+        <h3>Console Output</h3>
+        <div id="console-output">Console output will appear here...</div>
+        <button class="btn" onclick="clearConsole()">Clear Console</button>
+    </div>
+
+    <script>
+        // Override console.log to capture output
+        const originalLog = console.log;
+        const originalError = console.error;
+        const consoleOutput = document.getElementById('console-output');
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            consoleOutput.textContent += 'LOG: ' + args.join(' ') + '\n';
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            consoleOutput.textContent += 'ERROR: ' + args.join(' ') + '\n';
+        };
+        
+        function testBasicJS() {
+            console.log('Basic JavaScript function called');
+            document.getElementById('console-output').textContent += 'Basic JS test passed!\n';
+        }
+        
+        function testAlert() {
+            alert('Alert test - if you see this, JavaScript is working!');
+            console.log('Alert test completed');
+        }
+        
+        function testConsole() {
+            console.log('Console test message');
+            console.error('Console error test message');
+        }
+        
+        function testUpload() {
+            console.log('Upload button clicked');
+            alert('Upload function called!');
+        }
+        
+        function clearConsole() {
+            consoleOutput.textContent = 'Console cleared...\n';
+        }
+        
+        // File input change listener
+        document.getElementById('testFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            console.log('File selected:', file ? file.name : 'none');
+            
+            if (file) {
+                document.getElementById('fileInfo').textContent = `Selected: ${file.name} (${file.size} bytes)`;
+                document.getElementById('testUploadBtn').disabled = false;
+                console.log('Upload button enabled');
+            } else {
+                document.getElementById('fileInfo').textContent = 'No file selected';
+                document.getElementById('testUploadBtn').disabled = true;
+                console.log('Upload button disabled');
+            }
+        });
+        
+        // Page load test
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded successfully');
+            console.log('DOM ready - all elements should be available');
+            
+            // Test element access
+            const testFile = document.getElementById('testFile');
+            const testUploadBtn = document.getElementById('testUploadBtn');
+            
+            console.log('Elements found:', {
+                testFile: !!testFile,
+                testUploadBtn: !!testUploadBtn
+            });
+        });
+        
+        // Error handler
+        window.addEventListener('error', function(e) {
+            console.error('JavaScript error:', e.message, 'at', e.filename, 'line', e.lineno);
+        });
+    </script>
+</body>
+</html> 

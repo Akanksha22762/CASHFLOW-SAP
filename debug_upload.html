@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload Debug Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .upload-area { 
+            border: 2px dashed #ccc; 
+            padding: 20px; 
+            text-align: center; 
+            margin: 10px 0; 
+            border-radius: 10px;
+        }
+        .upload-area.dragover { 
+            border-color: #007bff; 
+            background-color: #f8f9fa; 
+        }
+        .btn { 
+            padding: 10px 20px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            margin: 5px;
+        }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-primary:disabled { background-color: #ccc; cursor: not-allowed; }
+        .file-info { 
+            background: #f8f9fa; 
+            padding: 10px; 
+            border-radius: 5px; 
+            margin: 10px 0; 
+            display: none;
+        }
+        .file-info.show { display: block; }
+    </style>
+</head>
+<body>
+    <h1>Upload Debug Test</h1>
+    
+    <div class="upload-area" id="bankUploadArea">
+        <h3>Bank File Upload</h3>
+        <input type="file" id="bankFile" accept=".xlsx,.xls,.csv" style="display: none;">
+        <button class="btn btn-primary" onclick="document.getElementById('bankFile').click()">
+            Select Bank File
+        </button>
+        <p>Drag and drop or click to select</p>
+    </div>
+    
+    <div class="file-info" id="bankFileInfo">
+        <h4>File Selected:</h4>
+        <p id="bankFileName"></p>
+    </div>
+    
+    <div class="upload-area" id="sapUploadArea">
+        <h3>SAP File Upload (Optional)</h3>
+        <input type="file" id="sapFile" accept=".xlsx,.xls,.csv" style="display: none;">
+        <button class="btn btn-primary" onclick="document.getElementById('sapFile').click()">
+            Select SAP File
+        </button>
+        <p>Drag and drop or click to select</p>
+    </div>
+    
+    <div class="file-info" id="sapFileInfo">
+        <h4>File Selected:</h4>
+        <p id="sapFileName"></p>
+    </div>
+    
+    <div style="text-align: center; margin: 20px 0;">
+        <button class="btn btn-primary" id="uploadBtn" onclick="uploadFiles()" disabled>
+            Upload & Process Files
+        </button>
+    </div>
+    
+    <div id="debugInfo" style="background: #f0f0f0; padding: 15px; border-radius: 5px; margin: 20px 0;">
+        <h4>Debug Info:</h4>
+        <p>Bank File Uploaded: <span id="bankStatus">false</span></p>
+        <p>SAP File Uploaded: <span id="sapStatus">false</span></p>
+        <p>Upload Button Disabled: <span id="buttonStatus">true</span></p>
+    </div>
+
+    <script>
+        let sapFileUploaded = false;
+        let bankFileUploaded = false;
+
+        function initializeEventListeners() {
+            // File input change listeners
+            document.getElementById('sapFile').addEventListener('change', function(e) {
+                handleFileSelect(e, 'sap');
+            });
+
+            document.getElementById('bankFile').addEventListener('change', function(e) {
+                handleFileSelect(e, 'bank');
+            });
+
+            // Drag and drop functionality
+            setupDragAndDrop();
+        }
+
+        function setupDragAndDrop() {
+            ['sapUploadArea', 'bankUploadArea'].forEach(id => {
+                const area = document.getElementById(id);
+                
+                area.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    area.classList.add('dragover');
+                });
+
+                area.addEventListener('dragleave', function(e) {
+                    e.preventDefault();
+                    area.classList.remove('dragover');
+                });
+
+                area.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    area.classList.remove('dragover');
+                    
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        const fileType = id.includes('sap') ? 'sap' : 'bank';
+                        const fileInput = document.getElementById(fileType + 'File');
+                        fileInput.files = files;
+                        handleFileSelect({target: fileInput}, fileType);
+                    }
+                });
+            });
+        }
+
+        function handleFileSelect(event, type) {
+            const file = event.target.files[0];
+            console.log('File selected:', type, file);
+            
+            if (!file) {
+                // File was deselected
+                if (type === 'sap') {
+                    sapFileUploaded = false;
+                    document.getElementById('sapFileInfo').classList.remove('show');
+                } else {
+                    bankFileUploaded = false;
+                    document.getElementById('bankFileInfo').classList.remove('show');
+                }
+                updateUploadButton();
+                updateDebugInfo();
+                return;
+            }
+
+            const allowedTypes = ['.xlsx', '.xls', '.csv'];
+            const fileExt = '.' + file.name.split('.').pop().toLowerCase();
+            if (!allowedTypes.includes(fileExt)) {
+                alert('Please select a valid Excel (.xlsx, .xls) or CSV file');
+                return;
+            }
+
+            // Update upload status and show file info
+            if (type === 'sap') {
+                sapFileUploaded = true;
+                document.getElementById('sapFileName').textContent = `${file.name} (${formatFileSize(file.size)})`;
+                document.getElementById('sapFileInfo').classList.add('show');
+            } else {
+                bankFileUploaded = true;
+                document.getElementById('bankFileName').textContent = `${file.name} (${formatFileSize(file.size)})`;
+                document.getElementById('bankFileInfo').classList.add('show');
+            }
+            updateUploadButton();
+            updateDebugInfo();
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function updateUploadButton() {
+            const uploadBtn = document.getElementById('uploadBtn');
+            uploadBtn.disabled = !bankFileUploaded; // Only bank file is required
+            console.log('Upload button disabled:', uploadBtn.disabled, 'Bank file uploaded:', bankFileUploaded);
+        }
+
+        function updateDebugInfo() {
+            document.getElementById('bankStatus').textContent = bankFileUploaded;
+            document.getElementById('sapStatus').textContent = sapFileUploaded;
+            document.getElementById('buttonStatus').textContent = document.getElementById('uploadBtn').disabled;
+        }
+
+        function uploadFiles() {
+            alert('Upload function called! This is just a debug test.');
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeEventListeners();
+            updateDebugInfo();
+            console.log('Debug page initialized');
+        });
+    </script>
+</body>
+</html> 
