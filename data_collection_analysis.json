@@ -1,0 +1,529 @@
+{
+  "current_data_assets": {
+    "bank_statement": {
+      "records": 493,
+      "columns": [
+        "Date",
+        "Description",
+        "Type",
+        "Amount",
+        "Balance"
+      ],
+      "date_range": "Available",
+      "sample_data": [
+        {
+          "Date": "2025-03-01 00:00:00",
+          "Description": "Payment to Vendor",
+          "Type": "Debit",
+          "Amount": 372067.5,
+          "Balance": 4627932.5
+        },
+        {
+          "Date": "2025-03-01 00:00:00",
+          "Description": "Water Utility",
+          "Type": "Debit",
+          "Amount": 115489.32,
+          "Balance": 4512443.18
+        },
+        {
+          "Date": "2025-03-01 00:00:00",
+          "Description": "Scrap Sale",
+          "Type": "Credit",
+          "Amount": 55735.11,
+          "Balance": 4568178.29
+        }
+      ]
+    },
+    "sap_ap_ar": {
+      "records": 374,
+      "columns": [
+        "Date",
+        "Description",
+        "Type",
+        "Amount",
+        "Status"
+      ],
+      "date_range": "Available",
+      "sample_data": [
+        {
+          "Date": "2025-03-01 00:00:00",
+          "Description": "Machinery Spare Parts",
+          "Type": "Accounts Payable",
+          "Amount": 151995.7,
+          "Status": "Pending"
+        },
+        {
+          "Date": "2025-03-01 00:00:00",
+          "Description": "Maintenance Service Charges",
+          "Type": "Accounts Payable",
+          "Amount": 166188.37,
+          "Status": "Paid"
+        },
+        {
+          "Date": "2025-03-01 00:00:00",
+          "Description": "Utility Bill Payment",
+          "Type": "Accounts Payable",
+          "Amount": 170056.05,
+          "Status": "Partially Paid"
+        }
+      ]
+    },
+    "master_data": {
+      "records": 12,
+      "columns": [
+        "Account Code",
+        "Account Name",
+        "Type"
+      ],
+      "sample_data": [
+        {
+          "Account Code": 1000,
+          "Account Name": "Cash",
+          "Type": "Asset"
+        },
+        {
+          "Account Code": 1100,
+          "Account Name": "Accounts Receivable",
+          "Type": "Asset"
+        },
+        {
+          "Account Code": 1200,
+          "Account Name": "Inventory",
+          "Type": "Asset"
+        }
+      ]
+    },
+    "steel_transactions": {
+      "records": 74,
+      "columns": [
+        "Transaction No",
+        "Date",
+        "Reference",
+        "Description",
+        "Type",
+        "Amount (INR)",
+        "Balance (INR)",
+        "Amount",
+        "Balance",
+        "Category"
+      ],
+      "date_range": "Available",
+      "sample_data": [
+        {
+          "Transaction No": 1.0,
+          "Date": "2025-06-25",
+          "Reference": "OPEN",
+          "Description": "Opening Balance",
+          "Type": "OPEN",
+          "Amount (INR)": NaN,
+          "Balance (INR)": 0,
+          "Amount": NaN,
+          "Balance": NaN,
+          "Category": NaN
+        },
+        {
+          "Transaction No": 2.0,
+          "Date": "2025-06-25",
+          "Reference": "CUST-INV-1001",
+          "Description": "Customer Payment - Invoice 1001",
+          "Type": "INWARD",
+          "Amount (INR)": 1500000.0,
+          "Balance (INR)": 1500000,
+          "Amount": NaN,
+          "Balance": NaN,
+          "Category": NaN
+        },
+        {
+          "Transaction No": 3.0,
+          "Date": "2025-06-25",
+          "Reference": "VEN-PAY-2001",
+          "Description": "Vendor Payment - Raw Materials",
+          "Type": "OUTWARD",
+          "Amount (INR)": 700000.0,
+          "Balance (INR)": 800000,
+          "Amount": NaN,
+          "Balance": NaN,
+          "Category": NaN
+        }
+      ]
+    },
+    "jsw_steel_dataset": {
+      "records": 349,
+      "columns": [
+        "Date",
+        "Description",
+        "Amount",
+        "Effect",
+        "Company",
+        "GL Code",
+        "GL Account",
+        "Account Description",
+        "Transaction Type",
+        "DR/CR Indicator",
+        "Company Code",
+        "Fiscal Year",
+        "Document Number",
+        "Profit Center",
+        "Cost Center",
+        "Cost Element",
+        "Segment",
+        "Currency",
+        "Cash Origin Account",
+        "Balance",
+        "Sales/Purchase",
+        "Tax Code",
+        "Accrued Expenses",
+        "Bank Account",
+        "Treasury Fund"
+      ],
+      "sample_data": [
+        {
+          "Date": "2024-11-26",
+          "Description": "Routine equipment servicing",
+          "Amount": 539559.94,
+          "Effect": "Outflow",
+          "Company": "JSW Steel",
+          "GL Code": 307692,
+          "GL Account": "GL-525181",
+          "Account Description": "Account 42 - Description",
+          "Transaction Type": "Credit",
+          "DR/CR Indicator": "DR",
+          "Company Code": "JSW001",
+          "Fiscal Year": 2023,
+          "Document Number": "DOC98074",
+          "Profit Center": "PC-5",
+          "Cost Center": "CC-373",
+          "Cost Element": "CE-940",
+          "Segment": "SEG-475",
+          "Currency": "INR",
+          "Cash Origin Account": "COA-3456",
+          "Balance": 103416.41,
+          "Sales/Purchase": "Sale",
+          "Tax Code": "TC-3",
+          "Accrued Expenses": 28224.28,
+          "Bank Account": 110665,
+          "Treasury Fund": 9996
+        },
+        {
+          "Date": "2024-10-05",
+          "Description": "Upgrade of automation systems",
+          "Amount": 96826.19,
+          "Effect": "Outflow",
+          "Company": "JSW Steel",
+          "GL Code": 390912,
+          "GL Account": "GL-111957",
+          "Account Description": "Account 7 - Description",
+          "Transaction Type": "Credit",
+          "DR/CR Indicator": "DR",
+          "Company Code": "JSW001",
+          "Fiscal Year": 2024,
+          "Document Number": "DOC75819",
+          "Profit Center": "PC-6",
+          "Cost Center": "CC-115",
+          "Cost Element": "CE-525",
+          "Segment": "SEG-241",
+          "Currency": "INR",
+          "Cash Origin Account": "COA-5005",
+          "Balance": 365839.75,
+          "Sales/Purchase": "Purchase",
+          "Tax Code": "TC-1",
+          "Accrued Expenses": 6005.49,
+          "Bank Account": 110982,
+          "Treasury Fund": 9994
+        },
+        {
+          "Date": "2024-12-17",
+          "Description": "Investment in company stocks",
+          "Amount": 100613.62,
+          "Effect": "Outflow",
+          "Company": "JSW Steel",
+          "GL Code": 317679,
+          "GL Account": "GL-290640",
+          "Account Description": "Account 46 - Description",
+          "Transaction Type": "Credit",
+          "DR/CR Indicator": "CR",
+          "Company Code": "JSW001",
+          "Fiscal Year": 2024,
+          "Document Number": "DOC51077",
+          "Profit Center": "PC-5",
+          "Cost Center": "CC-754",
+          "Cost Element": "CE-459",
+          "Segment": "SEG-637",
+          "Currency": "INR",
+          "Cash Origin Account": "COA-1647",
+          "Balance": 459195.94,
+          "Sales/Purchase": "Purchase",
+          "Tax Code": "TC-3",
+          "Accrued Expenses": 38429.23,
+          "Bank Account": 110625,
+          "Treasury Fund": 9991
+        }
+      ]
+    },
+    "steel_plant_pdf": {
+      "file_size": "578KB",
+      "pages": "4220 lines",
+      "type": "PDF document"
+    }
+  },
+  "required_data": {
+    "Revenue-Related Parameters": {
+      "Revenue forecasts": {
+        "description": "Expected income from sales, broken down by product, geography, and customer segment",
+        "data_sources_needed": [
+          "Sales forecast data",
+          "Product-wise sales data",
+          "Geographic sales breakdown",
+          "Customer segment data"
+        ],
+        "current_availability": "Partial"
+      },
+      "Customer payment terms": {
+        "description": "Typical days sales outstanding (DSO), average payment delays",
+        "data_sources_needed": [
+          "Customer payment history",
+          "Invoice dates vs payment dates",
+          "Customer credit terms",
+          "Payment delay patterns"
+        ],
+        "current_availability": "Partial"
+      },
+      "Accounts receivable aging": {
+        "description": "Breakdown of receivables into current, 30-60-90+ day buckets",
+        "data_sources_needed": [
+          "AR aging reports",
+          "Invoice aging data",
+          "Collection probability data"
+        ],
+        "current_availability": "Available"
+      },
+      "Sales pipeline & backlog": {
+        "description": "Expected future revenues from open opportunities and signed contracts",
+        "data_sources_needed": [
+          "CRM pipeline data",
+          "Sales opportunity data",
+          "Contract backlog data",
+          "Deal stage information"
+        ],
+        "current_availability": "Missing"
+      },
+      "Seasonality factors": {
+        "description": "Historical revenue fluctuations due to seasonality",
+        "data_sources_needed": [
+          "Historical monthly/quarterly sales data",
+          "Seasonal trend analysis",
+          "Industry seasonal patterns"
+        ],
+        "current_availability": "Missing"
+      }
+    },
+    "Expense-Related Parameters": {
+      "Operating expenses (OPEX)": {
+        "description": "Fixed and variable costs, such as rent, salaries, utilities, etc.",
+        "data_sources_needed": [
+          "Detailed expense breakdown",
+          "Fixed vs variable cost classification",
+          "Department-wise expenses",
+          "Cost center data"
+        ],
+        "current_availability": "Partial"
+      },
+      "Accounts payable terms": {
+        "description": "Days payable outstanding (DPO), payment cycles to vendors",
+        "data_sources_needed": [
+          "Vendor payment history",
+          "Payment terms by vendor",
+          "DPO calculations",
+          "Vendor credit terms"
+        ],
+        "current_availability": "Available"
+      },
+      "Inventory turnover": {
+        "description": "Cash locked in inventory, including procurement and storage cycles",
+        "data_sources_needed": [
+          "Inventory levels data",
+          "Turnover ratios",
+          "Procurement cycles",
+          "Storage costs"
+        ],
+        "current_availability": "Missing"
+      },
+      "Loan repayments": {
+        "description": "Principal and interest payments due over the projection period",
+        "data_sources_needed": [
+          "Loan schedules",
+          "Interest rates",
+          "Payment due dates",
+          "Loan terms"
+        ],
+        "current_availability": "Partial"
+      },
+      "Tax obligations": {
+        "description": "Upcoming GST, VAT, income tax, or other regulatory payments",
+        "data_sources_needed": [
+          "Tax calendar",
+          "Tax rates",
+          "Payment schedules",
+          "Compliance requirements"
+        ],
+        "current_availability": "Missing"
+      }
+    },
+    "Cash Inflows & Outflows": {
+      "Cash inflow types": {
+        "description": "Customer payments, loans, investor funding, asset sales",
+        "data_sources_needed": [
+          "Cash inflow categorization",
+          "Payment source tracking",
+          "Funding sources"
+        ],
+        "current_availability": "Available"
+      },
+      "Cash outflow types": {
+        "description": "Payroll, vendors, tax, interest, dividends, repayments",
+        "data_sources_needed": [
+          "Cash outflow categorization",
+          "Payment destination tracking",
+          "Expense classification"
+        ],
+        "current_availability": "Available"
+      },
+      "Payment frequency & timing": {
+        "description": "Weekly/monthly/quarterly cycles, lags",
+        "data_sources_needed": [
+          "Payment timing patterns",
+          "Frequency analysis",
+          "Lag calculations"
+        ],
+        "current_availability": "Available"
+      }
+    },
+    "Operational & Business Drivers": {
+      "Inventory turnover": {
+        "description": "Cash locked in inventory and replenishment cycles",
+        "data_sources_needed": [
+          "Inventory data",
+          "Turnover metrics",
+          "Replenishment cycles"
+        ],
+        "current_availability": "Missing"
+      },
+      "Headcount plans": {
+        "description": "Hiring/firing impact on payroll and benefits",
+        "data_sources_needed": [
+          "HR planning data",
+          "Hiring forecasts",
+          "Salary projections",
+          "Benefits data"
+        ],
+        "current_availability": "Missing"
+      },
+      "Expansion plans": {
+        "description": "New markets, products, facilities, partnerships",
+        "data_sources_needed": [
+          "Strategic planning data",
+          "Market expansion plans",
+          "Product development roadmaps",
+          "Partnership agreements"
+        ],
+        "current_availability": "Missing"
+      },
+      "Marketing spend and ROI": {
+        "description": "Influences lead generation and revenue growth",
+        "data_sources_needed": [
+          "Marketing budget data",
+          "Campaign performance",
+          "ROI metrics",
+          "Lead generation data"
+        ],
+        "current_availability": "Missing"
+      }
+    },
+    "External Economic Variables": {
+      "Interest rates": {
+        "description": "Affects loan repayments and future borrowings",
+        "data_sources_needed": [
+          "Market interest rates",
+          "Central bank rates",
+          "Loan rate forecasts"
+        ],
+        "current_availability": "Missing"
+      },
+      "Inflation": {
+        "description": "Influences pricing, costs, and real cash value",
+        "data_sources_needed": [
+          "Inflation rate data",
+          "Price indices",
+          "Cost escalation factors"
+        ],
+        "current_availability": "Missing"
+      },
+      "Exchange rates": {
+        "description": "For multinational or export-driven businesses",
+        "data_sources_needed": [
+          "Currency exchange rates",
+          "Forex forecasts",
+          "International transaction data"
+        ],
+        "current_availability": "Missing"
+      },
+      "Tax rates and policies": {
+        "description": "VAT, GST, income tax changes or rebates",
+        "data_sources_needed": [
+          "Tax policy changes",
+          "Rate updates",
+          "Compliance requirements"
+        ],
+        "current_availability": "Missing"
+      }
+    },
+    "Enhanced Data Inputs": {
+      "Bank transaction feeds": {
+        "description": "Real-time bank statements (API integration) for actual cash positions",
+        "data_sources_needed": [
+          "Bank API integration",
+          "Real-time transaction feeds",
+          "Account balance data"
+        ],
+        "current_availability": "Available"
+      },
+      "Invoice-level granularity": {
+        "description": "Aging, status, expected collection date, client payment behavior",
+        "data_sources_needed": [
+          "Detailed invoice data",
+          "Collection tracking",
+          "Payment behavior analysis"
+        ],
+        "current_availability": "Partial"
+      },
+      "CRM integration": {
+        "description": "Deal stage, expected close dates, probability of win",
+        "data_sources_needed": [
+          "CRM system data",
+          "Sales pipeline",
+          "Deal tracking"
+        ],
+        "current_availability": "Missing"
+      },
+      "ERP & accounting systems": {
+        "description": "Real-time GL feeds, journal entries, budget vs actual",
+        "data_sources_needed": [
+          "ERP system integration",
+          "General ledger data",
+          "Budget vs actual reports"
+        ],
+        "current_availability": "Partial"
+      },
+      "Operational metrics": {
+        "description": "Production output, delivery lead times, procurement delays",
+        "data_sources_needed": [
+          "Production data",
+          "Supply chain metrics",
+          "Operational KPIs"
+        ],
+        "current_availability": "Missing"
+      }
+    }
+  },
+  "analysis_date": "2025-07-24T12:03:54.343081"
+}

@@ -1,0 +1,15 @@
+{
+  "total_datasets": 7,
+  "total_records": 3220,
+  "datasets": {
+    "sap_data": 450,
+    "bank_data": 500,
+    "production": 480,
+    "inventory": 460,
+    "customers": 450,
+    "suppliers": 400,
+    "operational": 480
+  },
+  "generated_date": "2025-07-24T11:34:20.552300",
+  "steel_plant_specific": true
+}
