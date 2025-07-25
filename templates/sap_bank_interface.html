@@ -2469,14 +2469,6 @@
 
     <!-- Main Container -->
     <div class="container">
-        <!-- Dashboard Title Section -->
-        <div class="dashboard-title-section">
-            <h1 class="dashboard-title">Reconciliation Dashboard</h1>
-            <p class="dashboard-subtitle">Advanced financial reconciliation with AI-powered transaction categorization and real-time insights.</p>
-        </div>
-
-
-
         <!-- Advanced Filters Section -->
         <div class="filters-section" id="filtersSection" style="display: none;">
             <div class="section-header">
@@ -3290,141 +3282,7 @@
             </div>
         </div>
 
-        <!-- Complete Bottom Dashboard Section -->
-        <div class="bottom-dashboard-section" style="margin-top: 3rem;">
-            <!-- Summary Cards Section -->
-            <div class="summary-cards-section bottom-dashboard">
-                <div class="section-header">
-                    <div class="section-title">
-                        <i class="fas fa-chart-bar"></i>
-                        <h2>Dashboard Overview</h2>
-                    </div>
-                </div>
-                <div class="section-content">
-                    <div class="summary-cards-grid">
-                        <div class="summary-card">
-                            <div class="card-header">
-                                <div class="card-icon">
-                                    <i class="fas fa-exchange-alt"></i>
-                                </div>
-                                <div class="card-trend positive">
-                                    <i class="fas fa-arrow-up"></i>
-                                    <span id="transactionsTrend">--</span>
-                                </div>
-                            </div>
-                            <div class="card-content">
-                                <div class="card-value" id="totalTransactions">--</div>
-                                <div class="card-label">Total Transactions</div>
-                            </div>
-                        </div>
-
-                        <div class="summary-card">
-                            <div class="card-header">
-                                <div class="card-icon">
-                                    <i class="fas fa-check-circle"></i>
-                                </div>
-                                <div class="card-trend positive">
-                                    <i class="fas fa-arrow-up"></i>
-                                    <span id="reconciledTrend">--</span>
-                                </div>
-                            </div>
-                            <div class="card-content">
-                                <div class="card-value" id="reconciledAmount">--</div>
-                                <div class="card-label">Reconciled Amount</div>
-                            </div>
-                        </div>
-
-                        <div class="summary-card">
-                            <div class="card-header">
-                                <div class="card-icon">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                </div>
-                                <div class="card-trend negative">
-                                    <i class="fas fa-arrow-down"></i>
-                                    <span id="pendingTrend">--</span>
-                                </div>
-                            </div>
-                            <div class="card-content">
-                                <div class="card-value" id="pendingReviews">--</div>
-                                <div class="card-label">Pending Reviews</div>
-                            </div>
-                        </div>
-
-                        <div class="summary-card">
-                            <div class="card-header">
-                                <div class="card-icon">
-                                    <i class="fas fa-users"></i>
-                                </div>
-                                <div class="card-trend positive">
-                                    <i class="fas fa-arrow-up"></i>
-                                    <span id="usersTrend">--</span>
-                                </div>
-                            </div>
-                            <div class="card-content">
-                                <div class="card-value" id="activeUsers">--</div>
-                                <div class="card-label">Active Users</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Recent Transactions Section -->
-            <div class="section-card" style="margin-top: 2rem;">
-                <div class="section-header">
-                    <div class="section-title">
-                        <i class="fas fa-check-circle"></i>
-                        <h2>Recent Transactions with AI Categorization</h2>
-                    </div>
-                </div>
-                <div class="section-content">
-                    <div class="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Transaction ID</th>
-                                    <th>Description</th>
-                                    <th>Amount</th>
-                                    <th>AI Category</th>
-                                    <th>Confidence</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="transactionsTableBody">
-                                <tr>
-                                    <td colspan="6" style="text-align:center; color: var(--text-secondary);">
-                                        <i class="fas fa-info-circle"></i> No recent transactions to display. Upload files to see transaction data.
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Action Buttons (All together at the bottom) -->
-            <div class="summary-actions" style="margin-top: 2rem;">
-                <button class="btn btn-outline" onclick="toggleFilters()">
-                    <i class="fas fa-filter"></i>
-                    Advanced Filters
-                </button>
-                <button class="btn btn-outline" onclick="toggleCharts()">
-                    <i class="fas fa-chart-pie"></i>
-                    Analytics Dashboard
-                </button>
-                <button class="btn btn-outline" onclick="toggleAnalytics()">
-                    <i class="fas fa-analytics"></i>
-                    Advanced Analytics
-                </button>
-                <button class="btn btn-outline" onclick="exportData()">
-                    <i class="fas fa-download"></i>
-                    Export Data
-                </button>
-                <button class="btn btn-outline" onclick="refreshData()">
-                    <i class="fas fa-sync-alt"></i>
-                    Refresh
-                </button>
-            </div>
+        
         </div>
     </div>
 
@@ -3543,18 +3401,32 @@
 
 
         function enablePredictionButtons() {
+            console.log(' Enabling prediction buttons...');
             // Enable all prediction buttons after reconciliation is completed
             const anomalyBtn = document.getElementById('anomalyDetectionBtn');
             const duplicateBtn = document.getElementById('duplicateDetectionBtn');
             const cashflowBtn = document.getElementById('cashflowForecastBtn');
             const paymentDelayBtn = document.getElementById('paymentDelayBtn');
             
-            if (anomalyBtn) anomalyBtn.disabled = false;
+            console.log(' Found buttons:', {
+                anomalyBtn: !!anomalyBtn,
+                duplicateBtn: !!duplicateBtn,
+                cashflowBtn: !!cashflowBtn,
+                paymentDelayBtn: !!paymentDelayBtn
+            });
+            
+            if (anomalyBtn) {
+                anomalyBtn.disabled = false;
+                console.log(' Enabled anomaly detection button');
+            } else {
+                console.log(' Anomaly detection button not found');
+            }
             if (duplicateBtn) duplicateBtn.disabled = false;
             if (cashflowBtn) cashflowBtn.disabled = false;
             if (paymentDelayBtn) paymentDelayBtn.disabled = false;
             
             showAlert('AI Predictions are now available!', 'success');
+            console.log(' All prediction buttons enabled!');
         }
         
         async function uploadFiles() {
@@ -3593,6 +3465,7 @@
                     
                     filesProcessed = false;
                     document.getElementById('reconcileBtn').disabled = false;
+                    enablePredictionButtons(); // Enable AI buttons immediately after upload
                 } else {
                     showAlert(`Upload Error: ${data.error}`, 'error');
                 }
@@ -5176,11 +5049,19 @@ async function downloadOrphanedPaymentsEnhanced() {
         }
 
         function formatCategoryWithAI(category) {
-            if (category.includes('(AI)')) {
-                const baseCategory = category.replace(' (AI)', '');
-                return `${baseCategory} <span style="background: #9b59b6; color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.7em; font-weight: bold;">🤖 AI</span>`;
+            if (category.includes('(AI)') || category.includes('(ML)')) {
+                const baseCategory = category.replace(' (AI)', '').replace(' (ML)', '');
+                return `${baseCategory} <span style="background: #9b59b6; color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.7em; font-weight: bold;">�� AI/ML</span>`;
+            } else if (category.includes('(Local AI)')) {
+                const baseCategory = category.replace(' (Local AI)', '');
+                return `${baseCategory} <span style="background: #e74c3c; color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.7em; font-weight: bold;">�� Local AI</span>`;
+            } else if (category.includes('(Rule)')) {
+                const baseCategory = category.replace(' (Rule)', '');
+                return `${baseCategory} <span style="background: #17a2b8; color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.7em; font-weight: bold;">📋 RULE</span>`;
+            } else {
+                // Default case - assume it's AI/ML if no specific label
+                return `${category} <span style="background: #9b59b6; color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.7em; font-weight: bold;">�� AI/ML</span>`;
             }
-            return `${category} <span style="background: #17a2b8; color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.7em; font-weight: bold;">📋 RULE</span>`;
         }
 
         function initializeCategoryTabs() {
