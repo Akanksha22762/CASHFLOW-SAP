@@ -3683,8 +3683,8 @@
                 if (data.status === 'success') {
                             // The forecast data is nested under 'forecast' key
         const forecastData = data.forecast || data;
-        console.log('Forecast data structure:', Object.keys(forecastData));
-        console.log('Summary data:', forecastData.summary);
+                    console.log('Forecast data structure:', Object.keys(forecastData));
+                    console.log('Summary data:', forecastData.summary);
                     
                     // Show immediate success message
                     showAlert('✅ Forecast generated! Check console for details.', 'success');
@@ -3692,10 +3692,10 @@
 
                     
                     // Try to show the original comprehensive display first
-                            console.log('Showing comprehensive forecast results...');
+                    console.log('Showing comprehensive forecast results...');
         console.log('Full response data:', data);
-        console.log('Forecast data:', forecastData);
-        console.log('Summary data:', forecastData.summary);
+                    console.log('Forecast data:', forecastData);
+                    console.log('Summary data:', forecastData.summary);
         console.log('Data source:', data.data_source);
         console.log('Data points:', data.data_points);
                     
@@ -4034,14 +4034,14 @@
             popup.document.close();
             
             showAlert('✅ Forecast generated! Check popup for basic results.', 'success');
-            return;
-        }
+                return;
+            }
             
-                    // Show backdrop and results area
-        if (backdrop) backdrop.classList.add('show');
-        resultsArea.classList.add('show');
-        resultsHeader.style.display = 'flex';
-        resultsTitle.innerHTML = '<i class="fas fa-chart-line text-primary"></i> Cash Flow Forecast Dashboard';
+            // Show backdrop and results area
+            if (backdrop) backdrop.classList.add('show');
+            resultsArea.classList.add('show');
+            resultsHeader.style.display = 'flex';
+            resultsTitle.innerHTML = '<i class="fas fa-chart-line text-primary"></i> Cash Flow Forecast Dashboard';
         
         // Use the correct data structure
         const summary = summaryData;

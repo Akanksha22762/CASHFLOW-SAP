@@ -16,7 +16,18 @@ from openai import OpenAI
 import json
 from typing import Dict, List, Optional, Union, Any
 import warnings
-
+def normalize_category(category):
+    """
+    Normalize category names to match the keys in cash_flow_categories.
+    Strips any (AI) or similar suffixes.
+    """
+    if not category:
+        return 'Operating Activities'
+    if 'Investing' in category:
+        return 'Investing Activities'
+    if 'Financing' in category:
+        return 'Financing Activities'
+    return 'Operating Activities'
 # Advanced AI/ML Libraries
 try:
     from sklearn.ensemble import IsolationForest, RandomForestClassifier
@@ -2402,7 +2413,7 @@ def enhanced_vendor_cashflow_breakdown_fixed(df, vendor_data, use_ai=True):
         
         # Sum by category for this vendor
         for _, row in vendor_df.iterrows():
-            category = row.get('Category', 'Operating Activities')
+            category = normalize_category(row.get('Category', 'Operating Activities'))
             amount = float(row.get('Amount', 0))
             cash_flow_categories[category] = float(cash_flow_categories[category]) + amount
         
@@ -2421,7 +2432,7 @@ def enhanced_vendor_cashflow_breakdown_fixed(df, vendor_data, use_ai=True):
                 'Description': row['Description'],
                 'Amount': row['Amount'],
                 'Date': row.get('Date', ''),
-                'Category': row.get('Category', ''),
+                'Category': normalize_category(row.get('Category', '')),
                 'Type': row.get('Type', ''),
                 'Status': row.get('Status', ''),
                 'Cash_Flow_Direction': 'Inflow' if row['Amount'] > 0 else 'Outflow'
@@ -3022,7 +3033,7 @@ def standardize_cash_flow_categorization(df):
         ]
         
         # Check if category already exists and is valid
-        existing_category = row.get('Category', '')
+        existing_category = normalize_category(row.get('Category', ''))
         if existing_category and 'Operating Activities' in existing_category:
             category = existing_category
         elif existing_category and 'Investing Activities' in existing_category:
@@ -3078,7 +3089,7 @@ def unified_cash_flow_analysis(df, include_vendor_mapping=False, vendor_data=Non
                 'Description': row.get('Description', ''),
                 'Amount': row.get('Amount', 0),
                 'Date': row.get('Date', ''),
-                'Category': row.get('Category', category),
+                'Category': normalize_category(row.get('Category', category)),
                 'Type': row.get('Type', ''),
                 'Status': row.get('Status', ''),
                 'Cash_Flow_Direction': 'Inflow' if row.get('Amount', 0) > 0 else 'Outflow'
@@ -3110,7 +3121,7 @@ def apply_perfect_cash_flow_signs(df):
     
     for idx, row in df_copy.iterrows():
         description = str(row['Description']).lower() if 'Description' in row and pd.notna(row['Description']) else ""
-        category = row.get('Category', 'Operating Activities')
+        category = normalize_category(row.get('Category', 'Operating Activities'))
         amount = abs(float(row['Amount']))  # Always start with absolute value
         
         # FINANCING ACTIVITIES LOGIC
@@ -3209,7 +3220,7 @@ def generate_category_wise_breakdown(df, breakdown_type=""):
                 'Description': row.get('Description', ''),
                 'Amount': row.get('Amount', 0),
                 'Date': row.get('Date', ''),
-                'Category': row.get('Category', category)
+                'Category': normalize_category(row.get('Category', category))
             }
             
             # Add additional fields based on breakdown type
@@ -3539,7 +3550,7 @@ def calculate_aging_analysis(df, date_column='Date', amount_column='Amount'):
                     'Date': row.get('Date', ''),
                     'Days_Old': days_old,
                     'Status': row.get('Status', ''),
-                    'Category': row.get('Category', ''),
+                    'Category': normalize_category(row.get('Category', '')),
                     'Reference': row.get('Reference', '')
                 }
                 
@@ -3627,7 +3638,7 @@ def generate_ap_analysis(sap_df):
                         'Amount': abs(float(row.get('Amount', 0))),
                         'Date': str(row.get('Date', '2023-01-01')),
                         'Status': str(row.get('Status', 'Pending')),
-                        'Category': str(row.get('Category', 'Operating Activities'))
+                        'Category': str(normalize_category(row.get('Category', 'Operating Activities')))
                     })
         
         # Strategy 2: Look for expense/cost patterns in description columns
@@ -3654,7 +3665,7 @@ def generate_ap_analysis(sap_df):
                                 'Amount': abs(float(row.get('Amount', 0))),
                                 'Date': str(row.get('Date', '2023-01-01')),
                                 'Status': 'Paid' if any(word in desc.lower() for word in ['paid', 'settled']) else 'Pending',
-                                'Category': str(row.get('Category', 'Operating Activities'))
+                                'Category': str(normalize_category(row.get('Category', 'Operating Activities')))
                             })
         
         # Strategy 3: Use negative amounts as potential AP
@@ -3671,7 +3682,7 @@ def generate_ap_analysis(sap_df):
                         'Amount': abs(float(row.get('Amount', 0))),
                         'Date': str(row.get('Date', '2023-01-01')),
                         'Status': 'Pending',
-                        'Category': str(row.get('Category', 'Operating Activities'))
+                        'Category': str(normalize_category(row.get('Category', 'Operating Activities')))
                     })
         
         # Strategy 4: If still no AP data, create from largest amounts (likely expenses)
@@ -3691,7 +3702,7 @@ def generate_ap_analysis(sap_df):
                     'Amount': abs(float(row.get('Amount', 1000 * (i+1)))),
                     'Date': str(row.get('Date', '2023-01-01')),
                     'Status': 'Pending' if i % 2 == 0 else 'Paid',
-                    'Category': str(row.get('Category', 'Operating Activities'))
+                    'Category': str(normalize_category(row.get('Category', 'Operating Activities')))
                 })
         
         # Convert to DataFrame
@@ -4102,13 +4113,13 @@ def match_invoices_to_payments(sap_df, bank_df):
             
             # ULTRA-FLEXIBLE SCORING SYSTEM
             match_score = 0
-            
+                
             # 1. Reference number matching (50% weight if found)
             ref_matches = len(set(invoice_refs) & set(payment_refs))
             if ref_matches > 0:
                 match_score += 0.5 * ref_matches
                 print(f"🔗 Reference match found: {invoice_refs} ↔ {payment_refs}")
-            
+                
             # 2. Amount matching (very flexible - 30% weight)
             if invoice_amount > 0 and payment_amount > 0:
                 amount_diff_pct = abs(invoice_amount - payment_amount) / max(invoice_amount, payment_amount)
@@ -4122,11 +4133,11 @@ def match_invoices_to_payments(sap_df, bank_df):
                     match_score += 0.15
                 elif amount_diff_pct <= 0.5:   # Within 50%
                     match_score += 0.1
-            
+                
             # 3. Description similarity (20% weight)
             desc_similarity = SequenceMatcher(None, invoice_desc, payment_desc).ratio()
             match_score += 0.2 * desc_similarity
-            
+                
             # 4. Common words in descriptions (10% weight)
             invoice_words = set(invoice_desc.split())
             payment_words = set(payment_desc.split())
@@ -4134,7 +4145,7 @@ def match_invoices_to_payments(sap_df, bank_df):
             if len(common_words) > 0:
                 word_score = min(len(common_words) / max(len(invoice_words), len(payment_words)), 1.0)
                 match_score += 0.1 * word_score
-            
+                
             # 5. Date proximity bonus (10% weight)
             try:
                 if 'Date' in invoice and 'Date' in payment:
@@ -4151,16 +4162,16 @@ def match_invoices_to_payments(sap_df, bank_df):
                         match_score += 0.03
             except:
                 pass
-            
+                
             # 6. Special pattern bonuses
             # Customer/vendor name matching
             customer_patterns = ['customer', 'client', 'buyer', 'purchaser']
             vendor_patterns = ['vendor', 'supplier', 'seller', 'contractor']
-            
+                
             if any(pattern in invoice_desc for pattern in customer_patterns) and \
                any(pattern in payment_desc for pattern in customer_patterns):
                 match_score += 0.05
-            
+                
             if any(pattern in invoice_desc for pattern in vendor_patterns) and \
                any(pattern in payment_desc for pattern in vendor_patterns):
                 match_score += 0.05
@@ -4173,13 +4184,7 @@ def match_invoices_to_payments(sap_df, bank_df):
         
         # MUCH MORE LENIENT MATCHING THRESHOLD
         if best_payment_match is not None and best_match_score >= 0.15:  # Only 15% threshold!
-            payment_delay = calculate_payment_delay(
-                invoice.get('Date', ''), 
-                best_payment_match.get('Date', '')
-            )
-            
             matched_invoice_payments.append({
-                'Invoice_Description': invoice['Description'],
                 'Invoice_Amount': invoice['Amount'],
                 'Invoice_Date': invoice.get('Date', ''),
                 'Invoice_Category': invoice.get('Category', 'Operating Activities'),
@@ -4190,7 +4195,7 @@ def match_invoices_to_payments(sap_df, bank_df):
                 'Payment_Date': best_payment_match.get('Date', ''),
                 'Payment_Source': best_payment_match.get('Payment_Source', 'Unknown'),
                 'Match_Score': round(best_match_score, 3),
-                'Payment_Delay_Days': payment_delay,
+                'Payment_Delay_Days': calculate_payment_delay(invoice.get('Date', ''), best_payment_match.get('Date', '')),
                 'Amount_Difference': abs(float(invoice['Amount']) - float(best_payment_match['Amount'])),
                 'Invoice_References': ', '.join(invoice_refs) if invoice_refs else 'None',
                 'Payment_References': ', '.join(extract_invoice_references(best_payment_match['Description'])) if extract_invoice_references(best_payment_match['Description']) else 'None',
@@ -4314,7 +4319,7 @@ def create_enhanced_sample_data(sap_df, bank_df):
                 'Invoice_Description': f"Sample Invoice: {sap_row['Description'][:50]}",
                 'Invoice_Amount': abs(float(sap_row['Amount'])),
                 'Invoice_Date': sap_row.get('Date', '2024-01-01'),
-                'Invoice_Category': sap_row.get('Category', 'Operating Activities'),
+                'Invoice_Category': normalize_category(sap_row.get('Category', 'Operating Activities')),
                 'Invoice_Type': 'Sample Invoice',
                 'Invoice_Status': 'Paid',
                 'Payment_Description': f"Payment for: {bank_row['Description'][:50]}",
@@ -4339,7 +4344,7 @@ def create_enhanced_sample_data(sap_df, bank_df):
                 'Invoice_Description': f"Outstanding: {sap_row['Description'][:50]}",
                 'Invoice_Amount': abs(float(sap_row['Amount'])),
                 'Invoice_Date': sap_row.get('Date', '2024-01-01'),
-                'Invoice_Category': sap_row.get('Category', 'Operating Activities'),
+                'Invoice_Category': normalize_category(sap_row.get('Category', 'Operating Activities')),
                 'Invoice_Type': 'Outstanding Invoice',
                 'Invoice_Status': 'Outstanding',
                 'Days_Outstanding': 15 + (i * 10),
@@ -4605,20 +4610,20 @@ def minimal_standardize_columns(df):
             print(f"💰 FOUND AMOUNT COLUMN: {col}")
         
         # FORCE DATE COLUMN
-        elif col_lower == 'date':
             date_column = col
+            print(f"📅 FOUND DATE COLUMN: {col}")
             print(f"📅 FOUND DATE COLUMN: {col}")
     
     # FALLBACK DETECTION if exact matches not found
     if not description_column:
         for col in df.columns:
             col_lower = str(col).lower()
-            if df[col].dtype == 'object' and 'description' in col_lower:
+            if 'desc' in col_lower or 'note' in col_lower or 'memo' in col_lower:
+                description_column = col
+            if 'desc' in col_lower or 'note' in col_lower or 'memo' in col_lower:
                 description_column = col
                 print(f"🔍 FALLBACK DESCRIPTION: {col}")
                 break
-    
-    if not amount_column:
         for col in df.columns:
             if df[col].dtype in ['int64', 'float64', 'int32', 'float32']:
                 amount_column = col
@@ -9273,7 +9278,7 @@ def anomaly_detection_endpoint():
                     if vendor_col:
                         for _, row in vendor_df.iterrows():
                             vendor_data[row[vendor_col]] = {
-                                'category': row.get('Category', 'Unknown'),
+                                'category': normalize_category(row.get('Category', 'Unknown')),
                                 'payment_terms': row.get('Payment Terms', 'Standard')
                             }
                     print(f"✅ Loaded vendor data from: {master_files[0]}")
@@ -9390,7 +9395,7 @@ def download_anomaly_report():
                     if vendor_col:
                         for _, row in vendor_df.iterrows():
                             vendor_data[row[vendor_col]] = {
-                                'category': row.get('Category', 'Unknown'),
+                                'category': normalize_category(row.get('Category', 'Unknown')),
                                 'payment_terms': row.get('Payment Terms', 'Standard')
                             }
             
@@ -9940,8 +9945,31 @@ def test_ollama_integration():
             'message': str(e)
         }), 500
 
+@app.route('/test-console', methods=['GET'])
+def test_console_output():
+    """Test console output - this will show in your command prompt"""
+    print("🔍 TEST CONSOLE OUTPUT ROUTE CALLED!")
+    print("📝 This should appear in your command prompt immediately")
+    print("⏰ Timestamp:", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    
+    # Simulate some processing
+    for i in range(5):
+        print(f"   Processing step {i+1}/5...")
+        time.sleep(0.5)
+    
+    print("✅ Console output test completed!")
+    
+    return jsonify({
+        'status': 'success',
+        'message': 'Console output test completed - check your command prompt!',
+        'timestamp': datetime.now().isoformat()
+    })
+
 if __name__ == '__main__':
     print("🚀 Starting Cash Flow SAP Bank System with Ollama Integration...")
     print(f"🤖 Local AI Available: True")
     print(f"🦙 Ollama Available: {OLLAMA_AVAILABLE}")
-    app.run(debug=True, use_reloader=False, threaded=True)
+    print("📝 Console output enabled - you'll see detailed processing information")
+    print("🌐 Server will start on http://localhost:5000")
+    print("=" * 60)
+    app.run(debug=True, use_reloader=False, threaded=True, host='0.0.0.0', port=5000)
