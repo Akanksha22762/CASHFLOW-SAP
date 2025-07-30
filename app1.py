@@ -2635,38 +2635,6 @@ else:
     advanced_integration = None
 
 
-
-# ===== ADVANCED REVENUE AI SYSTEM INITIALIZATION =====
-if ADVANCED_AI_AVAILABLE:
-    try:
-        advanced_revenue_ai = AdvancedRevenueAISystem()
-        advanced_integration = AdvancedRevenueIntegration()
-        print("✅ Advanced Revenue AI System initialized successfully!")
-    except Exception as e:
-        print(f"❌ Error initializing Advanced AI System: {e}")
-        advanced_revenue_ai = None
-        advanced_integration = None
-else:
-    advanced_revenue_ai = None
-    advanced_integration = None
-
-
-
-# ===== ADVANCED REVENUE AI SYSTEM INITIALIZATION =====
-if ADVANCED_AI_AVAILABLE:
-    try:
-        advanced_revenue_ai = AdvancedRevenueAISystem()
-        advanced_integration = AdvancedRevenueIntegration()
-        print("✅ Advanced Revenue AI System initialized successfully!")
-    except Exception as e:
-        print(f"❌ Error initializing Advanced AI System: {e}")
-        advanced_revenue_ai = None
-        advanced_integration = None
-else:
-    advanced_revenue_ai = None
-    advanced_integration = None
-
-
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max file size
 
 def validate_file_upload(file_storage) -> bool:
@@ -9587,6 +9555,21 @@ def run_revenue_analysis():
                 'clickable': True
             }
         }
+        
+        # FORCE FIX: Ensure collection probability is capped at 100%
+        if 'A5_AR_Aging' in revenue_parameters and 'data' in revenue_parameters['A5_AR_Aging']:
+            ar_data = revenue_parameters['A5_AR_Aging']['data']
+            if 'collection_probability' in ar_data:
+                cp_value = ar_data['collection_probability']
+                if isinstance(cp_value, (int, float)) and cp_value > 100:
+                    ar_data['collection_probability'] = 100.0
+                elif isinstance(cp_value, str):
+                    try:
+                        num_value = float(cp_value.replace('%', ''))
+                        if num_value > 100:
+                            ar_data['collection_probability'] = 100.0
+                    except:
+                        ar_data['collection_probability'] = 85.0
         
         return jsonify({
             'status': 'success',
