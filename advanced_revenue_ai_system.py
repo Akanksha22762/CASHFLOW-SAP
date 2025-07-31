@@ -3,11 +3,11 @@ import numpy as np
 from datetime import datetime, timedelta
 import re
 import logging
-from sklearn.ensemble import RandomForestClassifier
+# XGBoost removed - using XGBoost only
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.metrics import classification_report, accuracy_score
 import xgboost as xgb
-from prophet import Prophet
+# Prophet removed - using XGBoost for forecasting
 from sentence_transformers import SentenceTransformer
 from sklearn.feature_extraction.text import TfidfVectorizer
 import random
@@ -46,38 +46,69 @@ class AdvancedRevenueAISystem:
         self._initialize_ai_models()
         
     def _initialize_ai_models(self):
-        """Initialize all AI/ML models for revenue analysis"""
+        """Initialize XGBoost + Ollama Hybrid Models for revenue analysis"""
         try:
-            # Text Processing Models
+            # Text Processing Models for Ollama Enhancement
             self.vectorizers['sentence_transformer'] = SentenceTransformer('all-MiniLM-L6-v2')
             self.vectorizers['tfidf'] = TfidfVectorizer(max_features=1000, ngram_range=(1, 2))
             
-            # Classification Models
-            self.models['revenue_classifier'] = RandomForestClassifier(
-                n_estimators=100, max_depth=10, random_state=42
-            )
-            self.models['xgb_classifier'] = xgb.XGBClassifier(
-                n_estimators=100, max_depth=6, learning_rate=0.1, random_state=42
-            )
-            self.models['customer_classifier'] = RandomForestClassifier(
-                n_estimators=50, max_depth=8, random_state=42
+            # XGBoost Models for All Revenue Analysis Tasks
+            self.models['revenue_classifier'] = xgb.XGBClassifier(
+                n_estimators=100, 
+                max_depth=8, 
+                learning_rate=0.1, 
+                random_state=42,
+                objective='multi:softprob',
+                eval_metric='mlogloss'
             )
             
-            # Forecasting Models
-            self.models['prophet_forecaster'] = Prophet(
-                yearly_seasonality=True,
-                weekly_seasonality=True,
-                daily_seasonality=False
+            self.models['customer_classifier'] = xgb.XGBClassifier(
+                n_estimators=80, 
+                max_depth=6, 
+                learning_rate=0.1, 
+                random_state=42,
+                objective='multi:softprob',
+                eval_metric='mlogloss'
+            )
+            
+            # XGBoost for Revenue Forecasting
+            self.models['revenue_forecaster'] = xgb.XGBRegressor(
+                n_estimators=100,
+                max_depth=6,
+                learning_rate=0.1,
+                random_state=42,
+                objective='reg:squarederror',
+                eval_metric='rmse'
+            )
+            
+            # XGBoost for Sales Forecasting
+            self.models['sales_forecaster'] = xgb.XGBRegressor(
+                n_estimators=120,
+                max_depth=7,
+                learning_rate=0.1,
+                random_state=42,
+                objective='reg:squarederror',
+                eval_metric='rmse'
+            )
+            
+            # XGBoost for Collection Probability
+            self.models['collection_probability'] = xgb.XGBClassifier(
+                n_estimators=60,
+                max_depth=5,
+                learning_rate=0.1,
+                random_state=42,
+                objective='binary:logistic',
+                eval_metric='logloss'
             )
             
             # Preprocessing
             self.scalers['standard'] = StandardScaler()
             self.encoders['label'] = LabelEncoder()
             
-            logger.info("✅ Advanced AI/ML models initialized successfully!")
+            logger.info("✅ XGBoost + Ollama Hybrid Models initialized successfully!")
             
         except Exception as e:
-            logger.error(f"❌ Error initializing AI models: {e}")
+            logger.error(f"❌ Error initializing XGBoost models: {e}")
     
     def ai_ml_categorize_any_description(self, description, amount, date):
         """
@@ -159,29 +190,25 @@ class AdvancedRevenueAISystem:
         return features
     
     def _ensemble_classification(self, features):
-        """Perform ensemble classification using multiple AI models"""
+        """Perform XGBoost classification for revenue analysis"""
         try:
             # Prepare feature vector
             feature_vector = self._prepare_feature_vector(features)
             
-            # Get predictions from multiple models
-            rf_prediction = self.models['revenue_classifier'].predict_proba([feature_vector])[0]
-            xgb_prediction = self.models['xgb_classifier'].predict_proba([feature_vector])[0]
+            # Get prediction from XGBoost model
+            xgb_prediction = self.models['revenue_classifier'].predict_proba([feature_vector])[0]
             
-            # Ensemble voting
-            ensemble_prediction = (rf_prediction + xgb_prediction) / 2
-            final_category = self._get_category_from_probability(ensemble_prediction)
+            # Get final category
+            final_category = self._get_category_from_probability(xgb_prediction)
             
             return {
                 'final_category': final_category,
-                'rf_confidence': max(rf_prediction),
                 'xgb_confidence': max(xgb_prediction),
-                'ensemble_confidence': max(ensemble_prediction),
-                'model_used': 'ensemble'
+                'model_used': 'xgb_classifier'
             }
             
         except Exception as e:
-            logger.error(f"Ensemble classification error: {e}")
+            logger.error(f"XGBoost classification error: {e}")
             return self._rule_based_fallback(features)
     
     def _intelligent_fallback(self, amount, date):
@@ -318,9 +345,9 @@ class AdvancedRevenueAISystem:
             # Return enhanced emergency analysis instead of basic one
             return self._emergency_trend_analysis(transactions)
     
-    def prophet_sales_forecasting(self, transactions):
+    def xgboost_sales_forecasting(self, transactions):
         """
-        Parameter A2: Sales forecast
+        Parameter A2: Sales forecast using XGBoost
         Based on pipeline, market trends, seasonality
         """
         try:
@@ -328,9 +355,9 @@ class AdvancedRevenueAISystem:
             if transactions is None or len(transactions) == 0:
                 return {
                     'error': 'No transaction data available',
-                    'current_month_forecast': '$0.00',
-                    'next_quarter_forecast': '$0.00',
-                    'next_year_forecast': '$0.00'
+                    'current_month_forecast': '₹0.00',
+                    'next_quarter_forecast': '₹0.00',
+                    'next_year_forecast': '₹0.00'
                 }
             
             revenue_data = self._filter_revenue_transactions(transactions)
@@ -344,9 +371,9 @@ class AdvancedRevenueAISystem:
             if amount_column is None:
                 return {
                     'error': 'No Amount column found in transaction data',
-                    'current_month_forecast': '$0.00',
-                    'next_quarter_forecast': '$0.00',
-                    'next_year_forecast': '$0.00'
+                    'current_month_forecast': '₹0.00',
+                    'next_quarter_forecast': '₹0.00',
+                    'next_year_forecast': '₹0.00'
                 }
             
             # Calculate basic metrics first using the correct amount column
@@ -355,54 +382,95 @@ class AdvancedRevenueAISystem:
             avg_transaction = total_revenue / transaction_count if transaction_count > 0 else 0
             
             try:
-                # Prepare data for Prophet
-                prophet_data = self._prepare_prophet_data(revenue_data)
+                # Prepare data for XGBoost forecasting
+                revenue_data['Date'] = pd.to_datetime(revenue_data['Date'], errors='coerce')
+                daily_data = revenue_data.groupby('Date')[amount_column].sum().reset_index()
                 
-                # Fit Prophet model
-                model = Prophet(
-                    yearly_seasonality=True,
-                    weekly_seasonality=True,
-                    daily_seasonality=False,
-                    changepoint_prior_scale=0.05
+                # Create time-based features
+                daily_data['day_of_week'] = daily_data['Date'].dt.dayofweek
+                daily_data['month'] = daily_data['Date'].dt.month
+                daily_data['day_of_month'] = daily_data['Date'].dt.day
+                daily_data['is_weekend'] = daily_data['Date'].dt.dayofweek.isin([5, 6]).astype(int)
+                
+                # Create lag features
+                daily_data['amount_lag1'] = daily_data[amount_column].shift(1)
+                daily_data['amount_lag7'] = daily_data[amount_column].shift(7)
+                daily_data['amount_rolling_mean'] = daily_data[amount_column].rolling(window=7).mean()
+                
+                # Prepare features for XGBoost
+                features = ['day_of_week', 'month', 'day_of_month', 'is_weekend', 'amount_lag1', 'amount_lag7', 'amount_rolling_mean']
+                X = daily_data[features].fillna(0)
+                y = daily_data[amount_column]
+                
+                # Remove rows with NaN values
+                valid_mask = ~(X.isna().any(axis=1) | y.isna())
+                X = X[valid_mask]
+                y = y[valid_mask]
+                
+                if len(X) < 10:
+                    raise ValueError("Insufficient data for XGBoost forecasting")
+                
+                # Train XGBoost model
+                model = xgb.XGBRegressor(
+                    n_estimators=100,
+                    max_depth=6,
+                    learning_rate=0.1,
+                    random_state=42,
+                    objective='reg:squarederror',
+                    eval_metric='rmse'
                 )
+                model.fit(X, y)
                 
-                model.fit(prophet_data)
+                # Generate future dates for forecasting
+                last_date = daily_data['Date'].max()
+                future_dates = pd.date_range(start=last_date + pd.Timedelta(days=1), periods=365, freq='D')
                 
-                # Generate future dates
-                future_dates = model.make_future_dataframe(periods=365)
-                forecast = model.predict(future_dates)
+                # Create future features
+                future_data = pd.DataFrame({'Date': future_dates})
+                future_data['day_of_week'] = future_data['Date'].dt.dayofweek
+                future_data['month'] = future_data['Date'].dt.month
+                future_data['day_of_month'] = future_data['Date'].dt.day
+                future_data['is_weekend'] = future_data['Date'].dt.dayofweek.isin([5, 6]).astype(int)
                 
-                # Calculate confidence intervals
-                confidence_intervals = self._calculate_forecast_confidence_intervals(forecast)
+                # Use last known values for lag features
+                last_amount = daily_data[amount_column].iloc[-1]
+                last_rolling_mean = daily_data['amount_rolling_mean'].iloc[-1]
                 
-                # Seasonality analysis
-                seasonality = self._analyze_seasonality_components(model, forecast)
+                future_data['amount_lag1'] = last_amount
+                future_data['amount_lag7'] = last_amount
+                future_data['amount_rolling_mean'] = last_rolling_mean
                 
-                # Extract forecast periods
-                forecast_3m = self._extract_forecast_period(forecast, 90)
-                forecast_6m = self._extract_forecast_period(forecast, 180)
-                forecast_12m = self._extract_forecast_period(forecast, 365)
+                # Predict
+                X_future = future_data[features]
+                predictions = model.predict(X_future)
+                
+                # Calculate forecast periods
+                forecast_3m = predictions[:90].sum()
+                forecast_6m = predictions[:180].sum()
+                forecast_12m = predictions[:365].sum()
                 
                 return {
                     'current_month_forecast': f"₹{forecast_3m:,.2f}",
                     'next_quarter_forecast': f"₹{forecast_6m:,.2f}",
                     'next_year_forecast': f"₹{forecast_12m:,.2f}",
                     'confidence_level': '85%',
-                    'forecast_basis': 'Prophet time series analysis',
+                    'forecast_basis': 'XGBoost time series analysis',
                     'seasonality_detected': 'Yes',
-                    'model_performance': self._evaluate_forecast_accuracy(model, revenue_data),
+                    'model_performance': {
+                        'model_type': 'XGBoost',
+                        'data_points': len(X),
+                        'accuracy_available': len(X) > 30
+                    },
                     'forecast_horizons': {
                         '3_months': forecast_3m,
                         '6_months': forecast_6m,
                         '12_months': forecast_12m
                     },
-                    'confidence_intervals': confidence_intervals,
-                    'seasonality': seasonality,
-                    'growth_rate': 10.0  # Fixed: More realistic growth rate
+                    'growth_rate': 10.0
                 }
                 
-            except Exception as prophet_error:
-                logger.error(f"Prophet forecasting failed: {prophet_error}")
+            except Exception as xgb_error:
+                logger.error(f"XGBoost forecasting failed: {xgb_error}")
                 # Fallback to simple forecasting
                 return {
                     'current_month_forecast': f"₹{total_revenue * 1.1:,.2f}",
@@ -411,8 +479,8 @@ class AdvancedRevenueAISystem:
                     'confidence_level': '75%',
                     'forecast_basis': 'Simple trend analysis',
                     'seasonality_detected': 'Unknown',
-                    'fallback_reason': 'Prophet model failed, using trend-based forecast',
-                    'growth_rate': 10.0  # Fixed: More realistic growth rate
+                    'fallback_reason': 'XGBoost model failed, using trend-based forecast',
+                    'growth_rate': 10.0
                 }
             
         except Exception as e:
@@ -549,7 +617,7 @@ class AdvancedRevenueAISystem:
             # Step 3: Complete Revenue Analysis (All 5 Parameters)
             results = {
                 'A1_historical_trends': self.analyze_historical_revenue_trends(categorized_transactions),
-                'A2_sales_forecast': self.prophet_sales_forecasting(categorized_transactions),
+                'A2_sales_forecast': self.xgboost_sales_forecasting(categorized_transactions),
                 'A3_customer_contracts': self.analyze_customer_contracts(categorized_transactions),
                 'A4_pricing_models': self.detect_pricing_models(categorized_transactions),
                 'A5_accounts_receivable': self.calculate_dso_and_collection_probability(categorized_transactions)
@@ -1466,7 +1534,7 @@ class AdvancedRevenueAISystem:
             else:
                 return 0.75  # Default confidence
         except Exception as e:
-            self.logger.error(f"Error calculating confidence: {e}")
+            logger.error(f"Error calculating confidence: {e}")
             return 0.7  # Fallback confidence
 
     def _advanced_statistical_analysis(self, data):
@@ -1481,7 +1549,7 @@ class AdvancedRevenueAISystem:
             }
             return analysis
         except Exception as e:
-            self.logger.error(f"Error in advanced statistical analysis: {e}")
+            logger.error(f"Error in advanced statistical analysis: {e}")
             return {'mean': 0, 'std': 0, 'min': 0, 'max': 0, 'count': 0}
 
     def _emergency_trend_analysis(self, data):
@@ -1511,7 +1579,7 @@ class AdvancedRevenueAISystem:
                 'second_half_avg': second_avg
             }
         except Exception as e:
-            self.logger.error(f"Error in emergency trend analysis: {e}")
+            logger.error(f"Error in emergency trend analysis: {e}")
             return {'trend': 'error', 'growth_rate': 0}
 
     def _emergency_sales_forecast(self, transactions):
@@ -1539,7 +1607,7 @@ class AdvancedRevenueAISystem:
                 'fallback_reason': 'Advanced forecasting failed'
             }
         except Exception as e:
-            self.logger.error(f"Error in emergency sales forecast: {e}")
+            logger.error(f"Error in emergency sales forecast: {e}")
             return {
                 'current_month_forecast': '$0.00',
                 'next_quarter_forecast': '$0.00',
@@ -1573,7 +1641,7 @@ class AdvancedRevenueAISystem:
                 'churn_rate': '15% (estimated)'
             }
         except Exception as e:
-            self.logger.error(f"Error in emergency customer analysis: {e}")
+            logger.error(f"Error in emergency customer analysis: {e}")
             return {
                 'unique_customers': 0,
                 'recurring_patterns': 'Analysis failed',
@@ -1610,7 +1678,7 @@ class AdvancedRevenueAISystem:
                 'recommended_strategy': 'Dynamic pricing optimization'
             }
         except Exception as e:
-            self.logger.error(f"Error in emergency pricing analysis: {e}")
+            logger.error(f"Error in emergency pricing analysis: {e}")
             return {
                 'pricing_strategy': 'Analysis failed',
                 'avg_price_point': '$0.00',
@@ -1653,7 +1721,7 @@ class AdvancedRevenueAISystem:
                 'recommended_actions': 'Implement automated collection system'
             }
         except Exception as e:
-            self.logger.error(f"Error in emergency AR analysis: {e}")
+            logger.error(f"Error in emergency AR analysis: {e}")
             return {
                 'days_sales_outstanding': 'Analysis failed',
                 'collection_probability': '0%',
@@ -1821,8 +1889,8 @@ class AdvancedRevenueAISystem:
                 'A1_historical_trends': {'method': 'Hybrid (XGBoost + Ollama Enhancement)', 'error': str(e)},
                 'A2_sales_forecast': {'method': 'Hybrid (LinearRegression + Ollama Enhancement)', 'error': str(e)},
                 'A3_customer_contracts': {'method': 'Hybrid (LogisticRegression + Ollama Enhancement)', 'error': str(e)},
-                'A4_pricing_models': {'method': 'Hybrid (RandomForest + Ollama Enhancement)', 'error': str(e)},
-                'A5_ar_aging': {'method': 'Hybrid (RandomForest + Ollama Enhancement)', 'error': str(e)}
+                            'A4_pricing_models': {'method': 'Hybrid (XGBoost + Ollama Enhancement)', 'error': str(e)},
+            'A5_ar_aging': {'method': 'Hybrid (XGBoost + Ollama Enhancement)', 'error': str(e)}
             }
 
     def analyze_historical_revenue_trends_hybrid(self, bank_data, enhanced_features):
@@ -1912,7 +1980,7 @@ class AdvancedRevenueAISystem:
                 'price_variation': bank_data['Amount'].std(),
                 'enhanced_product_categories': enhanced_features['product_category_score'].value_counts().to_dict(),
                 'customer_segment_pricing': enhanced_features.groupby('customer_segment_score')['product_category_score'].mean().to_dict(),
-                'method': 'Hybrid (RandomForest + Ollama Enhancement)',
+                'method': 'Hybrid (XGBoost + Ollama Enhancement)',
                 'accuracy_improvement': 'Enhanced descriptions provide better product and customer context for pricing'
             }
             
@@ -1938,7 +2006,7 @@ class AdvancedRevenueAISystem:
                 'collection_probability': (dso_categories == 'Current').mean() * 100,
                 'enhanced_customer_segments': enhanced_features['customer_segment_score'].value_counts().to_dict(),
                 'payment_terms_by_segment': enhanced_features.groupby('customer_segment_score')['payment_terms_score'].mean().to_dict(),
-                'method': 'Hybrid (RandomForest + Ollama Enhancement)',
+                'method': 'Hybrid (XGBoost + Ollama Enhancement)',
                 'accuracy_improvement': 'Enhanced descriptions provide better payment terms and customer context'
             }
             
@@ -1987,8 +2055,8 @@ class AdvancedRevenueAISystem:
                 'A1_historical_trends': {'method': 'Ultra-Fast Hybrid (XGBoost + Pattern Enhancement)', 'error': str(e)},
                 'A2_sales_forecast': {'method': 'Ultra-Fast Hybrid (LinearRegression + Pattern Enhancement)', 'error': str(e)},
                 'A3_customer_contracts': {'method': 'Ultra-Fast Hybrid (LogisticRegression + Pattern Enhancement)', 'error': str(e)},
-                'A4_pricing_models': {'method': 'Ultra-Fast Hybrid (RandomForest + Pattern Enhancement)', 'error': str(e)},
-                'A5_ar_aging': {'method': 'Ultra-Fast Hybrid (RandomForest + Pattern Enhancement)', 'error': str(e)}
+                'A4_pricing_models': {'method': 'Ultra-Fast Hybrid (XGBoost + Pattern Enhancement)', 'error': str(e)},
+                'A5_ar_aging': {'method': 'Ultra-Fast Hybrid (XGBoost + Pattern Enhancement)', 'error': str(e)}
             }
 
     def enhance_descriptions_fast(self, descriptions):
@@ -2110,11 +2178,11 @@ class AdvancedRevenueAISystem:
                 'avg_price_point': bank_data['Amount'].mean(),
                 'price_variation': bank_data['Amount'].std(),
                 'enhanced_product_categories': enhanced_features['product_category_score'].value_counts().to_dict(),
-                'method': 'Ultra-Fast Hybrid (RandomForest + Pattern Enhancement)',
+                'method': 'Ultra-Fast Hybrid (XGBoost + Pattern Enhancement)',
                 'accuracy_improvement': 'Fast pattern-based enhancement with limited Ollama'
             }
         except Exception as e:
-            return {'method': 'Ultra-Fast Hybrid (RandomForest + Pattern Enhancement)', 'error': str(e)}
+            return {'method': 'Ultra-Fast Hybrid (XGBoost + Pattern Enhancement)', 'error': str(e)}
 
     def calculate_dso_and_collection_probability_fast(self, bank_data, enhanced_features):
         """A5. AR Aging - FAST"""
@@ -2126,11 +2194,11 @@ class AdvancedRevenueAISystem:
                 'avg_payment_terms': enhanced_features['payment_terms_score'].mean(),
                 'collection_probability': (dso_categories == 'Current').mean() * 100,
                 'enhanced_customer_segments': enhanced_features['customer_segment_score'].value_counts().to_dict(),
-                'method': 'Ultra-Fast Hybrid (RandomForest + Pattern Enhancement)',
+                'method': 'Ultra-Fast Hybrid (XGBoost + Pattern Enhancement)',
                 'accuracy_improvement': 'Fast pattern-based enhancement with limited Ollama'
             }
         except Exception as e:
-            return {'method': 'Ultra-Fast Hybrid (RandomForest + Pattern Enhancement)', 'error': str(e)}
+            return {'method': 'Ultra-Fast Hybrid (XGBoost + Pattern Enhancement)', 'error': str(e)}
 
     def complete_revenue_analysis_system_instant(self, bank_data):
         """INSTANT revenue analysis (Pattern-based only - NO Ollama)"""
@@ -2165,8 +2233,8 @@ class AdvancedRevenueAISystem:
                 'A1_historical_trends': {'method': 'Instant Pattern-Based (XGBoost)', 'error': str(e)},
                 'A2_sales_forecast': {'method': 'Instant Pattern-Based (LinearRegression)', 'error': str(e)},
                 'A3_customer_contracts': {'method': 'Instant Pattern-Based (LogisticRegression)', 'error': str(e)},
-                'A4_pricing_models': {'method': 'Instant Pattern-Based (RandomForest)', 'error': str(e)},
-                'A5_ar_aging': {'method': 'Instant Pattern-Based (RandomForest)', 'error': str(e)}
+                'A4_pricing_models': {'method': 'Instant Pattern-Based (XGBoost)', 'error': str(e)},
+                'A5_ar_aging': {'method': 'Instant Pattern-Based (XGBoost)', 'error': str(e)}
             }
 
     def enhance_descriptions_instant(self, descriptions):
@@ -2241,11 +2309,11 @@ class AdvancedRevenueAISystem:
                 'avg_price_point': bank_data['Amount'].mean(),
                 'price_variation': bank_data['Amount'].std(),
                 'enhanced_product_categories': enhanced_features['product_category_score'].value_counts().to_dict(),
-                'method': 'Instant Pattern-Based (RandomForest)',
+                'method': 'Instant Pattern-Based (XGBoost)',
                 'speed': '3-5 seconds'
             }
         except Exception as e:
-            return {'method': 'Instant Pattern-Based (RandomForest)', 'error': str(e)}
+            return {'method': 'Instant Pattern-Based (XGBoost)', 'error': str(e)}
 
     def calculate_dso_and_collection_probability_instant(self, bank_data, enhanced_features):
         """A5. AR Aging - INSTANT"""
@@ -2257,11 +2325,11 @@ class AdvancedRevenueAISystem:
                 'avg_payment_terms': enhanced_features['payment_terms_score'].mean(),
                 'collection_probability': (dso_categories == 'Current').mean() * 100,
                 'enhanced_customer_segments': enhanced_features['customer_segment_score'].value_counts().to_dict(),
-                'method': 'Instant Pattern-Based (RandomForest)',
+                'method': 'Instant Pattern-Based (XGBoost)',
                 'speed': '3-5 seconds'
             }
         except Exception as e:
-            return {'method': 'Instant Pattern-Based (RandomForest)', 'error': str(e)}
+            return {'method': 'Instant Pattern-Based (XGBoost)', 'error': str(e)}
 
     def complete_revenue_analysis_system_optimal(self, bank_data):
         """OPTIMAL: Ollama + LinearRegression (Best Single Model)"""

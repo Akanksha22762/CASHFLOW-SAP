@@ -70,7 +70,7 @@ class OllamaSimpleIntegration:
             response = requests.post(
                 f"{self.base_url}/api/generate",
                 json=payload,
-                timeout=30
+                timeout=10
             )
             
             if response.status_code == 200:
@@ -135,19 +135,17 @@ class OllamaSimpleIntegration:
         """
         if not self.is_available:
             logger.warning("Ollama not available, returning default categories")
-            return ["Other"] * len(descriptions)
+            return ["Operating Activities"] * len(descriptions)
             
         categories = []
         
         for desc in descriptions:
             try:
                 prompt = f"""
-                Categorize this transaction into one of these categories:
-                - Sales/Revenue
-                - Operating Expenses
-                - Capital Expenditure
-                - Financing
-                - Other
+                Categorize this transaction into one of these cash flow categories:
+                - Operating Activities (revenue, expenses, regular business operations)
+                - Investing Activities (capital expenditure, asset purchases, investments)
+                - Financing Activities (loans, interest, dividends, equity)
                 
                 Transaction: {desc}
                 Category:"""
@@ -156,16 +154,16 @@ class OllamaSimpleIntegration:
                 if category:
                     # Clean up the response
                     category = category.strip().split('\n')[0].strip()
-                    if category not in ["Sales/Revenue", "Operating Expenses", "Capital Expenditure", "Financing", "Other"]:
-                        category = "Other"
+                    if category not in ["Operating Activities", "Investing Activities", "Financing Activities"]:
+                        category = "Operating Activities"
                 else:
-                    category = "Other"
+                    category = "Operating Activities"
                     
                 categories.append(category)
                 
             except Exception as e:
                 logger.error(f"Error categorizing '{desc}': {e}")
-                categories.append("Other")
+                categories.append("Operating Activities")
         
         return categories
     
@@ -279,6 +277,18 @@ def analyze_patterns_with_ollama(data: List[Dict[str, Any]]) -> Dict[str, Any]:
         Pattern analysis results
     """
     return ollama_integration.analyze_patterns(data)
+
+def check_ollama_availability():
+    """Check if Ollama is available and working"""
+    try:
+        import httpx
+        response = httpx.get("http://127.0.0.1:11434/api/tags", timeout=5)
+        if response.status_code == 200:
+            return True
+        else:
+            return False
+    except Exception:
+        return False
 
 # Test function
 def test_ollama_integration():

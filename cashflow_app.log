@@ -27800,3 +27800,12 @@ A detailed migration guide is available here: https://github.com/openai/openai-p
 2025-07-25 14:04:25,232 - werkzeug - INFO - 127.0.0.1 - - [25/Jul/2025 14:04:25] "GET / HTTP/1.1" 200 -
 2025-07-25 14:04:25,553 - werkzeug - INFO - 127.0.0.1 - - [25/Jul/2025 14:04:25] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
 2025-07-25 15:01:11,038 - werkzeug - INFO - 127.0.0.1 - - [25/Jul/2025 15:01:11] "GET / HTTP/1.1" 200 -
+2025-07-30 15:02:29,840 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.10.67:5000
+2025-07-30 15:02:29,841 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-07-30 15:07:15,380 - werkzeug - INFO - 127.0.0.1 - - [30/Jul/2025 15:07:15] "GET / HTTP/1.1" 200 -
+2025-07-30 15:07:34,142 - werkzeug - INFO - 127.0.0.1 - - [30/Jul/2025 15:07:34] "POST /upload HTTP/1.1" 200 -
+2025-07-30 15:07:38,278 - werkzeug - INFO - 127.0.0.1 - - [30/Jul/2025 15:07:38] "POST /run-revenue-analysis HTTP/1.1" 200 -
+2025-07-30 15:08:55,521 - werkzeug - INFO - 127.0.0.1 - - [30/Jul/2025 15:08:55] "POST /run-revenue-analysis HTTP/1.1" 200 -
