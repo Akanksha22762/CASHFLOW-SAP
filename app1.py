@@ -40,28 +40,6 @@ except ImportError as e:
     print(f"⚠️ Advanced AI system not available: {e}")
 
 
-# ===== ADVANCED REVENUE AI SYSTEM IMPORTS =====
-try:
-    from advanced_revenue_ai_system import AdvancedRevenueAISystem
-    from integrate_advanced_revenue_system import AdvancedRevenueIntegration
-    ADVANCED_AI_AVAILABLE = True
-    print("✅ Advanced Revenue AI System loaded successfully!")
-except ImportError as e:
-    ADVANCED_AI_AVAILABLE = False
-    print(f"⚠️ Advanced AI system not available: {e}")
-
-
-# ===== ADVANCED REVENUE AI SYSTEM IMPORTS =====
-try:
-    from advanced_revenue_ai_system import AdvancedRevenueAISystem
-    from integrate_advanced_revenue_system import AdvancedRevenueIntegration
-    ADVANCED_AI_AVAILABLE = True
-    print("✅ Advanced Revenue AI System loaded successfully!")
-except ImportError as e:
-    ADVANCED_AI_AVAILABLE = False
-    print(f"⚠️ Advanced AI system not available: {e}")
-
-
 try:
     # Core ML Libraries - XGBoost Only
     from sklearn.preprocessing import StandardScaler, LabelEncoder
@@ -3067,7 +3045,7 @@ import openai
 
 def hybrid_categorize_transaction(description, amount=0, transaction_type=''):
     """
-    Hybrid transaction categorization using XGBoost + Ollama + Rules
+    Hybrid transaction categorization using BUSINESS ACTIVITY LOGIC + XGBoost + Ollama + Rules
     """
     try:
         # Step 1: Try XGBoost ML categorization FIRST (100% AI/ML approach)
@@ -3086,8 +3064,8 @@ def hybrid_categorize_transaction(description, amount=0, transaction_type=''):
             from ollama_simple_integration import simple_ollama, check_ollama_availability
             if check_ollama_availability():
                 prompt = f"""
-                Categorize this transaction into one of these cash flow categories:
-                - Operating Activities (revenue, expenses, regular business operations)
+                Categorize this transaction into one of these cash flow categories based on BUSINESS ACTIVITY:
+                - Operating Activities (business revenue, business expenses, regular business operations)
                 - Investing Activities (capital expenditure, asset purchases, investments)
                 - Financing Activities (loans, interest, dividends, equity)
                 
@@ -3108,15 +3086,15 @@ def hybrid_categorize_transaction(description, amount=0, transaction_type=''):
         except Exception as e:
             print(f"⚠️ Ollama categorization failed: {e}")
         
-        # Step 3: Use rule-based categorization as fallback
+        # Step 3: Use BUSINESS ACTIVITY-BASED rule categorization as fallback
         try:
             rule_result = categorize_transaction_perfect(description, amount)
-            return f"{rule_result} (Rules)"
+            return f"{rule_result} (Business-Rules)"
         except Exception as e:
-            print(f"⚠️ Rule-based categorization failed: {e}")
+            print(f"⚠️ Business activity rule-based categorization failed: {e}")
         
         # Step 4: Default fallback
-        return "Operating Activities (Default)"
+        return "Operating Activities (Business-Default)"
         
     except Exception as e:
         print(f"❌ Hybrid categorization error: {e}")
@@ -3614,7 +3592,7 @@ def ultra_fast_process(df, use_ai=True, max_ai_transactions=100):
     return df_result
 def standardize_cash_flow_categorization(df):
     """
-    Standardize cash flow categorization to ensure consistency across all analyses
+    Standardize cash flow categorization using BUSINESS ACTIVITY LOGIC (not amount signs)
     """
     df_processed = df.copy()
     
@@ -3622,57 +3600,78 @@ def standardize_cash_flow_categorization(df):
     if 'Amount' in df_processed.columns:
         df_processed['Amount'] = pd.to_numeric(df_processed['Amount'], errors='coerce').fillna(0)
     
-    # Apply consistent categorization rules
+    # Apply BUSINESS ACTIVITY-BASED categorization rules
     for idx, row in df_processed.iterrows():
         description = str(row.get('Description', '')).lower()
-        amount = float(row.get('Amount', 0))
         
-        # CONSISTENT CATEGORIZATION LOGIC
-        # Operating Activities (most common)
-        operating_patterns = [
+        # BUSINESS ACTIVITY LOGIC (not amount-based)
+        
+        # Define business revenue keywords (actual business activities)
+        business_revenue_keywords = [
+            'sale', 'revenue', 'income', 'invoice', 'product', 'service',
+            'contract', 'order', 'delivery', 'steel', 'construction',
+            'infrastructure', 'warehouse', 'plant', 'factory', 'customer',
+            'client', 'project', 'work', 'consulting', 'payment received',
+            'advance received', 'milestone payment', 'final payment',
+            'customer payment', 'vip customer payment', 'bulk order payment',
+            'quarterly settlement', 'export payment', 'international order',
+            'scrap metal sale', 'excess steel scrap'
+        ]
+        
+        # Define business expense keywords (operating costs)
+        business_expense_keywords = [
             'salary', 'wages', 'payroll', 'bonus', 'employee', 'staff',
             'vendor', 'supplier', 'purchase', 'raw material', 'inventory',
             'utility', 'electricity', 'water', 'gas', 'fuel', 'rent',
             'tax', 'gst', 'tds', 'statutory', 'maintenance', 'service',
-            'sales', 'customer', 'revenue', 'income'
+            'fee', 'charge', 'bill', 'expense', 'cost', 'salary payment',
+            'employee payroll', 'cleaning payment', 'housekeeping services',
+            'transport payment', 'logistics services', 'freight charges',
+            'utility payment', 'electricity bill', 'telephone payment',
+            'landline & mobile', 'monthly charges'
         ]
         
-        # Investing Activities
-        investing_patterns = [
-            'machinery', 'equipment', 'plant', 'vehicle', 'building',
-            'construction', 'capital', 'asset', 'property', 'land'
-        ]
-        
-        # Financing Activities
-        financing_patterns = [
+        # Define financing keywords (NOT business activities)
+        financing_keywords = [
             'loan', 'emi', 'interest', 'dividend', 'share', 'capital',
-            'finance', 'bank loan', 'borrowing'
+            'finance', 'bank loan', 'borrowing', 'investment', 'equity',
+            'debt', 'credit', 'mortgage', 'stock', 'bond', 'refinancing',
+            'funding', 'investment received', 'equity infusion', 'capital injection'
         ]
         
+        # Define investing keywords (capital expenditures)
+        investing_keywords = [
+            'machinery', 'equipment', 'plant', 'vehicle', 'building',
+            'construction', 'capital', 'asset', 'property', 'land',
+            'infrastructure development', 'warehouse construction', 'plant expansion',
+            'new production line', 'rolling mill upgrade', 'blast furnace',
+            'quality testing equipment', 'automation system', 'erp system',
+            'digital transformation', 'industry 4.0', 'technology investment',
+            'software investment', 'capex', 'capital expenditure'
+        ]
+        
+        # BUSINESS ACTIVITY-BASED CATEGORIZATION
         # Check if category already exists and is valid
         existing_category = normalize_category(row.get('Category', ''))
-        if existing_category and 'Operating Activities' in existing_category:
+        
+        if existing_category and any(activity in existing_category for activity in ['Operating Activities', 'Investing Activities', 'Financing Activities']):
             category = existing_category
-        elif existing_category and 'Investing Activities' in existing_category:
-            category = existing_category
-        elif existing_category and 'Financing Activities' in existing_category:
-            category = existing_category
-        elif existing_category and 'Uncategorized' in existing_category:
-            # Convert uncategorized to operating activities
-            category = 'Operating Activities (Rule-Default)'
         else:
-            # Apply new categorization
-            if any(pattern in description for pattern in financing_patterns):
+            # Apply BUSINESS ACTIVITY logic (not amount-based)
+            if any(keyword in description for keyword in financing_keywords):
                 category = 'Financing Activities'
-            elif any(pattern in description for pattern in investing_patterns):
+            elif any(keyword in description for keyword in investing_keywords):
                 category = 'Investing Activities'
+            elif any(keyword in description for keyword in business_revenue_keywords + business_expense_keywords):
+                category = 'Operating Activities'
             else:
-                category = 'Operating Activities (Rule-Default)'
+                # Default to Operating Activities for unknown transactions
+                category = 'Operating Activities (Business-Default)'
         
         df_processed.at[idx, 'Category'] = category
     
-    # Apply consistent cash flow signs
-    df_processed = apply_perfect_cash_flow_signs(df_processed)
+    # Apply BUSINESS ACTIVITY-BASED cash flow signs
+    df_processed = apply_business_activity_cash_flow_signs(df_processed)
     
     return df_processed
 
@@ -3709,7 +3708,7 @@ def unified_cash_flow_analysis(df, include_vendor_mapping=False, vendor_data=Non
                 'Category': normalize_category(row.get('Category', category)),
                 'Type': row.get('Type', ''),
                 'Status': row.get('Status', ''),
-                'Cash_Flow_Direction': 'Inflow' if row.get('Amount', 0) > 0 else 'Outflow'
+                'Cash_Flow_Direction': 'Inflow' if row.get('Amount', 0) > 0 else 'Outflow'  # Business activity logic already applied
             }
             
             # Add vendor info if available
@@ -3727,9 +3726,9 @@ def unified_cash_flow_analysis(df, include_vendor_mapping=False, vendor_data=Non
         }
     
     return breakdown, df_standardized
-def apply_perfect_cash_flow_signs(df):
+def apply_business_activity_cash_flow_signs(df):
     """
-    Apply mathematically correct cash flow signs based on business logic
+    Apply BUSINESS ACTIVITY-BASED cash flow signs (not amount-based)
     """
     df_copy = df.copy()
     
@@ -3739,73 +3738,133 @@ def apply_perfect_cash_flow_signs(df):
     for idx, row in df_copy.iterrows():
         description = str(row['Description']).lower() if 'Description' in row and pd.notna(row['Description']) else ""
         category = normalize_category(row.get('Category', 'Operating Activities'))
-        amount = abs(float(row['Amount']))  # Always start with absolute value
+        original_amount = float(row['Amount'])  # Keep original amount for reference
         
-        # FINANCING ACTIVITIES LOGIC
-        if 'financing' in category.lower():
-            financing_inflows = [
-                'loan received', 'loan disbursement', 'bank loan', 'financing received',
-                'share capital', 'equity received', 'investment received', 'grant received'
-            ]
-            financing_outflows = [
-                'loan emi', 'emi paid', 'loan repayment', 'interest paid',
-                'dividend paid', 'loan payment', 'finance charges'
-            ]
-            
-            if any(keyword in description for keyword in financing_inflows):
-                df_copy.at[idx, 'Amount'] = amount  # Positive (cash inflow)
-            elif any(keyword in description for keyword in financing_outflows):
-                df_copy.at[idx, 'Amount'] = -amount  # Negative (cash outflow)
+        # BUSINESS ACTIVITY-BASED CASH FLOW LOGIC
+        
+        # Define business revenue keywords (cash inflows)
+        business_revenue_keywords = [
+            'sale', 'revenue', 'income', 'invoice', 'product', 'service',
+            'contract', 'order', 'delivery', 'steel', 'construction',
+            'infrastructure', 'warehouse', 'plant', 'factory', 'customer',
+            'client', 'project', 'work', 'consulting', 'payment received',
+            'advance received', 'milestone payment', 'final payment',
+            'customer payment', 'vip customer payment', 'bulk order payment',
+            'quarterly settlement', 'export payment', 'international order',
+            'scrap metal sale', 'excess steel scrap'
+        ]
+        
+        # Define business expense keywords (cash outflows)
+        business_expense_keywords = [
+            'salary', 'wages', 'payroll', 'bonus', 'employee', 'staff',
+            'vendor', 'supplier', 'purchase', 'raw material', 'inventory',
+            'utility', 'electricity', 'water', 'gas', 'fuel', 'rent',
+            'tax', 'gst', 'tds', 'statutory', 'maintenance', 'service',
+            'payment', 'fee', 'charge', 'bill', 'expense', 'cost',
+            'salary payment', 'employee payroll', 'cleaning payment',
+            'housekeeping services', 'transport payment', 'logistics services',
+            'freight charges', 'utility payment', 'electricity bill',
+            'telephone payment', 'landline & mobile', 'monthly charges',
+            'cleaning', 'housekeeping', 'maintenance payment', 'service payment',
+            'utility bill', 'electricity bill', 'telephone bill', 'mobile bill',
+            'landline bill', 'monthly charges', 'service charges', 'maintenance charges'
+        ]
+        
+        # Define financing inflow keywords
+        financing_inflow_keywords = [
+            'loan received', 'loan disbursement', 'bank loan', 'financing received',
+            'share capital', 'equity received', 'investment received', 'grant received',
+            'capital injection', 'equity infusion', 'funding received'
+        ]
+        
+        # Define financing outflow keywords
+        financing_outflow_keywords = [
+            'loan emi', 'emi paid', 'loan repayment', 'interest paid',
+            'dividend paid', 'loan payment', 'finance charges', 'penalty payment',
+            'late payment charges', 'overdue interest', 'bank charges',
+            'processing fee', 'loan emi payment', 'principal + interest'
+        ]
+        
+        # Define investing inflow keywords
+        investing_inflow_keywords = [
+            'asset sale', 'machinery sale', 'equipment sale', 'scrap sale',
+            'property sale', 'disposal', 'old machinery', 'scrap value',
+            'asset sale proceeds'
+        ]
+        
+        # Define investing outflow keywords
+        investing_outflow_keywords = [
+            'purchase', 'advance for', 'capex', 'construction',
+            'installation', 'commissioning', 'machinery purchase',
+            'equipment purchase', 'plant expansion', 'new production line',
+            'rolling mill upgrade', 'blast furnace', 'quality testing equipment',
+            'automation system', 'erp system', 'digital transformation',
+            'industry 4.0', 'technology investment', 'software investment',
+            'infrastructure development', 'warehouse construction',
+            'plant modernization', 'energy efficiency', 'capacity increase',
+            'renovation payment', 'plant modernization', 'capex payment',
+            'blast furnace', 'new blast furnace', 'phase 3', 'installation payment'
+        ]
+        
+        # BUSINESS ACTIVITY-BASED CASH FLOW DETERMINATION
+        
+        # OPERATING ACTIVITIES
+        if 'operating' in category.lower():
+            # Business revenue = inflow
+            if any(keyword in description for keyword in business_revenue_keywords):
+                df_copy.at[idx, 'Amount'] = abs(original_amount)  # Ensure positive (inflow)
+            # Business expense = outflow
+            elif any(keyword in description for keyword in business_expense_keywords):
+                df_copy.at[idx, 'Amount'] = -abs(original_amount)  # Ensure negative (outflow)
+            else:
+                # Default operating logic based on description
+                if any(word in description for word in ['received', 'payment', 'income', 'revenue']):
+                    df_copy.at[idx, 'Amount'] = abs(original_amount)  # Inflow
+                else:
+                    df_copy.at[idx, 'Amount'] = -abs(original_amount)  # Outflow
+        
+        # FINANCING ACTIVITIES
+        elif 'financing' in category.lower():
+            # Financing received = inflow
+            if any(keyword in description for keyword in financing_inflow_keywords):
+                df_copy.at[idx, 'Amount'] = abs(original_amount)  # Inflow
+            # Financing paid = outflow
+            elif any(keyword in description for keyword in financing_outflow_keywords):
+                df_copy.at[idx, 'Amount'] = -abs(original_amount)  # Outflow
             else:
                 # Default financing logic
-                if any(word in description for word in ['received', 'credit', 'loan disbursement']):
-                    df_copy.at[idx, 'Amount'] = amount
+                if any(word in description for word in ['received', 'credit', 'loan disbursement', 'investment received']):
+                    df_copy.at[idx, 'Amount'] = abs(original_amount)  # Inflow
                 else:
-                    df_copy.at[idx, 'Amount'] = -amount
+                    df_copy.at[idx, 'Amount'] = -abs(original_amount)  # Outflow
         
-        # INVESTING ACTIVITIES LOGIC
+        # INVESTING ACTIVITIES
         elif 'investing' in category.lower():
-            investing_inflows = [
-                'asset sale', 'machinery sale', 'equipment sale', 'scrap sale',
-                'property sale', 'disposal'
-            ]
-            investing_outflows = [
-                'purchase', 'advance for', 'capex', 'construction',
-                'installation', 'commissioning'
-            ]
-            
-            if any(keyword in description for keyword in investing_inflows):
-                df_copy.at[idx, 'Amount'] = amount  # Positive (cash inflow)
-            elif any(keyword in description for keyword in investing_outflows):
-                df_copy.at[idx, 'Amount'] = -amount  # Negative (cash outflow)
+            # Asset sale = inflow
+            if any(keyword in description for keyword in investing_inflow_keywords):
+                df_copy.at[idx, 'Amount'] = abs(original_amount)  # Inflow
+            # Asset purchase = outflow
+            elif any(keyword in description for keyword in investing_outflow_keywords):
+                df_copy.at[idx, 'Amount'] = -abs(original_amount)  # Outflow
             else:
-                # Default investing logic - most investing activities are outflows
-                df_copy.at[idx, 'Amount'] = -amount
-        
-        # OPERATING ACTIVITIES LOGIC
-        else:  # Operating Activities
-            operating_inflows = [
-                'sales', 'customer payment', 'revenue', 'income',
-                'advance from customer', 'refund received', 'rebate'
-            ]
-            operating_outflows = [
-                'vendor payment', 'supplier payment', 'purchase', 'payroll',
-                'salary', 'tax payment', 'gst payment', 'bill payment',
-                'rent', 'utility', 'maintenance', 'transport', 'freight'
-            ]
-            
-            if any(keyword in description for keyword in operating_inflows):
-                df_copy.at[idx, 'Amount'] = amount  # Positive (cash inflow)
-            elif any(keyword in description for keyword in operating_outflows):
-                df_copy.at[idx, 'Amount'] = -amount  # Negative (cash outflow)
-            else:
-                # Default operating logic
-                if any(word in description for word in ['payment', 'paid', 'expense']):
-                    df_copy.at[idx, 'Amount'] = -amount
-                elif any(word in description for word in ['receipt', 'received', 'sale']):
-                    df_copy.at[idx, 'Amount'] = amount
+                # Default investing logic
+                if any(word in description for word in ['sale', 'disposal', 'proceeds']):
+                    df_copy.at[idx, 'Amount'] = abs(original_amount)  # Inflow
                 else:
-                    df_copy.at[idx, 'Amount'] = amount  # Keep original sign
+                    df_copy.at[idx, 'Amount'] = -abs(original_amount)  # Outflow
+        
+        # DEFAULT (Operating Activities)
+        else:
+            # Apply business activity logic
+            if any(keyword in description for keyword in business_revenue_keywords):
+                df_copy.at[idx, 'Amount'] = abs(original_amount)  # Inflow
+            elif any(keyword in description for keyword in business_expense_keywords):
+                df_copy.at[idx, 'Amount'] = -abs(original_amount)  # Outflow
+            else:
+                # Keep original amount if no clear business activity pattern
+                df_copy.at[idx, 'Amount'] = original_amount
+    
+
     
     return df_copy
 
@@ -5080,8 +5139,8 @@ def generate_ap_ar_cash_flow(sap_df):
         
         # Apply cash flow categorization
         try:
-            ap_processed = apply_perfect_cash_flow_signs(ap_df) if not ap_df.empty else pd.DataFrame()
-            ar_processed = apply_perfect_cash_flow_signs(ar_df) if not ar_df.empty else pd.DataFrame()
+            ap_processed = apply_business_activity_cash_flow_signs(ap_df) if not ap_df.empty else pd.DataFrame()
+            ar_processed = apply_business_activity_cash_flow_signs(ar_df) if not ar_df.empty else pd.DataFrame()
             
             logger.info("Cash flow signs applied successfully")
             
@@ -5719,22 +5778,65 @@ def universal_categorize_any_dataset(df):
             # Create training data with better categorization logic
             training_data = df_processed.copy()
             
-            # Enhanced categorization logic for better training data
+            # BUSINESS ACTIVITY-BASED categorization logic for better training data
             def create_training_category(amount, description):
                 desc_lower = str(description).lower()
                 
-                # Financing Activities - specific keywords
-                financing_keywords = ['loan', 'emi', 'interest', 'dividend', 'share', 'capital', 'finance', 'bank loan', 'borrowing', 'debt', 'credit', 'mortgage', 'stock', 'equity', 'bond', 'refinancing', 'funding', 'investment received', 'equity infusion', 'capital injection', 'loan disbursement']
+                # Define business revenue keywords (actual business activities)
+                business_revenue_keywords = [
+                    'sale', 'revenue', 'income', 'invoice', 'product', 'service',
+                    'contract', 'order', 'delivery', 'steel', 'construction',
+                    'infrastructure', 'warehouse', 'plant', 'factory', 'customer',
+                    'client', 'project', 'work', 'consulting', 'payment received',
+                    'advance received', 'milestone payment', 'final payment',
+                    'customer payment', 'vip customer payment', 'bulk order payment',
+                    'quarterly settlement', 'export payment', 'international order',
+                    'scrap metal sale', 'excess steel scrap'
+                ]
+                
+                # Define business expense keywords (operating costs)
+                business_expense_keywords = [
+                    'salary', 'wages', 'payroll', 'bonus', 'employee', 'staff',
+                    'vendor', 'supplier', 'purchase', 'raw material', 'inventory',
+                    'utility', 'electricity', 'water', 'gas', 'fuel', 'rent',
+                    'tax', 'gst', 'tds', 'statutory', 'maintenance', 'service',
+                    'fee', 'charge', 'bill', 'expense', 'cost', 'salary payment',
+                    'employee payroll', 'cleaning payment', 'housekeeping services',
+                    'transport payment', 'logistics services', 'freight charges',
+                    'utility payment', 'electricity bill', 'telephone payment',
+                    'landline & mobile', 'monthly charges'
+                ]
+                
+                # Financing Activities - specific keywords (NOT business activities)
+                financing_keywords = [
+                    'loan', 'emi', 'interest', 'dividend', 'share', 'capital', 'finance', 
+                    'bank loan', 'borrowing', 'debt', 'credit', 'mortgage', 'stock', 
+                    'equity', 'bond', 'refinancing', 'funding', 'investment received', 
+                    'equity infusion', 'capital injection', 'loan disbursement'
+                ]
+                
+                # Investing Activities - specific keywords (capital expenditures)
+                investing_keywords = [
+                    'equipment purchase', 'machinery purchase', 'capex', 'capital expenditure', 
+                    'fixed asset', 'plant expansion', 'new production line', 'blast furnace', 
+                    'rolling mill upgrade', 'quality testing equipment', 'warehouse construction', 
+                    'infrastructure development', 'plant modernization', 'energy efficiency', 
+                    'capacity increase', 'installation', 'renovation payment', 'infrastructure', 
+                    'development', 'construction', 'equipment', 'machinery', 'purchase',
+                    'capex payment', 'new blast furnace', 'phase 3', 'installation payment',
+                    'blast furnace payment', 'capital expenditure payment'
+                ]
+                
+                # BUSINESS ACTIVITY-BASED CATEGORIZATION (not amount-based)
                 if any(word in desc_lower for word in financing_keywords):
                     return 'Financing Activities'
-                
-                # Investing Activities - specific keywords
-                investing_keywords = ['equipment purchase', 'machinery purchase', 'capex', 'capital expenditure', 'fixed asset', 'plant expansion', 'new production line', 'blast furnace', 'rolling mill upgrade', 'quality testing equipment', 'warehouse construction', 'infrastructure development', 'plant modernization', 'energy efficiency', 'capacity increase', 'installation', 'renovation payment', 'infrastructure', 'development', 'construction', 'equipment', 'machinery', 'purchase']
-                if any(word in desc_lower for word in investing_keywords):
+                elif any(word in desc_lower for word in investing_keywords):
                     return 'Investing Activities'
-                
-                # Operating Activities - everything else
-                return 'Operating Activities'
+                elif any(word in desc_lower for word in business_revenue_keywords + business_expense_keywords):
+                    return 'Operating Activities'
+                else:
+                    # Default to Operating Activities for unknown transactions
+                    return 'Operating Activities'
             
             training_data['Category'] = training_data.apply(
                 lambda row: create_training_category(row['_amount'], row['_combined_description']), axis=1
@@ -6077,7 +6179,7 @@ def reconcile_data():
                 bank_df['Category'] = bank_df.apply(
                     lambda row: pure_ai_categorization(row['Description'], row['Amount']), axis=1
                 )
-            bank_df = apply_perfect_cash_flow_signs(bank_df)
+            bank_df = apply_business_activity_cash_flow_signs(bank_df)
             reconciliation_data = {
                 "matched_exact": bank_df,
                 "matched_fuzzy": pd.DataFrame(),
@@ -7162,7 +7264,7 @@ def download_data(data_type):
                 
                 if df is not None and not df.empty:
                     # Apply cash flow processing
-                    df_processed = apply_perfect_cash_flow_signs(df)
+                    df_processed = apply_business_activity_cash_flow_signs(df)
                     cash_flow_breakdown = generate_category_wise_breakdown(df_processed, "cash_flow")
                     
                     # 1. CASH FLOW EXECUTIVE SUMMARY
@@ -9856,6 +9958,26 @@ def run_parameter_analysis():
             results = advanced_revenue_ai.detect_pricing_models(sample_df)
         elif parameter_type == 'A5_ar_aging':
             results = advanced_revenue_ai.calculate_dso_and_collection_probability(sample_df)
+        elif parameter_type == 'A1_historical_trends':
+            results = advanced_revenue_ai.enhanced_analyze_historical_revenue_trends(sample_df)
+        elif parameter_type == 'A6_operating_expenses':
+            results = advanced_revenue_ai.enhanced_analyze_operating_expenses(sample_df)
+        elif parameter_type == 'A7_accounts_payable':
+            results = advanced_revenue_ai.enhanced_analyze_accounts_payable_terms(sample_df)
+        elif parameter_type == 'A8_inventory_turnover':
+            results = advanced_revenue_ai.enhanced_analyze_inventory_turnover(sample_df)
+        elif parameter_type == 'A9_loan_repayments':
+            results = advanced_revenue_ai.enhanced_analyze_loan_repayments(sample_df)
+        elif parameter_type == 'A10_tax_obligations':
+            results = advanced_revenue_ai.enhanced_analyze_tax_obligations(sample_df)
+        elif parameter_type == 'A11_capital_expenditure':
+            results = advanced_revenue_ai.enhanced_analyze_capital_expenditure(sample_df)
+        elif parameter_type == 'A12_equity_debt_inflows':
+            results = advanced_revenue_ai.enhanced_analyze_equity_debt_inflows(sample_df)
+        elif parameter_type == 'A13_other_income_expenses':
+            results = advanced_revenue_ai.enhanced_analyze_other_income_expenses(sample_df)
+        elif parameter_type == 'A14_cash_flow_types':
+            results = advanced_revenue_ai.enhanced_analyze_cash_flow_types(sample_df)
         else:
             return jsonify({
                 'status': 'error',

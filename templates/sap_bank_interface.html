@@ -4545,7 +4545,6 @@
                                 Run Analysis
                             </button>
                         </div>
-                        <div id="A1_results" class="mt-3" style="display: none;"></div>
                     </div>
 
                     <div class="stat-card" id="A2_Sales_Forecast_Card">
@@ -4558,7 +4557,6 @@
                                 Run Analysis
                             </button>
                         </div>
-                        <div id="A2_results" class="mt-3" style="display: none;"></div>
                     </div>
 
                     <div class="stat-card" id="A3_Customer_Contracts_Card">
@@ -4571,7 +4569,6 @@
                                 Run Analysis
                             </button>
                         </div>
-                        <div id="A3_results" class="mt-3" style="display: none;"></div>
                     </div>
 
                     <div class="stat-card" id="A4_Pricing_Models_Card">
@@ -4584,7 +4581,6 @@
                                 Run Analysis
                             </button>
                         </div>
-                        <div id="A4_results" class="mt-3" style="display: none;"></div>
                     </div>
 
                     <div class="stat-card" id="A5_AR_Aging_Card">
@@ -4597,7 +4593,114 @@
                                 Run Analysis
                             </button>
                         </div>
-                        <div id="A5_results" class="mt-3" style="display: none;"></div>
+                    </div>
+
+                    <div class="stat-card" id="A6_Operating_Expenses_Card">
+                        <i class="fas fa-chart-pie stat-icon"></i>
+                        <h3 class="font-semibold mb-2">Operating Expenses (OPEX)</h3>
+                        <p class="text-sm text-secondary mb-3">Fixed and variable costs, expense optimization</p>
+                        <div class="btn-group">
+                            <button class="btn btn-primary btn-sm" onclick="runParameterAnalysis('A6_operating_expenses')">
+                                <i class="fas fa-play"></i>
+                                Run Analysis
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="stat-card" id="A7_Accounts_Payable_Card">
+                        <i class="fas fa-credit-card stat-icon"></i>
+                        <h3 class="font-semibold mb-2">Accounts Payable Terms</h3>
+                        <p class="text-sm text-secondary mb-3">DPO, vendor payment cycles, payment efficiency</p>
+                        <div class="btn-group">
+                            <button class="btn btn-primary btn-sm" onclick="runParameterAnalysis('A7_accounts_payable')">
+                                <i class="fas fa-play"></i>
+                                Run Analysis
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="stat-card" id="A8_Inventory_Turnover_Card">
+                        <i class="fas fa-boxes stat-icon"></i>
+                        <h3 class="font-semibold mb-2">Inventory Turnover</h3>
+                        <p class="text-sm text-secondary mb-3">Cash locked in inventory, procurement cycles</p>
+                        <div class="btn-group">
+                            <button class="btn btn-primary btn-sm" onclick="runParameterAnalysis('A8_inventory_turnover')">
+                                <i class="fas fa-play"></i>
+                                Run Analysis
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="stat-card" id="A9_Loan_Repayments_Card">
+                        <i class="fas fa-money-bill-wave stat-icon"></i>
+                        <h3 class="font-semibold mb-2">Loan Repayments</h3>
+                        <p class="text-sm text-secondary mb-3">Principal and interest payments, debt service</p>
+                        <div class="btn-group">
+                            <button class="btn btn-primary btn-sm" onclick="runParameterAnalysis('A9_loan_repayments')">
+                                <i class="fas fa-play"></i>
+                                Run Analysis
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="stat-card" id="A10_Tax_Obligations_Card">
+                        <i class="fas fa-file-invoice-dollar stat-icon"></i>
+                        <h3 class="font-semibold mb-2">Tax Obligations</h3>
+                        <p class="text-sm text-secondary mb-3">GST, VAT, income tax, regulatory payments</p>
+                        <div class="btn-group">
+                            <button class="btn btn-primary btn-sm" onclick="runParameterAnalysis('A10_tax_obligations')">
+                                <i class="fas fa-play"></i>
+                                Run Analysis
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="stat-card" id="A11_Capital_Expenditure_Card">
+                        <i class="fas fa-industry stat-icon"></i>
+                        <h3 class="font-semibold mb-2">Capital Expenditure (CapEx)</h3>
+                        <p class="text-sm text-secondary mb-3">Fixed assets, infrastructure investments</p>
+                        <div class="btn-group">
+                            <button class="btn btn-primary btn-sm" onclick="runParameterAnalysis('A11_capital_expenditure')">
+                                <i class="fas fa-play"></i>
+                                Run Analysis
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="stat-card" id="A12_Equity_Debt_Inflows_Card">
+                        <i class="fas fa-chart-line stat-icon"></i>
+                        <h3 class="font-semibold mb-2">Equity & Debt Inflows</h3>
+                        <p class="text-sm text-secondary mb-3">Funding through investments and financing</p>
+                        <div class="btn-group">
+                            <button class="btn btn-primary btn-sm" onclick="runParameterAnalysis('A12_equity_debt_inflows')">
+                                <i class="fas fa-play"></i>
+                                Run Analysis
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="stat-card" id="A13_Other_Income_Expenses_Card">
+                        <i class="fas fa-exchange-alt stat-icon"></i>
+                        <h3 class="font-semibold mb-2">Other Income/Expenses</h3>
+                        <p class="text-sm text-secondary mb-3">One-off items, asset sales, forex gains/losses</p>
+                        <div class="btn-group">
+                            <button class="btn btn-primary btn-sm" onclick="runParameterAnalysis('A13_other_income_expenses')">
+                                <i class="fas fa-play"></i>
+                                Run Analysis
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="stat-card" id="A14_Cash_Flow_Types_Card">
+                        <i class="fas fa-stream stat-icon"></i>
+                        <h3 class="font-semibold mb-2">Cash Flow Types</h3>
+                        <p class="text-sm text-secondary mb-3">Payment frequency & timing patterns</p>
+                        <div class="btn-group">
+                            <button class="btn btn-primary btn-sm" onclick="runParameterAnalysis('A14_cash_flow_types')">
+                                <i class="fas fa-play"></i>
+                                Run Analysis
+                            </button>
+                        </div>
                     </div>
                 </div>
                 
@@ -5317,6 +5420,8 @@
             let cardId;
             if (parameterType === 'A5_ar_aging') {
                 cardId = 'A5_AR_Aging_Card';
+            } else if (parameterType === 'A6_operating_expenses') {
+                cardId = 'A6_Operating_Expenses_Card';
             } else {
                 cardId = parameterType.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('_') + '_Card';
             }
@@ -5368,10 +5473,18 @@
         }
 
         function showParameterResults(parameterType, results) {
+            // Store results in global variable for modal access
+            if (!window.lastParameterResults) {
+                window.lastParameterResults = {};
+            }
+            window.lastParameterResults[parameterType] = results;
+            
             // Handle special cases for card IDs
             let cardId;
             if (parameterType === 'A5_ar_aging') {
                 cardId = 'A5_AR_Aging_Card';
+            } else if (parameterType === 'A6_operating_expenses') {
+                cardId = 'A6_Operating_Expenses_Card';
             } else {
                 cardId = parameterType.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('_') + '_Card';
             }
@@ -5379,21 +5492,6 @@
             if (!card) {
                 showAlert(`❌ Card not found for parameter: ${parameterType}`, 'error');
                 return;
-            }
-            
-            // Extract the parameter number (A1, A2, etc.) for the correct ID
-            const paramNumber = parameterType.split('_')[0];
-            const resultsDiv = card.querySelector(`#${paramNumber}_results`);
-            
-            // Format results for display
-            const formattedResults = formatParameterResults(parameterType, results);
-            
-            if (resultsDiv) {
-                // Store the formatted results in the div but keep it hidden
-                resultsDiv.innerHTML = formattedResults;
-                resultsDiv.style.display = 'none';
-            } else {
-                console.error(`Results div not found for parameter: ${parameterType}`);
             }
             
             // Keep the button as "Run Analysis" so users can view results multiple times
@@ -5405,7 +5503,13 @@
                 console.error(`Run button not found for parameter: ${parameterType}`);
             }
             
-            // Automatically show detailed modal after a short delay
+            // Show success message
+            showAlert(`✅ ${getParameterTitle(parameterType)} analysis completed! Opening detailed results...`, 'success');
+            
+            // Show results in console for debugging
+            console.log(`📊 Results for ${parameterType}:`, results);
+            
+            // Automatically show detailed modal immediately
             setTimeout(() => {
                 viewParameterResults(parameterType);
             }, 1000);
@@ -5499,7 +5603,16 @@
                 'A2_sales_forecast': 'Sales Forecast',
                 'A3_customer_contracts': 'Customer Contracts',
                 'A4_pricing_models': 'Pricing Models',
-                'A5_ar_aging': 'AR Aging'
+                'A5_ar_aging': 'AR Aging',
+                'A6_operating_expenses': 'Operating Expenses (OPEX)',
+                'A7_accounts_payable': 'Accounts Payable Terms',
+                'A8_inventory_turnover': 'Inventory Turnover',
+                'A9_loan_repayments': 'Loan Repayments',
+                'A10_tax_obligations': 'Tax Obligations',
+                'A11_capital_expenditure': 'Capital Expenditure (CapEx)',
+                'A12_equity_debt_inflows': 'Equity & Debt Inflows',
+                'A13_other_income_expenses': 'Other Income/Expenses',
+                'A14_cash_flow_types': 'Cash Flow Types'
             };
             return titles[parameterType] || parameterType;
         }
@@ -5655,6 +5768,232 @@
                 }
                 
                 html += '</div>';
+            } else if (parameterType === 'A6_operating_expenses') {
+                html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
+                if (results.total_expenses) {
+                    html += `<div style="background: #fef2f2; padding: 12px; border-radius: 8px; border-left: 4px solid #ef4444;">
+                        <div style="color: #ef4444; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Total Expenses</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.total_expenses)}</div>
+                    </div>`;
+                }
+                if (results.expense_count) {
+                    html += `<div style="background: #eff6ff; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                        <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Expense Count</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.expense_count)}</div>
+                    </div>`;
+                }
+                if (results.expense_efficiency_score) {
+                    html += `<div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border-left: 4px solid #059669;">
+                        <div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Efficiency Score</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.expense_efficiency_score)}%</div>
+                    </div>`;
+                }
+                if (results.avg_expense) {
+                    html += `<div style="background: #fffbeb; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                        <div style="color: #f59e0b; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Average Expense</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.avg_expense)}</div>
+                    </div>`;
+                }
+                
+                // Add Advanced AI Features section
+                if (results.advanced_ai_features) {
+                    html += '<div style="grid-column: 1 / -1; margin-top: 16px; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">';
+                    html += '<div style="color: #1f2937; font-size: 14px; font-weight: 600; margin-bottom: 12px;">🤖 Advanced AI Analysis</div>';
+                    
+                    // Display AI features
+                    for (const [key, value] of Object.entries(results.advanced_ai_features)) {
+                        if (typeof value === 'object' && value !== null) {
+                            if (value.recommendations) {
+                                html += `<div style="margin-bottom: 12px;">
+                                    <div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 4px;">${key.replace(/_/g, ' ').toUpperCase()}</div>
+                                    <div style="color: #1f2937; font-size: 12px;">${value.recommendations.slice(0, 2).join(', ')}</div>
+                                </div>`;
+                            } else if (value.forecast_total) {
+                                html += `<div style="margin-bottom: 12px;">
+                                    <div style="color: #7c3aed; font-size: 12px; font-weight: 600; margin-bottom: 4px;">${key.replace(/_/g, ' ').toUpperCase()}</div>
+                                    <div style="color: #1f2937; font-size: 12px;">Forecast: ₹${safeValue(value.forecast_total)}</div>
+                                </div>`;
+                            } else if (value.count) {
+                                html += `<div style="margin-bottom: 12px;">
+                                    <div style="color: #dc2626; font-size: 12px; font-weight: 600; margin-bottom: 4px;">${key.replace(/_/g, ' ').toUpperCase()}</div>
+                                    <div style="color: #1f2937; font-size: 12px;">${safeValue(value.count)} detected</div>
+                                </div>`;
+                            }
+                        }
+                    }
+                    
+                    html += '</div>';
+                }
+                
+                html += '</div>';
+            } else if (parameterType === 'A7_accounts_payable') {
+                html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
+                if (results.total_payables) {
+                    html += `<div style="background: #fef2f2; padding: 12px; border-radius: 8px; border-left: 4px solid #ef4444;">
+                        <div style="color: #ef4444; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Total Payables</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.total_payables)}</div>
+                    </div>`;
+                }
+                if (results.dpo_days) {
+                    html += `<div style="background: #eff6ff; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                        <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">DPO</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.dpo_days)}</div>
+                    </div>`;
+                }
+                if (results.vendor_analysis) {
+                    html += `<div style="background: #fffbeb; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                        <div style="color: #f59e0b; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Vendor Analysis</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.vendor_analysis)}</div>
+                    </div>`;
+                }
+                html += '</div>';
+            } else if (parameterType === 'A8_inventory_turnover') {
+                html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
+                if (results.inventory_value) {
+                    html += `<div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border-left: 4px solid #059669;">
+                        <div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Inventory Value</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.inventory_value)}</div>
+                    </div>`;
+                }
+                if (results.turnover_ratio) {
+                    html += `<div style="background: #eff6ff; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                        <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Turnover Ratio</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.turnover_ratio)}</div>
+                    </div>`;
+                }
+                if (results.inventory_analysis) {
+                    html += `<div style="background: #fffbeb; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                        <div style="color: #f59e0b; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Analysis</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.inventory_analysis)}</div>
+                    </div>`;
+                }
+                html += '</div>';
+            } else if (parameterType === 'A9_loan_repayments') {
+                html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
+                if (results.total_repayments) {
+                    html += `<div style="background: #fef2f2; padding: 12px; border-radius: 8px; border-left: 4px solid #ef4444;">
+                        <div style="color: #ef4444; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Total Repayments</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.total_repayments)}</div>
+                    </div>`;
+                }
+                if (results.monthly_payment) {
+                    html += `<div style="background: #eff6ff; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                        <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Monthly Payment</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.monthly_payment)}</div>
+                    </div>`;
+                }
+                if (results.loan_analysis) {
+                    html += `<div style="background: #fffbeb; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                        <div style="color: #f59e0b; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Loan Analysis</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.loan_analysis)}</div>
+                    </div>`;
+                }
+                html += '</div>';
+            } else if (parameterType === 'A10_tax_obligations') {
+                html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
+                if (results.total_taxes) {
+                    html += `<div style="background: #fef2f2; padding: 12px; border-radius: 8px; border-left: 4px solid #ef4444;">
+                        <div style="color: #ef4444; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Total Taxes</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.total_taxes)}</div>
+                    </div>`;
+                }
+                if (results.gst_taxes) {
+                    html += `<div style="background: #eff6ff; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                        <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">GST Taxes</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.gst_taxes)}</div>
+                    </div>`;
+                }
+                if (results.tax_analysis) {
+                    html += `<div style="background: #fffbeb; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                        <div style="color: #f59e0b; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Tax Analysis</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.tax_analysis)}</div>
+                    </div>`;
+                }
+                html += '</div>';
+            } else if (parameterType === 'A11_capital_expenditure') {
+                html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
+                if (results.total_capex) {
+                    html += `<div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border-left: 4px solid #059669;">
+                        <div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Total CapEx</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.total_capex)}</div>
+                    </div>`;
+                }
+                if (results.equipment_capex) {
+                    html += `<div style="background: #eff6ff; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                        <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Equipment</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.equipment_capex)}</div>
+                    </div>`;
+                }
+                if (results.capex_analysis) {
+                    html += `<div style="background: #fffbeb; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                        <div style="color: #f59e0b; font-size: 12px; font-weight: 600; margin-bottom: 4px;">CapEx Analysis</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.capex_analysis)}</div>
+                    </div>`;
+                }
+                html += '</div>';
+            } else if (parameterType === 'A12_equity_debt_inflows') {
+                html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
+                if (results.total_inflows) {
+                    html += `<div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border-left: 4px solid #059669;">
+                        <div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Total Inflows</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.total_inflows)}</div>
+                    </div>`;
+                }
+                if (results.equity_inflows) {
+                    html += `<div style="background: #eff6ff; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                        <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Equity Inflows</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.equity_inflows)}</div>
+                    </div>`;
+                }
+                if (results.funding_analysis) {
+                    html += `<div style="background: #fffbeb; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                        <div style="color: #f59e0b; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Funding Analysis</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.funding_analysis)}</div>
+                    </div>`;
+                }
+                html += '</div>';
+            } else if (parameterType === 'A13_other_income_expenses') {
+                html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
+                if (results.total_other) {
+                    html += `<div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border-left: 4px solid #059669;">
+                        <div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Total Other</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.total_other)}</div>
+                    </div>`;
+                }
+                if (results.other_income) {
+                    html += `<div style="background: #eff6ff; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                        <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Other Income</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.other_income)}</div>
+                    </div>`;
+                }
+                if (results.other_analysis) {
+                    html += `<div style="background: #fffbeb; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                        <div style="color: #f59e0b; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Other Analysis</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.other_analysis)}</div>
+                    </div>`;
+                }
+                html += '</div>';
+            } else if (parameterType === 'A14_cash_flow_types') {
+                html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
+                if (results.total_transactions) {
+                    html += `<div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border-left: 4px solid #059669;">
+                        <div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Total Transactions</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.total_transactions)}</div>
+                    </div>`;
+                }
+                if (results.total_amount) {
+                    html += `<div style="background: #eff6ff; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                        <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Total Amount</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.total_amount)}</div>
+                    </div>`;
+                }
+                if (results.cash_flow_analysis) {
+                    html += `<div style="background: #fffbeb; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                        <div style="color: #f59e0b; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Flow Analysis</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.cash_flow_analysis)}</div>
+                    </div>`;
+                }
+                html += '</div>';
             }
             
             // Show error if present
@@ -5678,335 +6017,24 @@
                 return;
             }
             
-            // Get the results from the card
-            const paramNumber = parameterType.split('_')[0];
-            let cardId;
-            if (parameterType === 'A5_ar_aging') {
-                cardId = 'A5_AR_Aging_Card';
-            } else {
-                cardId = parameterType.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('_') + '_Card';
-            }
-            const card = document.getElementById(cardId);
-            
-            if (!card) {
-                console.error(`Card not found: ${cardId}`);
-                contentDiv.innerHTML = `
-                    <div style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); padding: 30px; border-radius: 20px; text-align: center;">
-                        <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                            <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #f59e0b; margin-bottom: 15px;"></i>
-                            <h3 style="margin-bottom: 15px; color: #1f2937; font-size: 22px;">Analysis Not Available</h3>
-                            <p style="color: #6b7280; font-size: 16px;">Please run the analysis first to view detailed results.</p>
-                        </div>
-                    </div>
-                `;
+            // Check if we have results stored in the global variable
+            if (window.lastParameterResults && window.lastParameterResults[parameterType]) {
+                const results = window.lastParameterResults[parameterType];
+                const formattedResults = formatParameterResults(parameterType, results);
+                contentDiv.innerHTML = formattedResults;
                 return;
             }
             
-            // Check if analysis has been run by looking for results in the hidden div
-            const checkResultsDiv = card.querySelector(`#${paramNumber}_results`);
-            const hasResults = checkResultsDiv && checkResultsDiv.innerHTML.trim() !== '';
-            
-            if (!hasResults) {
-                contentDiv.innerHTML = `
-                    <div style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); padding: 30px; border-radius: 20px; text-align: center;">
-                        <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                            <i class="fas fa-chart-line" style="font-size: 48px; color: #3b82f6; margin-bottom: 15px;"></i>
-                            <h3 style="margin-bottom: 15px; color: #1f2937; font-size: 22px;">Ready for Analysis</h3>
-                            <p style="color: #6b7280; font-size: 16px;">Click "Run Analysis" to generate detailed insights.</p>
-                        </div>
-                    </div>
-                `;
-                return;
-            }
-            
-            // Get the results from the hidden results div
-            const resultsDiv = checkResultsDiv;
-            let extractedData = {};
-            
-            if (resultsDiv) {
-                // Extract data from the formatted results div
-                const metricCards = resultsDiv.querySelectorAll('div[style*="background:"]');
-                
-                metricCards.forEach((metricCard) => {
-                    const titleDiv = metricCard.querySelector('div[style*="color:"]');
-                    const valueDiv = metricCard.querySelector('div[style*="font-weight: bold"]');
-                    
-                    if (titleDiv && valueDiv) {
-                        const title = titleDiv.textContent.trim();
-                        const value = valueDiv.textContent.trim();
-                        
-                        if (title === 'Total Revenue') {
-                            extractedData.totalRevenue = value;
-                        } else if (title === 'Transactions') {
-                            extractedData.transactions = value;
-                        } else if (title === 'Trend') {
-                            extractedData.trend = value;
-                        } else if (title === 'Growth Rate') {
-                            extractedData.growthRate = value;
-                        } else if (title === 'Current Month') {
-                            extractedData.currentMonth = value;
-                        } else if (title === 'Next Quarter') {
-                            extractedData.nextQuarter = value;
-                        } else if (title === 'Confidence') {
-                            extractedData.confidence = value;
-                        } else if (title === 'Customers') {
-                            extractedData.customers = value;
-                        } else if (title === 'Contract Value') {
-                            extractedData.contractValue = value;
-                        } else if (title === 'Retention') {
-                            extractedData.retention = value;
-                        } else if (title === 'Models') {
-                            extractedData.models = value;
-                        } else if (title === 'Price Range') {
-                            extractedData.priceRange = value;
-                        } else if (title === 'DSO') {
-                            extractedData.dso = value;
-                        } else if (title === 'Collection') {
-                            extractedData.collection = value;
-                        } else if (title === 'Aging') {
-                            extractedData.aging = value;
-                        } else if (title === 'Current (0-30 days)') {
-                            extractedData.currentAging = value;
-                        } else if (title === '30-60 days') {
-                            extractedData.thirtyDaysAging = value;
-                        } else if (title === '60-90 days') {
-                            extractedData.sixtyDaysAging = value;
-                        } else if (title === 'Over 90 days') {
-                            extractedData.overNinetyDaysAging = value;
-                        }
-                    }
-                });
-            }
-            
-            // Fallback: also check for any text content that might contain the data
-            const allText = resultsDiv.textContent || '';
-            if (!extractedData.totalRevenue && allText.includes('Total Revenue')) {
-                const match = allText.match(/Total Revenue[:\s]*([^\n\r]+)/);
-                if (match) extractedData.totalRevenue = match[1].trim();
-            }
-            if (!extractedData.transactions && allText.includes('Transactions')) {
-                const match = allText.match(/Transactions[:\s]*([^\n\r]+)/);
-                if (match) extractedData.transactions = match[1].trim();
-            }
-            if (!extractedData.trend && allText.includes('Trend')) {
-                const match = allText.match(/Trend[:\s]*([^\n\r]+)/);
-                if (match) extractedData.trend = match[1].trim();
-            }
-            if (!extractedData.growthRate && allText.includes('Growth Rate')) {
-                const match = allText.match(/Growth Rate[:\s]*([^\n\r]+)/);
-                if (match) extractedData.growthRate = match[1].trim();
-            }
-            if (!extractedData.currentMonth && allText.includes('Current Month')) {
-                const match = allText.match(/Current Month[:\s]*([^\n\r]+)/);
-                if (match) extractedData.currentMonth = match[1].trim();
-            }
-            if (!extractedData.nextQuarter && allText.includes('Next Quarter')) {
-                const match = allText.match(/Next Quarter[:\s]*([^\n\r]+)/);
-                if (match) extractedData.nextQuarter = match[1].trim();
-            }
-            if (!extractedData.confidence && allText.includes('Confidence')) {
-                const match = allText.match(/Confidence[:\s]*([^\n\r]+)/);
-                if (match) extractedData.confidence = match[1].trim();
-            }
-            if (!extractedData.customers && allText.includes('Customers')) {
-                const match = allText.match(/Customers[:\s]*([^\n\r]+)/);
-                if (match) extractedData.customers = match[1].trim();
-            }
-            if (!extractedData.contractValue && allText.includes('Contract Value')) {
-                const match = allText.match(/Contract Value[:\s]*([^\n\r]+)/);
-                if (match) extractedData.contractValue = match[1].trim();
-            }
-            if (!extractedData.retention && allText.includes('Retention')) {
-                const match = allText.match(/Retention[:\s]*([^\n\r]+)/);
-                if (match) extractedData.retention = match[1].trim();
-            }
-            if (!extractedData.models && allText.includes('Models')) {
-                const match = allText.match(/Models[:\s]*([^\n\r]+)/);
-                if (match) extractedData.models = match[1].trim();
-            }
-            if (!extractedData.priceRange && allText.includes('Price Range')) {
-                const match = allText.match(/Price Range[:\s]*([^\n\r]+)/);
-                if (match) extractedData.priceRange = match[1].trim();
-            }
-            if (!extractedData.dso && allText.includes('DSO')) {
-                const match = allText.match(/DSO[:\s]*([^\n\r]+)/);
-                if (match) extractedData.dso = match[1].trim();
-            }
-            if (!extractedData.collection && allText.includes('Collection')) {
-                const match = allText.match(/Collection[:\s]*([^\n\r]+)/);
-                if (match) extractedData.collection = match[1].trim();
-            }
-            if (!extractedData.aging && allText.includes('Aging')) {
-                const match = allText.match(/Aging[:\s]*([^\n\r]+)/);
-                if (match) extractedData.aging = match[1].trim();
-            }
-            
-            // Create clean, modern content
-            let content = `
-                <div style="background: #f8f9fa; padding: 25px; border-radius: 15px; margin-bottom: 25px;">
-                    <h3 style="margin-bottom: 20px; color: #1f2937; font-size: 20px;">📊 Summary Statistics</h3>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-            `;
-            
-            // Add parameter-specific key insights with improved UI
-            if (parameterType === 'A1_historical_trends') {
-                content += `
-                    <div style="text-align: center; margin-bottom: 25px;">
-                        <div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);">
-                            <i class="fas fa-chart-line" style="font-size: 36px; margin-bottom: 15px; display: block;"></i>
-                            <h3 style="margin: 0; font-size: 26px; font-weight: 600;">Historical Revenue Trends</h3>
-                            <p style="margin: 8px 0 0 0; opacity: 0.9; font-size: 14px;">Revenue performance insights</p>
-                        </div>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-top: 25px;">
-                            <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); padding: 20px; border-radius: 12px; border-left: 5px solid #3b82f6; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                                <h4 style="margin: 0 0 10px 0; color: #3b82f6; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Total Revenue</h4>
-                                <p style="margin: 0; font-size: 20px; font-weight: bold; color: #1f2937;">${extractedData.totalRevenue || 'N/A'}</p>
-                            </div>
-                            <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); padding: 20px; border-radius: 12px; border-left: 5px solid #059669; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                                <h4 style="margin: 0 0 10px 0; color: #059669; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Transactions</h4>
-                                <p style="margin: 0; font-size: 20px; font-weight: bold; color: #1f2937;">${extractedData.transactions || 'N/A'}</p>
-                            </div>
-                            <div style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); padding: 20px; border-radius: 12px; border-left: 5px solid #f59e0b; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                                <h4 style="margin: 0 0 10px 0; color: #f59e0b; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Trend</h4>
-                                <p style="margin: 0; font-size: 20px; font-weight: bold; color: #1f2937;">${extractedData.trend || 'N/A'}</p>
-                            </div>
-                            <div style="background: linear-gradient(135deg, #f3e8ff 0%, #ede9fe 100%); padding: 20px; border-radius: 12px; border-left: 5px solid #8b5cf6; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                                <h4 style="margin: 0 0 10px 0; color: #8b5cf6; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Growth Rate</h4>
-                                <p style="margin: 0; font-size: 20px; font-weight: bold; color: #1f2937;">${extractedData.growthRate || 'N/A'}</p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else if (parameterType === 'A2_sales_forecast') {
-                content += `
-                    <div style="text-align: center; margin-bottom: 25px;">
-                        <div style="background: linear-gradient(135deg, #059669 0%, #047857 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 8px 16px rgba(5, 150, 105, 0.3);">
-                            <i class="fas fa-chart-bar" style="font-size: 36px; margin-bottom: 15px; display: block;"></i>
-                            <h3 style="margin: 0; font-size: 26px; font-weight: 600;">Sales Forecast</h3>
-                            <p style="margin: 8px 0 0 0; opacity: 0.9; font-size: 14px;">AI-powered predictions</p>
-                        </div>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-top: 25px;">
-                            <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); padding: 20px; border-radius: 12px; border-left: 5px solid #3b82f6; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                                <h4 style="margin: 0 0 10px 0; color: #3b82f6; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Current Month</h4>
-                                <p style="margin: 0; font-size: 20px; font-weight: bold; color: #1f2937;">${extractedData.currentMonth || 'N/A'}</p>
-                            </div>
-                            <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); padding: 20px; border-radius: 12px; border-left: 5px solid #059669; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                                <h4 style="margin: 0 0 10px 0; color: #059669; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Next Quarter</h4>
-                                <p style="margin: 0; font-size: 20px; font-weight: bold; color: #1f2937;">${extractedData.nextQuarter || 'N/A'}</p>
-                            </div>
-                            <div style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); padding: 20px; border-radius: 12px; border-left: 5px solid #f59e0b; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                                <h4 style="margin: 0 0 10px 0; color: #f59e0b; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Confidence</h4>
-                                <p style="margin: 0; font-size: 20px; font-weight: bold; color: #1f2937;">${extractedData.confidence || 'N/A'}</p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else if (parameterType === 'A3_customer_contracts') {
-                content += `
-                    <div style="text-align: center; margin-bottom: 25px;">
-                        <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 8px 16px rgba(245, 158, 11, 0.3);">
-                            <i class="fas fa-users" style="font-size: 36px; margin-bottom: 15px; display: block;"></i>
-                            <h3 style="margin: 0; font-size: 26px; font-weight: 600;">Customer Contracts</h3>
-                            <p style="margin: 8px 0 0 0; opacity: 0.9; font-size: 14px;">Customer relationship insights</p>
-                        </div>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-top: 25px;">
-                            <div style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); padding: 20px; border-radius: 12px; border-left: 5px solid #f59e0b; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                                <h4 style="margin: 0 0 10px 0; color: #f59e0b; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Customers</h4>
-                                <p style="margin: 0; font-size: 20px; font-weight: bold; color: #1f2937;">${extractedData.customers || 'N/A'}</p>
-                            </div>
-                            <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); padding: 20px; border-radius: 12px; border-left: 5px solid #3b82f6; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                                <h4 style="margin: 0 0 10px 0; color: #3b82f6; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Contract Value</h4>
-                                <p style="margin: 0; font-size: 20px; font-weight: bold; color: #1f2937;">${extractedData.contractValue || 'N/A'}</p>
-                            </div>
-                            <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); padding: 20px; border-radius: 12px; border-left: 5px solid #059669; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                                <h4 style="margin: 0 0 10px 0; color: #059669; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Retention</h4>
-                                <p style="margin: 0; font-size: 20px; font-weight: bold; color: #1f2937;">${extractedData.retention || 'N/A'}</p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else if (parameterType === 'A4_pricing_models') {
-                content += `
-                    <div style="text-align: center; margin-bottom: 25px;">
-                        <div style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 8px 16px rgba(139, 92, 246, 0.3);">
-                            <i class="fas fa-tags" style="font-size: 36px; margin-bottom: 15px; display: block;"></i>
-                            <h3 style="margin: 0; font-size: 26px; font-weight: 600;">Pricing Models</h3>
-                            <p style="margin: 8px 0 0 0; opacity: 0.9; font-size: 14px;">Revenue optimization insights</p>
-                        </div>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-top: 25px;">
-                            <div style="background: linear-gradient(135deg, #f3e8ff 0%, #ede9fe 100%); padding: 20px; border-radius: 12px; border-left: 5px solid #8b5cf6; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                                <h4 style="margin: 0 0 10px 0; color: #8b5cf6; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Models</h4>
-                                <p style="margin: 0; font-size: 20px; font-weight: bold; color: #1f2937;">${extractedData.models || 'N/A'}</p>
-                            </div>
-                            <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); padding: 20px; border-radius: 12px; border-left: 5px solid #3b82f6; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                                <h4 style="margin: 0 0 10px 0; color: #3b82f6; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Price Range</h4>
-                                <p style="margin: 0; font-size: 20px; font-weight: bold; color: #1f2937;">${extractedData.priceRange || 'N/A'}</p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else if (parameterType === 'A5_ar_aging') {
-                content += `
-                    <div style="text-align: center; margin-bottom: 25px;">
-                        <div style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 8px 16px rgba(239, 68, 68, 0.3);">
-                            <i class="fas fa-clock" style="font-size: 36px; margin-bottom: 15px; display: block;"></i>
-                            <h3 style="margin: 0; font-size: 26px; font-weight: 600;">AR Aging Analysis</h3>
-                            <p style="margin: 8px 0 0 0; opacity: 0.9; font-size: 14px;">Collection efficiency insights</p>
-                        </div>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-top: 25px;">
-                            <div style="background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); padding: 20px; border-radius: 12px; border-left: 5px solid #ef4444; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                                <h4 style="margin: 0 0 10px 0; color: #ef4444; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">DSO</h4>
-                                <p style="margin: 0; font-size: 20px; font-weight: bold; color: #1f2937;">${extractedData.dso || 'N/A'}</p>
-                            </div>
-                            <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); padding: 20px; border-radius: 12px; border-left: 5px solid #3b82f6; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                                <h4 style="margin: 0 0 10px 0; color: #3b82f6; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Collection</h4>
-                                <p style="margin: 0; font-size: 20px; font-weight: bold; color: #1f2937;">${extractedData.collection || 'N/A'}</p>
-                            </div>
-                        </div>
-                        
-                        <!-- Aging Buckets Summary -->
-                        <div style="margin-top: 30px;">
-                            <h4 style="margin-bottom: 20px; color: #1f2937; font-size: 18px; font-weight: 600;">📊 Aging Buckets Summary</h4>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-                                <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); padding: 15px; border-radius: 10px; border-left: 4px solid #3b82f6;">
-                                    <h5 style="margin: 0 0 8px 0; color: #3b82f6; font-size: 12px; font-weight: 600;">Current (0-30 days)</h5>
-                                    <p style="margin: 0; font-size: 14px; color: #1f2937;">${extractedData.currentAging || 'No transactions'}</p>
-                                </div>
-                                <div style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); padding: 15px; border-radius: 10px; border-left: 4px solid #f59e0b;">
-                                    <h5 style="margin: 0 0 8px 0; color: #f59e0b; font-size: 12px; font-weight: 600;">30-60 days</h5>
-                                    <p style="margin: 0; font-size: 14px; color: #1f2937;">${extractedData.thirtyDaysAging || 'No transactions'}</p>
-                                </div>
-                                <div style="background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); padding: 15px; border-radius: 10px; border-left: 4px solid #ef4444;">
-                                    <h5 style="margin: 0 0 8px 0; color: #ef4444; font-size: 12px; font-weight: 600;">60-90 days</h5>
-                                    <p style="margin: 0; font-size: 14px; color: #1f2937;">${extractedData.sixtyDaysAging || 'No transactions'}</p>
-                                </div>
-                                <div style="background: linear-gradient(135deg, #f3e8ff 0%, #ede9fe 100%); padding: 15px; border-radius: 10px; border-left: 4px solid #8b5cf6;">
-                                    <h5 style="margin: 0 0 8px 0; color: #8b5cf6; font-size: 12px; font-weight: 600;">Over 90 days</h5>
-                                    <p style="margin: 0; font-size: 14px; color: #1f2937;">${extractedData.overNinetyDaysAging || 'No transactions'}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            // Add a simple summary footer
-            content += `
-                    </div>
-                    
-                    <div style="display: flex; gap: 15px; margin-top: 30px; justify-content: center;">
-                        <button onclick="closeParameterModal()" style="background: #ef4444; color: white; border: none; padding: 15px 30px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; transition: background-color 0.3s;" onmouseover="this.style.backgroundColor='#dc2626'" onmouseout="this.style.backgroundColor='#ef4444'">
-                            ❌ Close Modal
-                        </button>
-                        <button onclick="closeParameterModal();" style="background: #6b7280; color: white; border: none; padding: 15px 30px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; transition: background-color 0.3s;" onmouseover="this.style.backgroundColor='#4b5563'" onmouseout="this.style.backgroundColor='#6b7280'">
-                            🔙 Back to Parameters
-                        </button>
+            // If no results available, show ready message
+            contentDiv.innerHTML = `
+                <div style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); padding: 30px; border-radius: 20px; text-align: center;">
+                    <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                        <i class="fas fa-chart-line" style="font-size: 48px; color: #3b82f6; margin-bottom: 15px;"></i>
+                        <h3 style="margin-bottom: 15px; color: #1f2937; font-size: 22px;">Ready for Analysis</h3>
+                        <p style="color: #6b7280; font-size: 16px;">Click "Run Analysis" to generate detailed insights.</p>
                     </div>
                 </div>
-            </div>
             `;
-            
-            contentDiv.innerHTML = content;
         }
 
         function closeParameterModal() {
