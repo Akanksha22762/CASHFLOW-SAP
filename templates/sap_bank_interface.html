@@ -4534,21 +4534,70 @@
             </div>
             <div class="section-content">
                 <div class="grid grid-sm" id="aiFeaturesGrid">
-                    <!-- Revenue Analysis - Initial Single Card -->
-                    <div class="stat-card" id="revenueAnalysisCard" style="cursor: pointer;" onclick="showRevenueAnalysisCards()">
+                    <!-- Individual Parameter Cards -->
+                    <div class="stat-card" id="A1_Historical_Trends_Card">
                         <i class="fas fa-chart-line stat-icon"></i>
-                        <h3 class="font-semibold mb-2">Revenue Analysis</h3>
-                        <p class="text-sm text-secondary mb-3">AI-powered revenue analysis with comprehensive parameters</p>
+                        <h3 class="font-semibold mb-2">Historical Revenue Trends</h3>
+                        <p class="text-sm text-secondary mb-3">Monthly/quarterly income over past periods</p>
                         <div class="btn-group">
-                            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); showRevenueAnalysisCards()">
-                                <i class="fas fa-eye"></i>
-                                View Analysis
-                            </button>
-                            <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); exportRevenueAnalysis()">
-                                <i class="fas fa-download"></i>
-                                Export
+                            <button class="btn btn-primary btn-sm" onclick="runParameterAnalysis('A1_historical_trends')">
+                                <i class="fas fa-play"></i>
+                                Run Analysis
                             </button>
                         </div>
+                        <div id="A1_results" class="mt-3" style="display: none;"></div>
+                    </div>
+
+                    <div class="stat-card" id="A2_Sales_Forecast_Card">
+                        <i class="fas fa-chart-bar stat-icon"></i>
+                        <h3 class="font-semibold mb-2">Sales Forecast</h3>
+                        <p class="text-sm text-secondary mb-3">Based on pipeline, market trends, seasonality</p>
+                        <div class="btn-group">
+                            <button class="btn btn-primary btn-sm" onclick="runParameterAnalysis('A2_sales_forecast')">
+                                <i class="fas fa-play"></i>
+                                Run Analysis
+                            </button>
+                        </div>
+                        <div id="A2_results" class="mt-3" style="display: none;"></div>
+                    </div>
+
+                    <div class="stat-card" id="A3_Customer_Contracts_Card">
+                        <i class="fas fa-users stat-icon"></i>
+                        <h3 class="font-semibold mb-2">Customer Contracts</h3>
+                        <p class="text-sm text-secondary mb-3">Recurring revenue, churn rate, customer lifetime value</p>
+                        <div class="btn-group">
+                            <button class="btn btn-primary btn-sm" onclick="runParameterAnalysis('A3_customer_contracts')">
+                                <i class="fas fa-play"></i>
+                                Run Analysis
+                            </button>
+                        </div>
+                        <div id="A3_results" class="mt-3" style="display: none;"></div>
+                    </div>
+
+                    <div class="stat-card" id="A4_Pricing_Models_Card">
+                        <i class="fas fa-tags stat-icon"></i>
+                        <h3 class="font-semibold mb-2">Pricing Models</h3>
+                        <p class="text-sm text-secondary mb-3">Subscription, one-time fees, dynamic pricing changes</p>
+                        <div class="btn-group">
+                            <button class="btn btn-primary btn-sm" onclick="runParameterAnalysis('A4_pricing_models')">
+                                <i class="fas fa-play"></i>
+                                Run Analysis
+                            </button>
+                        </div>
+                        <div id="A4_results" class="mt-3" style="display: none;"></div>
+                    </div>
+
+                    <div class="stat-card" id="A5_AR_Aging_Card">
+                        <i class="fas fa-clock stat-icon"></i>
+                        <h3 class="font-semibold mb-2">AR Aging</h3>
+                        <p class="text-sm text-secondary mb-3">Days Sales Outstanding (DSO), collection probability</p>
+                        <div class="btn-group">
+                            <button class="btn btn-primary btn-sm" onclick="runParameterAnalysis('A5_ar_aging')">
+                                <i class="fas fa-play"></i>
+                                Run Analysis
+                            </button>
+                        </div>
+                        <div id="A5_results" class="mt-3" style="display: none;"></div>
                     </div>
                 </div>
                 
@@ -5227,50 +5276,12 @@
                     showAlert('✅ AI analysis completed successfully!', 'success');
                 } else {
                     showAlert(`❌ AI analysis failed: ${data.error}`, 'error');
-                    // Reset to original state if error
-                    if (grid) {
-                        grid.innerHTML = `
-                            <div class="stat-card" id="revenueAnalysisCard" style="cursor: pointer;" onclick="showRevenueAnalysisCards()">
-                                <i class="fas fa-chart-line stat-icon"></i>
-                                <h3 class="font-semibold mb-2">Revenue Analysis</h3>
-                                <p class="text-sm text-secondary mb-3">AI-powered revenue analysis with comprehensive parameters</p>
-                                <div class="btn-group">
-                                    <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); showRevenueAnalysisCards()">
-                                        <i class="fas fa-eye"></i>
-                                        View Analysis
-                                    </button>
-                                    <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); exportRevenueAnalysis()">
-                                        <i class="fas fa-download"></i>
-                                        Export
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-                    }
+                    // Keep the individual parameter cards - don't revert to old single card
                 }
             })
             .catch(error => {
                 showAlert(`❌ AI analysis error: ${error.message}`, 'error');
-                // Reset to original state if error
-                if (grid) {
-                    grid.innerHTML = `
-                        <div class="stat-card" id="revenueAnalysisCard" style="cursor: pointer;" onclick="showRevenueAnalysisCards()">
-                            <i class="fas fa-chart-line stat-icon"></i>
-                            <h3 class="font-semibold mb-2">Revenue Analysis</h3>
-                            <p class="text-sm text-secondary mb-3">AI-powered revenue analysis with comprehensive parameters</p>
-                            <div class="btn-group">
-                                <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); showRevenueAnalysisCards()">
-                                    <i class="fas fa-eye"></i>
-                                    View Analysis
-                                </button>
-                                <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); exportRevenueAnalysis()">
-                                    <i class="fas fa-download"></i>
-                                    Export
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                }
+                // Keep the individual parameter cards - don't revert to old single card
             });
         }
 
@@ -5283,14 +5294,811 @@
                             <i class="fas fa-exclamation-triangle"></i>
                         </div>
                         <h3>Please Upload Files First</h3>
-                        <p>You need to upload your bank and SAP files before running revenue analysis</p>
+                        <p>You need to upload your bank and SAP files before running parameter analysis</p>
                         <div class="feature-stats">
                             <span class="stat">Go to Step 1 and upload your files</span>
-                            <span class="stat">Then come back and click "Run Revenue Analysis"</span>
+                            <span class="stat">Then come back and click "Run Analysis" on any parameter card</span>
                         </div>
                     </div>
                 `;
             }
+        }
+
+        // New Individual Parameter Analysis Functions
+        function runParameterAnalysis(parameterType) {
+            // Check if files are uploaded first
+            if (!window.uploadedFiles || !window.uploadedFiles.bank) {
+                showAlert('⚠️ Please upload a Bank Statement file first! Go to Step 1 and upload your file, then come back to run the analysis.', 'warning');
+                return;
+            }
+            
+            // Show loading state for specific parameter
+            // Handle special cases for card IDs
+            let cardId;
+            if (parameterType === 'A5_ar_aging') {
+                cardId = 'A5_AR_Aging_Card';
+            } else {
+                cardId = parameterType.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('_') + '_Card';
+            }
+            const card = document.getElementById(cardId);
+            if (!card) {
+                showAlert(`❌ Card not found for parameter: ${parameterType}`, 'error');
+                return;
+            }
+            
+            const runBtn = card.querySelector('.btn-primary');
+            if (!runBtn) {
+                showAlert(`❌ Run button not found for parameter: ${parameterType}`, 'error');
+                return;
+            }
+            
+            const originalText = runBtn.innerHTML;
+            
+            runBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running...';
+            runBtn.disabled = true;
+            
+            fetch('/run-parameter-analysis', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    parameter_type: parameterType
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Show results in the card
+                    showParameterResults(parameterType, data.results);
+                    showAlert(`✅ ${getParameterTitle(parameterType)} analysis completed!`, 'success');
+                } else {
+                    showAlert(`❌ ${getParameterTitle(parameterType)} analysis failed: ${data.error}`, 'error');
+                    // Reset button
+                    runBtn.innerHTML = originalText;
+                    runBtn.disabled = false;
+                }
+            })
+            .catch(error => {
+                showAlert(`❌ ${getParameterTitle(parameterType)} analysis error: ${error.message}`, 'error');
+                // Reset button
+                runBtn.innerHTML = originalText;
+                runBtn.disabled = false;
+            });
+        }
+
+        function showParameterResults(parameterType, results) {
+            // Handle special cases for card IDs
+            let cardId;
+            if (parameterType === 'A5_ar_aging') {
+                cardId = 'A5_AR_Aging_Card';
+            } else {
+                cardId = parameterType.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('_') + '_Card';
+            }
+            const card = document.getElementById(cardId);
+            if (!card) {
+                showAlert(`❌ Card not found for parameter: ${parameterType}`, 'error');
+                return;
+            }
+            
+            // Extract the parameter number (A1, A2, etc.) for the correct ID
+            const paramNumber = parameterType.split('_')[0];
+            const resultsDiv = card.querySelector(`#${paramNumber}_results`);
+            
+            // Format results for display
+            const formattedResults = formatParameterResults(parameterType, results);
+            
+            if (resultsDiv) {
+                // Store the formatted results in the div but keep it hidden
+                resultsDiv.innerHTML = formattedResults;
+                resultsDiv.style.display = 'none';
+            } else {
+                console.error(`Results div not found for parameter: ${parameterType}`);
+            }
+            
+            // Keep the button as "Run Analysis" so users can view results multiple times
+            const runBtn = card.querySelector('.btn-primary');
+            if (runBtn) {
+                // Don't change the button - keep it as "Run Analysis"
+                runBtn.disabled = false;
+            } else {
+                console.error(`Run button not found for parameter: ${parameterType}`);
+            }
+            
+            // Automatically show detailed modal after a short delay
+            setTimeout(() => {
+                viewParameterResults(parameterType);
+            }, 1000);
+        }
+
+        function viewParameterResults(parameterType) {
+            // Show detailed modal for parameter results
+            const modalHtml = `
+                <div id="parameterModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; border-radius: 20px; padding: 40px; max-width: 1000px; width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px rgba(0,0,0,0.3);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                            <div>
+                                <h2 style="color: #1f2937; margin: 0; font-size: 28px; font-weight: bold;">📊 ${getParameterTitle(parameterType)}</h2>
+                                <p style="color: #6b7280; margin: 5px 0 0 0; font-size: 16px;">Advanced AI Analysis Results</p>
+                            </div>
+                            <button id="closeModalBtn" onclick="closeParameterModal();" style="background: none; border: none; font-size: 32px; cursor: pointer; color: #ef4444; padding: 5px; border-radius: 50%; transition: background-color 0.3s;" onmouseover="this.style.backgroundColor='#fef2f2'" onmouseout="this.style.backgroundColor='transparent'" title="Close">&times;</button>
+                        </div>
+                        
+                        <div id="parameterModalContent">
+                            <!-- Content will be loaded dynamically -->
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Add event listener for close button with multiple fallbacks
+            setTimeout(() => {
+                const closeBtn = document.getElementById('closeModalBtn');
+                if (closeBtn) {
+                    console.log('Close button found, adding event listener');
+                    closeBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('Close button clicked');
+                        closeParameterModal();
+                    });
+                    
+                    // Also add direct onclick as backup
+                    closeBtn.onclick = function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('Close button clicked (onclick)');
+                        closeParameterModal();
+                    };
+                } else {
+                    console.error('Close button not found! Trying alternative approach...');
+                    // Try to find any close button in the modal
+                    const modal = document.getElementById('parameterModal');
+                    if (modal) {
+                        const closeButtons = modal.querySelectorAll('button[onclick*="close"], button[id*="close"], button:contains("×")');
+                        closeButtons.forEach(btn => {
+                            btn.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                console.log('Alternative close button clicked');
+                                closeParameterModal();
+                            });
+                        });
+                    }
+                }
+            }, 50);
+            
+            // Also add click outside to close
+            const modal = document.getElementById('parameterModal');
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        closeParameterModal();
+                    }
+                });
+            }
+            
+            // Add keyboard event listener for Escape key
+            const handleEscape = function(e) {
+                if (e.key === 'Escape') {
+                    closeParameterModal();
+                    document.removeEventListener('keydown', handleEscape);
+                }
+            };
+            document.addEventListener('keydown', handleEscape);
+            
+            // Load parameter-specific content
+            loadParameterModalContent(parameterType);
+        }
+
+        function getParameterTitle(parameterType) {
+            const titles = {
+                'A1_historical_trends': 'Historical Revenue Trends',
+                'A2_sales_forecast': 'Sales Forecast',
+                'A3_customer_contracts': 'Customer Contracts',
+                'A4_pricing_models': 'Pricing Models',
+                'A5_ar_aging': 'AR Aging'
+            };
+            return titles[parameterType] || parameterType;
+        }
+
+        function formatParameterResults(parameterType, results) {
+            // Helper function to safely extract values
+            function safeValue(value) {
+                if (value === null || value === undefined) return 'N/A';
+                if (typeof value === 'object') {
+                    if (value.hasOwnProperty('value')) return value.value;
+                    if (value.hasOwnProperty('dso_days')) return value.dso_days;
+                    if (value.hasOwnProperty('collection_probability')) return value.collection_probability;
+                    return JSON.stringify(value);
+                }
+                return value;
+            }
+            
+            // Format results for display in the card with improved UI
+            let html = '<div style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); padding: 20px; border-radius: 12px; margin-top: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">';
+            html += '<h4 style="margin: 0 0 15px 0; color: #1f2937; font-size: 16px; font-weight: 600;">📊 Analysis Results</h4>';
+            
+            // Handle different parameter types with better formatting
+            if (parameterType === 'A1_historical_trends') {
+                html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
+                if (results.total_revenue) {
+                    html += `<div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border-left: 4px solid #059669;">
+                        <div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Total Revenue</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.total_revenue)}</div>
+                    </div>`;
+                }
+                if (results.transaction_count) {
+                    html += `<div style="background: #eff6ff; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                        <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Transactions</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.transaction_count)}</div>
+                    </div>`;
+                }
+                if (results.trend_direction) {
+                    html += `<div style="background: #fffbeb; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                        <div style="color: #f59e0b; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Trend</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.trend_direction)}</div>
+                    </div>`;
+                }
+                if (results.growth_rate !== undefined) {
+                    html += `<div style="background: #f3e8ff; padding: 12px; border-radius: 8px; border-left: 4px solid #8b5cf6;">
+                        <div style="color: #8b5cf6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Growth Rate</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.growth_rate).toFixed(2)}%</div>
+                    </div>`;
+                }
+                html += '</div>';
+            } else if (parameterType === 'A2_sales_forecast') {
+                html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
+                if (results.current_month_forecast) {
+                    html += `<div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border-left: 4px solid #059669;">
+                        <div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Current Month</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.current_month_forecast)}</div>
+                    </div>`;
+                }
+                if (results.next_quarter_forecast) {
+                    html += `<div style="background: #eff6ff; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                        <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Next Quarter</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.next_quarter_forecast)}</div>
+                    </div>`;
+                }
+                if (results.confidence_level) {
+                    html += `<div style="background: #fffbeb; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                        <div style="color: #f59e0b; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Confidence</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.confidence_level)}</div>
+                    </div>`;
+                }
+                html += '</div>';
+            } else if (parameterType === 'A3_customer_contracts') {
+                html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
+                if (results.unique_customers) {
+                    html += `<div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border-left: 4px solid #059669;">
+                        <div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Customers</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.unique_customers)}</div>
+                    </div>`;
+                }
+                if (results.contract_value) {
+                    html += `<div style="background: #eff6ff; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                        <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Contract Value</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.contract_value)}</div>
+                    </div>`;
+                }
+                if (results.retention_rate) {
+                    html += `<div style="background: #fffbeb; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                        <div style="color: #f59e0b; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Retention</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.retention_rate)}</div>
+                    </div>`;
+                }
+                html += '</div>';
+            } else if (parameterType === 'A4_pricing_models') {
+                html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
+                if (results.pricing_models) {
+                    html += `<div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border-left: 4px solid #059669;">
+                        <div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Models</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.pricing_models)}</div>
+                    </div>`;
+                }
+                if (results.price_range) {
+                    html += `<div style="background: #eff6ff; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                        <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Price Range</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.price_range)}</div>
+                    </div>`;
+                }
+                html += '</div>';
+            } else if (parameterType === 'A5_ar_aging') {
+                html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
+                if (results.days_sales_outstanding) {
+                    html += `<div style="background: #fef2f2; padding: 12px; border-radius: 8px; border-left: 4px solid #ef4444;">
+                        <div style="color: #ef4444; font-size: 12px; font-weight: 600; margin-bottom: 4px;">DSO</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.days_sales_outstanding)}</div>
+                    </div>`;
+                }
+                if (results.collection_probability) {
+                    html += `<div style="background: #eff6ff; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                        <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Collection</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.collection_probability)}</div>
+                    </div>`;
+                }
+                
+                // Add aging bucket summaries
+                if (results.aging_buckets && typeof results.aging_buckets === 'object') {
+                    const agingBuckets = results.aging_buckets;
+                    
+                    if (agingBuckets.current && agingBuckets.current.summary) {
+                        html += `<div style="background: #eff6ff; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                            <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Current (0-30 days)</div>
+                            <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${agingBuckets.current.summary}</div>
+                        </div>`;
+                    }
+                    
+                    if (agingBuckets['30_days'] && agingBuckets['30_days'].summary) {
+                        html += `<div style="background: #fffbeb; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                            <div style="color: #f59e0b; font-size: 12px; font-weight: 600; margin-bottom: 4px;">30-60 days</div>
+                            <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${agingBuckets['30_days'].summary}</div>
+                        </div>`;
+                    }
+                    
+                    if (agingBuckets['60_days'] && agingBuckets['60_days'].summary) {
+                        html += `<div style="background: #fef2f2; padding: 12px; border-radius: 8px; border-left: 4px solid #ef4444;">
+                            <div style="color: #ef4444; font-size: 12px; font-weight: 600; margin-bottom: 4px;">60-90 days</div>
+                            <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${agingBuckets['60_days'].summary}</div>
+                        </div>`;
+                    }
+                    
+                    if (agingBuckets['over_90_days'] && agingBuckets['over_90_days'].summary) {
+                        html += `<div style="background: #f3e8ff; padding: 12px; border-radius: 8px; border-left: 4px solid #8b5cf6;">
+                            <div style="color: #8b5cf6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Over 90 days</div>
+                            <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${agingBuckets['over_90_days'].summary}</div>
+                        </div>`;
+                    }
+                }
+                
+                html += '</div>';
+            }
+            
+            // Show error if present
+            if (results.error) {
+                html += `<div style="margin-top: 12px; padding: 12px; background: #fef2f2; border-radius: 8px; border-left: 4px solid #ef4444;">
+                    <div style="color: #ef4444; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Error</div>
+                    <div style="color: #1f2937; font-size: 14px;">${results.error}</div>
+                </div>`;
+            }
+            
+            html += '</div>';
+            return html;
+        }
+
+        function loadParameterModalContent(parameterType) {
+            // Load specific content based on parameter type
+            const contentDiv = document.getElementById('parameterModalContent');
+            
+            if (!contentDiv) {
+                console.error('parameterModalContent div not found');
+                return;
+            }
+            
+            // Get the results from the card
+            const paramNumber = parameterType.split('_')[0];
+            let cardId;
+            if (parameterType === 'A5_ar_aging') {
+                cardId = 'A5_AR_Aging_Card';
+            } else {
+                cardId = parameterType.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('_') + '_Card';
+            }
+            const card = document.getElementById(cardId);
+            
+            if (!card) {
+                console.error(`Card not found: ${cardId}`);
+                contentDiv.innerHTML = `
+                    <div style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); padding: 30px; border-radius: 20px; text-align: center;">
+                        <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #f59e0b; margin-bottom: 15px;"></i>
+                            <h3 style="margin-bottom: 15px; color: #1f2937; font-size: 22px;">Analysis Not Available</h3>
+                            <p style="color: #6b7280; font-size: 16px;">Please run the analysis first to view detailed results.</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Check if analysis has been run by looking for results in the hidden div
+            const checkResultsDiv = card.querySelector(`#${paramNumber}_results`);
+            const hasResults = checkResultsDiv && checkResultsDiv.innerHTML.trim() !== '';
+            
+            if (!hasResults) {
+                contentDiv.innerHTML = `
+                    <div style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); padding: 30px; border-radius: 20px; text-align: center;">
+                        <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                            <i class="fas fa-chart-line" style="font-size: 48px; color: #3b82f6; margin-bottom: 15px;"></i>
+                            <h3 style="margin-bottom: 15px; color: #1f2937; font-size: 22px;">Ready for Analysis</h3>
+                            <p style="color: #6b7280; font-size: 16px;">Click "Run Analysis" to generate detailed insights.</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Get the results from the hidden results div
+            const resultsDiv = checkResultsDiv;
+            let extractedData = {};
+            
+            if (resultsDiv) {
+                // Extract data from the formatted results div
+                const metricCards = resultsDiv.querySelectorAll('div[style*="background:"]');
+                
+                metricCards.forEach((metricCard) => {
+                    const titleDiv = metricCard.querySelector('div[style*="color:"]');
+                    const valueDiv = metricCard.querySelector('div[style*="font-weight: bold"]');
+                    
+                    if (titleDiv && valueDiv) {
+                        const title = titleDiv.textContent.trim();
+                        const value = valueDiv.textContent.trim();
+                        
+                        if (title === 'Total Revenue') {
+                            extractedData.totalRevenue = value;
+                        } else if (title === 'Transactions') {
+                            extractedData.transactions = value;
+                        } else if (title === 'Trend') {
+                            extractedData.trend = value;
+                        } else if (title === 'Growth Rate') {
+                            extractedData.growthRate = value;
+                        } else if (title === 'Current Month') {
+                            extractedData.currentMonth = value;
+                        } else if (title === 'Next Quarter') {
+                            extractedData.nextQuarter = value;
+                        } else if (title === 'Confidence') {
+                            extractedData.confidence = value;
+                        } else if (title === 'Customers') {
+                            extractedData.customers = value;
+                        } else if (title === 'Contract Value') {
+                            extractedData.contractValue = value;
+                        } else if (title === 'Retention') {
+                            extractedData.retention = value;
+                        } else if (title === 'Models') {
+                            extractedData.models = value;
+                        } else if (title === 'Price Range') {
+                            extractedData.priceRange = value;
+                        } else if (title === 'DSO') {
+                            extractedData.dso = value;
+                        } else if (title === 'Collection') {
+                            extractedData.collection = value;
+                        } else if (title === 'Aging') {
+                            extractedData.aging = value;
+                        } else if (title === 'Current (0-30 days)') {
+                            extractedData.currentAging = value;
+                        } else if (title === '30-60 days') {
+                            extractedData.thirtyDaysAging = value;
+                        } else if (title === '60-90 days') {
+                            extractedData.sixtyDaysAging = value;
+                        } else if (title === 'Over 90 days') {
+                            extractedData.overNinetyDaysAging = value;
+                        }
+                    }
+                });
+            }
+            
+            // Fallback: also check for any text content that might contain the data
+            const allText = resultsDiv.textContent || '';
+            if (!extractedData.totalRevenue && allText.includes('Total Revenue')) {
+                const match = allText.match(/Total Revenue[:\s]*([^\n\r]+)/);
+                if (match) extractedData.totalRevenue = match[1].trim();
+            }
+            if (!extractedData.transactions && allText.includes('Transactions')) {
+                const match = allText.match(/Transactions[:\s]*([^\n\r]+)/);
+                if (match) extractedData.transactions = match[1].trim();
+            }
+            if (!extractedData.trend && allText.includes('Trend')) {
+                const match = allText.match(/Trend[:\s]*([^\n\r]+)/);
+                if (match) extractedData.trend = match[1].trim();
+            }
+            if (!extractedData.growthRate && allText.includes('Growth Rate')) {
+                const match = allText.match(/Growth Rate[:\s]*([^\n\r]+)/);
+                if (match) extractedData.growthRate = match[1].trim();
+            }
+            if (!extractedData.currentMonth && allText.includes('Current Month')) {
+                const match = allText.match(/Current Month[:\s]*([^\n\r]+)/);
+                if (match) extractedData.currentMonth = match[1].trim();
+            }
+            if (!extractedData.nextQuarter && allText.includes('Next Quarter')) {
+                const match = allText.match(/Next Quarter[:\s]*([^\n\r]+)/);
+                if (match) extractedData.nextQuarter = match[1].trim();
+            }
+            if (!extractedData.confidence && allText.includes('Confidence')) {
+                const match = allText.match(/Confidence[:\s]*([^\n\r]+)/);
+                if (match) extractedData.confidence = match[1].trim();
+            }
+            if (!extractedData.customers && allText.includes('Customers')) {
+                const match = allText.match(/Customers[:\s]*([^\n\r]+)/);
+                if (match) extractedData.customers = match[1].trim();
+            }
+            if (!extractedData.contractValue && allText.includes('Contract Value')) {
+                const match = allText.match(/Contract Value[:\s]*([^\n\r]+)/);
+                if (match) extractedData.contractValue = match[1].trim();
+            }
+            if (!extractedData.retention && allText.includes('Retention')) {
+                const match = allText.match(/Retention[:\s]*([^\n\r]+)/);
+                if (match) extractedData.retention = match[1].trim();
+            }
+            if (!extractedData.models && allText.includes('Models')) {
+                const match = allText.match(/Models[:\s]*([^\n\r]+)/);
+                if (match) extractedData.models = match[1].trim();
+            }
+            if (!extractedData.priceRange && allText.includes('Price Range')) {
+                const match = allText.match(/Price Range[:\s]*([^\n\r]+)/);
+                if (match) extractedData.priceRange = match[1].trim();
+            }
+            if (!extractedData.dso && allText.includes('DSO')) {
+                const match = allText.match(/DSO[:\s]*([^\n\r]+)/);
+                if (match) extractedData.dso = match[1].trim();
+            }
+            if (!extractedData.collection && allText.includes('Collection')) {
+                const match = allText.match(/Collection[:\s]*([^\n\r]+)/);
+                if (match) extractedData.collection = match[1].trim();
+            }
+            if (!extractedData.aging && allText.includes('Aging')) {
+                const match = allText.match(/Aging[:\s]*([^\n\r]+)/);
+                if (match) extractedData.aging = match[1].trim();
+            }
+            
+            // Create clean, modern content
+            let content = `
+                <div style="background: #f8f9fa; padding: 25px; border-radius: 15px; margin-bottom: 25px;">
+                    <h3 style="margin-bottom: 20px; color: #1f2937; font-size: 20px;">📊 Summary Statistics</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+            `;
+            
+            // Add parameter-specific key insights with improved UI
+            if (parameterType === 'A1_historical_trends') {
+                content += `
+                    <div style="text-align: center; margin-bottom: 25px;">
+                        <div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);">
+                            <i class="fas fa-chart-line" style="font-size: 36px; margin-bottom: 15px; display: block;"></i>
+                            <h3 style="margin: 0; font-size: 26px; font-weight: 600;">Historical Revenue Trends</h3>
+                            <p style="margin: 8px 0 0 0; opacity: 0.9; font-size: 14px;">Revenue performance insights</p>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-top: 25px;">
+                            <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); padding: 20px; border-radius: 12px; border-left: 5px solid #3b82f6; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                <h4 style="margin: 0 0 10px 0; color: #3b82f6; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Total Revenue</h4>
+                                <p style="margin: 0; font-size: 20px; font-weight: bold; color: #1f2937;">${extractedData.totalRevenue || 'N/A'}</p>
+                            </div>
+                            <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); padding: 20px; border-radius: 12px; border-left: 5px solid #059669; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                <h4 style="margin: 0 0 10px 0; color: #059669; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Transactions</h4>
+                                <p style="margin: 0; font-size: 20px; font-weight: bold; color: #1f2937;">${extractedData.transactions || 'N/A'}</p>
+                            </div>
+                            <div style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); padding: 20px; border-radius: 12px; border-left: 5px solid #f59e0b; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                <h4 style="margin: 0 0 10px 0; color: #f59e0b; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Trend</h4>
+                                <p style="margin: 0; font-size: 20px; font-weight: bold; color: #1f2937;">${extractedData.trend || 'N/A'}</p>
+                            </div>
+                            <div style="background: linear-gradient(135deg, #f3e8ff 0%, #ede9fe 100%); padding: 20px; border-radius: 12px; border-left: 5px solid #8b5cf6; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                <h4 style="margin: 0 0 10px 0; color: #8b5cf6; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Growth Rate</h4>
+                                <p style="margin: 0; font-size: 20px; font-weight: bold; color: #1f2937;">${extractedData.growthRate || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (parameterType === 'A2_sales_forecast') {
+                content += `
+                    <div style="text-align: center; margin-bottom: 25px;">
+                        <div style="background: linear-gradient(135deg, #059669 0%, #047857 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 8px 16px rgba(5, 150, 105, 0.3);">
+                            <i class="fas fa-chart-bar" style="font-size: 36px; margin-bottom: 15px; display: block;"></i>
+                            <h3 style="margin: 0; font-size: 26px; font-weight: 600;">Sales Forecast</h3>
+                            <p style="margin: 8px 0 0 0; opacity: 0.9; font-size: 14px;">AI-powered predictions</p>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-top: 25px;">
+                            <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); padding: 20px; border-radius: 12px; border-left: 5px solid #3b82f6; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                <h4 style="margin: 0 0 10px 0; color: #3b82f6; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Current Month</h4>
+                                <p style="margin: 0; font-size: 20px; font-weight: bold; color: #1f2937;">${extractedData.currentMonth || 'N/A'}</p>
+                            </div>
+                            <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); padding: 20px; border-radius: 12px; border-left: 5px solid #059669; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                <h4 style="margin: 0 0 10px 0; color: #059669; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Next Quarter</h4>
+                                <p style="margin: 0; font-size: 20px; font-weight: bold; color: #1f2937;">${extractedData.nextQuarter || 'N/A'}</p>
+                            </div>
+                            <div style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); padding: 20px; border-radius: 12px; border-left: 5px solid #f59e0b; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                <h4 style="margin: 0 0 10px 0; color: #f59e0b; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Confidence</h4>
+                                <p style="margin: 0; font-size: 20px; font-weight: bold; color: #1f2937;">${extractedData.confidence || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (parameterType === 'A3_customer_contracts') {
+                content += `
+                    <div style="text-align: center; margin-bottom: 25px;">
+                        <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 8px 16px rgba(245, 158, 11, 0.3);">
+                            <i class="fas fa-users" style="font-size: 36px; margin-bottom: 15px; display: block;"></i>
+                            <h3 style="margin: 0; font-size: 26px; font-weight: 600;">Customer Contracts</h3>
+                            <p style="margin: 8px 0 0 0; opacity: 0.9; font-size: 14px;">Customer relationship insights</p>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-top: 25px;">
+                            <div style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); padding: 20px; border-radius: 12px; border-left: 5px solid #f59e0b; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                <h4 style="margin: 0 0 10px 0; color: #f59e0b; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Customers</h4>
+                                <p style="margin: 0; font-size: 20px; font-weight: bold; color: #1f2937;">${extractedData.customers || 'N/A'}</p>
+                            </div>
+                            <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); padding: 20px; border-radius: 12px; border-left: 5px solid #3b82f6; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                <h4 style="margin: 0 0 10px 0; color: #3b82f6; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Contract Value</h4>
+                                <p style="margin: 0; font-size: 20px; font-weight: bold; color: #1f2937;">${extractedData.contractValue || 'N/A'}</p>
+                            </div>
+                            <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); padding: 20px; border-radius: 12px; border-left: 5px solid #059669; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                <h4 style="margin: 0 0 10px 0; color: #059669; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Retention</h4>
+                                <p style="margin: 0; font-size: 20px; font-weight: bold; color: #1f2937;">${extractedData.retention || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (parameterType === 'A4_pricing_models') {
+                content += `
+                    <div style="text-align: center; margin-bottom: 25px;">
+                        <div style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 8px 16px rgba(139, 92, 246, 0.3);">
+                            <i class="fas fa-tags" style="font-size: 36px; margin-bottom: 15px; display: block;"></i>
+                            <h3 style="margin: 0; font-size: 26px; font-weight: 600;">Pricing Models</h3>
+                            <p style="margin: 8px 0 0 0; opacity: 0.9; font-size: 14px;">Revenue optimization insights</p>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-top: 25px;">
+                            <div style="background: linear-gradient(135deg, #f3e8ff 0%, #ede9fe 100%); padding: 20px; border-radius: 12px; border-left: 5px solid #8b5cf6; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                <h4 style="margin: 0 0 10px 0; color: #8b5cf6; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Models</h4>
+                                <p style="margin: 0; font-size: 20px; font-weight: bold; color: #1f2937;">${extractedData.models || 'N/A'}</p>
+                            </div>
+                            <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); padding: 20px; border-radius: 12px; border-left: 5px solid #3b82f6; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                <h4 style="margin: 0 0 10px 0; color: #3b82f6; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Price Range</h4>
+                                <p style="margin: 0; font-size: 20px; font-weight: bold; color: #1f2937;">${extractedData.priceRange || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (parameterType === 'A5_ar_aging') {
+                content += `
+                    <div style="text-align: center; margin-bottom: 25px;">
+                        <div style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 8px 16px rgba(239, 68, 68, 0.3);">
+                            <i class="fas fa-clock" style="font-size: 36px; margin-bottom: 15px; display: block;"></i>
+                            <h3 style="margin: 0; font-size: 26px; font-weight: 600;">AR Aging Analysis</h3>
+                            <p style="margin: 8px 0 0 0; opacity: 0.9; font-size: 14px;">Collection efficiency insights</p>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-top: 25px;">
+                            <div style="background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); padding: 20px; border-radius: 12px; border-left: 5px solid #ef4444; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                <h4 style="margin: 0 0 10px 0; color: #ef4444; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">DSO</h4>
+                                <p style="margin: 0; font-size: 20px; font-weight: bold; color: #1f2937;">${extractedData.dso || 'N/A'}</p>
+                            </div>
+                            <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); padding: 20px; border-radius: 12px; border-left: 5px solid #3b82f6; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                <h4 style="margin: 0 0 10px 0; color: #3b82f6; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Collection</h4>
+                                <p style="margin: 0; font-size: 20px; font-weight: bold; color: #1f2937;">${extractedData.collection || 'N/A'}</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Aging Buckets Summary -->
+                        <div style="margin-top: 30px;">
+                            <h4 style="margin-bottom: 20px; color: #1f2937; font-size: 18px; font-weight: 600;">📊 Aging Buckets Summary</h4>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                                <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); padding: 15px; border-radius: 10px; border-left: 4px solid #3b82f6;">
+                                    <h5 style="margin: 0 0 8px 0; color: #3b82f6; font-size: 12px; font-weight: 600;">Current (0-30 days)</h5>
+                                    <p style="margin: 0; font-size: 14px; color: #1f2937;">${extractedData.currentAging || 'No transactions'}</p>
+                                </div>
+                                <div style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); padding: 15px; border-radius: 10px; border-left: 4px solid #f59e0b;">
+                                    <h5 style="margin: 0 0 8px 0; color: #f59e0b; font-size: 12px; font-weight: 600;">30-60 days</h5>
+                                    <p style="margin: 0; font-size: 14px; color: #1f2937;">${extractedData.thirtyDaysAging || 'No transactions'}</p>
+                                </div>
+                                <div style="background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); padding: 15px; border-radius: 10px; border-left: 4px solid #ef4444;">
+                                    <h5 style="margin: 0 0 8px 0; color: #ef4444; font-size: 12px; font-weight: 600;">60-90 days</h5>
+                                    <p style="margin: 0; font-size: 14px; color: #1f2937;">${extractedData.sixtyDaysAging || 'No transactions'}</p>
+                                </div>
+                                <div style="background: linear-gradient(135deg, #f3e8ff 0%, #ede9fe 100%); padding: 15px; border-radius: 10px; border-left: 4px solid #8b5cf6;">
+                                    <h5 style="margin: 0 0 8px 0; color: #8b5cf6; font-size: 12px; font-weight: 600;">Over 90 days</h5>
+                                    <p style="margin: 0; font-size: 14px; color: #1f2937;">${extractedData.overNinetyDaysAging || 'No transactions'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Add a simple summary footer
+            content += `
+                    </div>
+                    
+                    <div style="display: flex; gap: 15px; margin-top: 30px; justify-content: center;">
+                        <button onclick="closeParameterModal()" style="background: #ef4444; color: white; border: none; padding: 15px 30px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; transition: background-color 0.3s;" onmouseover="this.style.backgroundColor='#dc2626'" onmouseout="this.style.backgroundColor='#ef4444'">
+                            ❌ Close Modal
+                        </button>
+                        <button onclick="closeParameterModal();" style="background: #6b7280; color: white; border: none; padding: 15px 30px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; transition: background-color 0.3s;" onmouseover="this.style.backgroundColor='#4b5563'" onmouseout="this.style.backgroundColor='#6b7280'">
+                            🔙 Back to Parameters
+                        </button>
+                    </div>
+                </div>
+            </div>
+            `;
+            
+            contentDiv.innerHTML = content;
+        }
+
+        function closeParameterModal() {
+            console.log('closeParameterModal called');
+            
+            // Method 1: Try to find modal by ID
+            let modal = document.getElementById('parameterModal');
+            
+            // Method 2: Try finding by style attributes
+            if (!modal) {
+                modal = document.querySelector('[style*="position: fixed"][style*="z-index: 2000"]');
+            }
+            
+            // Method 3: Try finding any modal-like element
+            if (!modal) {
+                const modals = document.querySelectorAll('[style*="position: fixed"]');
+                for (let m of modals) {
+                    const zIndex = parseInt(m.style.zIndex) || 0;
+                    if (zIndex >= 1000) {
+                        modal = m;
+                        break;
+                    }
+                }
+            }
+            
+            // Method 4: Try finding by background overlay
+            if (!modal) {
+                modal = document.querySelector('[style*="background: rgba(0,0,0,0.8)"]');
+            }
+            
+            // Method 5: Try finding any element with modal-like structure
+            if (!modal) {
+                const potentialModals = document.querySelectorAll('div');
+                for (let m of potentialModals) {
+                    const style = m.style || {};
+                    if (style.position === 'fixed' && 
+                        (style.zIndex >= 1000 || style.background?.includes('rgba(0,0,0,0.8)'))) {
+                        modal = m;
+                        break;
+                    }
+                }
+            }
+            
+            if (modal) {
+                console.log('Modal found, removing...');
+                modal.remove();
+            } else {
+                console.log('No modal found, using aggressive cleanup...');
+                
+                // Aggressive cleanup - remove all potential modal elements
+                const allElements = document.querySelectorAll('div');
+                allElements.forEach(el => {
+                    const style = el.style || {};
+                    const zIndex = parseInt(style.zIndex) || 0;
+                    const position = style.position || '';
+                    const background = style.background || '';
+                    
+                    if ((position === 'fixed' && zIndex >= 1000) || 
+                        background.includes('rgba(0,0,0,0.8)')) {
+                        console.log('Removing modal element:', el);
+                        el.remove();
+                    }
+                });
+            }
+            
+            // Final cleanup - remove any remaining overlays and reset body
+            const overlays = document.querySelectorAll('[style*="background: rgba(0,0,0,0.8)"]');
+            overlays.forEach(overlay => overlay.remove());
+            
+            // Remove any remaining fixed position elements
+            const fixedElements = document.querySelectorAll('[style*="position: fixed"]');
+            fixedElements.forEach(el => {
+                const zIndex = parseInt(el.style.zIndex) || 0;
+                if (zIndex >= 1000) {
+                    el.remove();
+                }
+            });
+            
+            // Reset body overflow if it was modified
+            document.body.style.overflow = '';
+            
+            // Reset the button back to "Run Analysis" so users can view results again
+            const completedButtons = document.querySelectorAll('.btn-success');
+            completedButtons.forEach(btn => {
+                if (btn.innerHTML.includes('Completed')) {
+                    btn.innerHTML = '<i class="fas fa-play"></i> Run Analysis';
+                    btn.className = 'btn btn-primary btn-sm';
+                    btn.disabled = false;
+                }
+            });
+            
+            console.log('Modal close attempt completed');
         }
 
         function updateAIFeaturesGrid(data) {
@@ -5611,137 +6419,11 @@
             return html;
         }
 
-        function closeParameterModal() {
-            const modal = document.querySelector('.parameter-modal');
-            if (modal) {
-                modal.remove();
-            }
-        }
 
 
 
-        function showRevenueAnalysisCards() {
-            // Run the revenue analysis first, then show the 5 cards with results
-            runRevenueAnalysis().then(() => {
-                // After analysis is complete, show the 5 cards
-                const grid = document.getElementById('aiFeaturesGrid');
-                if (grid) {
-                    grid.innerHTML = `
-                        <div style="position: relative;">
-                            <button onclick="closeRevenueAnalysisCards()" style="position: absolute; top: 15px; right: 15px; background: #ef4444; border: none; font-size: 24px; cursor: pointer; color: white; z-index: 10; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(0,0,0,0.2); transition: all 0.3s;" onmouseover="this.style.backgroundColor='#dc2626'; this.style.transform='scale(1.1)'" onmouseout="this.style.backgroundColor='#ef4444'; this.style.transform='scale(1)'">&times;</button>
-                            
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px;">
-                                <div class="stat-card">
-                                    <i class="fas fa-chart-line stat-icon"></i>
-                                    <h3 class="font-semibold mb-2">Historical Revenue Trends</h3>
-                                    <p class="text-sm text-secondary mb-3">Monthly/quarterly income over past periods</p>
-                                    <div class="btn-group">
-                                        <button class="btn btn-primary btn-sm" onclick="viewRevenueAnalysis('historical')">
-                                            <i class="fas fa-eye"></i>
-                                            View Analysis
-                                        </button>
-                                        <button class="btn btn-outline btn-sm" onclick="exportRevenueAnalysis()">
-                                            <i class="fas fa-download"></i>
-                                            Export
-                                        </button>
-                                    </div>
-                                </div>
 
-                                <div class="stat-card">
-                                    <i class="fas fa-chart-bar stat-icon"></i>
-                                    <h3 class="font-semibold mb-2">Sales Forecast</h3>
-                                    <p class="text-sm text-secondary mb-3">Based on pipeline, market trends, seasonality</p>
-                                    <div class="btn-group">
-                                        <button class="btn btn-primary btn-sm" onclick="viewRevenueAnalysis('forecast')">
-                                            <i class="fas fa-eye"></i>
-                                            View Analysis
-                                        </button>
-                                        <button class="btn btn-outline btn-sm" onclick="exportRevenueAnalysis()">
-                                            <i class="fas fa-download"></i>
-                                            Export
-                                        </button>
-                                    </div>
-                                </div>
 
-                                <div class="stat-card">
-                                    <i class="fas fa-users stat-icon"></i>
-                                    <h3 class="font-semibold mb-2">Customer Contracts</h3>
-                                    <p class="text-sm text-secondary mb-3">Recurring revenue, churn rate, customer lifetime value</p>
-                                    <div class="btn-group">
-                                        <button class="btn btn-primary btn-sm" onclick="viewRevenueAnalysis('contracts')">
-                                            <i class="fas fa-eye"></i>
-                                            View Analysis
-                                        </button>
-                                        <button class="btn btn-outline btn-sm" onclick="exportRevenueAnalysis()">
-                                            <i class="fas fa-download"></i>
-                                            Export
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div class="stat-card">
-                                    <i class="fas fa-tags stat-icon"></i>
-                                    <h3 class="font-semibold mb-2">Pricing Models</h3>
-                                    <p class="text-sm text-secondary mb-3">Subscription, one-time fees, dynamic pricing changes</p>
-                                    <div class="btn-group">
-                                        <button class="btn btn-primary btn-sm" onclick="viewRevenueAnalysis('pricing')">
-                                            <i class="fas fa-eye"></i>
-                                            View Analysis
-                                        </button>
-                                        <button class="btn btn-outline btn-sm" onclick="exportRevenueAnalysis()">
-                                            <i class="fas fa-download"></i>
-                                            Export
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div class="stat-card">
-                                    <i class="fas fa-clock stat-icon"></i>
-                                    <h3 class="font-semibold mb-2">Accounts Receivable Aging</h3>
-                                    <p class="text-sm text-secondary mb-3">Days Sales Outstanding (DSO), collection probability</p>
-                                    <div class="btn-group">
-                                        <button class="btn btn-primary btn-sm" onclick="viewRevenueAnalysis('aging')">
-                                            <i class="fas fa-eye"></i>
-                                            View Analysis
-                                        </button>
-                                        <button class="btn btn-outline btn-sm" onclick="exportRevenueAnalysis()">
-                                            <i class="fas fa-download"></i>
-                                            Export
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
-            }).catch((error) => {
-                showAlert(`Error running revenue analysis: ${error.message}`, 'error');
-            });
-        }
-
-        function closeRevenueAnalysisCards() {
-            // Close all revenue analysis cards and show the single card again
-            const grid = document.getElementById('aiFeaturesGrid');
-            if (grid) {
-                grid.innerHTML = `
-                    <div class="stat-card" id="revenueAnalysisCard" style="cursor: pointer;" onclick="showRevenueAnalysisCards()">
-                        <i class="fas fa-chart-line stat-icon"></i>
-                        <h3 class="font-semibold mb-2">Revenue Analysis</h3>
-                        <p class="text-sm text-secondary mb-3">AI-powered revenue analysis with comprehensive parameters</p>
-                        <div class="btn-group">
-                            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); showRevenueAnalysisCards()">
-                                <i class="fas fa-eye"></i>
-                                View Analysis
-                            </button>
-                            <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); exportRevenueAnalysis()">
-                                <i class="fas fa-download"></i>
-                                Export
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }
-        }
 
 
 
@@ -5830,8 +6512,8 @@
                             <button onclick="closeAnalysisDetailsModal()" style="background: #ef4444; color: white; border: none; padding: 15px 30px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; transition: background-color 0.3s;" onmouseover="this.style.backgroundColor='#dc2626'" onmouseout="this.style.backgroundColor='#ef4444'">
                                 ❌ Close Modal
                             </button>
-                            <button onclick="closeAnalysisDetailsModal(); closeRevenueAnalysisCards();" style="background: #6b7280; color: white; border: none; padding: 15px 30px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; transition: background-color 0.3s;" onmouseover="this.style.backgroundColor='#4b5563'" onmouseout="this.style.backgroundColor='#6b7280'">
-                                🔙 Back to Revenue Analysis
+                            <button onclick="closeAnalysisDetailsModal();" style="background: #6b7280; color: white; border: none; padding: 15px 30px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; transition: background-color 0.3s;" onmouseover="this.style.backgroundColor='#4b5563'" onmouseout="this.style.backgroundColor='#6b7280'">
+                                🔙 Back to Parameters
                             </button>
                         </div>
                     </div>
@@ -7839,6 +8521,8 @@ async function downloadOrphanedPaymentsEnhanced() {
             `;
             showModal(testModalHtml);
         }
+
+
 
 
 
@@ -10910,6 +11594,8 @@ async function loadVendorList() {
                 stopProgressTracking();
             }
         }
+
+
 
         // Initialize all features when page loads
         document.addEventListener('DOMContentLoaded', function() {

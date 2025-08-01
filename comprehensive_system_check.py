@@ -122,7 +122,6 @@ def comprehensive_system_check():
                     results['categorization'] = True
                 else:
                     print("   ⚠️ Using fallback method")
-                    
         else:
             print("❌ Training: Failed")
             
