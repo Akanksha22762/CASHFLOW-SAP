@@ -91,6 +91,16 @@ except ImportError:
     OLLAMA_AVAILABLE = False
     print("⚠️ Ollama Integration not available.")
 
+# ===== UNIVERSAL DATA ADAPTER =====
+try:
+    from universal_data_adapter import UniversalDataAdapter
+    from data_adapter_integration import preprocess_for_analysis, load_and_preprocess_file, get_adaptation_report
+    DATA_ADAPTER_AVAILABLE = True
+    print("✅ Universal Data Adapter loaded successfully!")
+except ImportError as e:
+    DATA_ADAPTER_AVAILABLE = False
+    print(f"⚠️ Universal Data Adapter not available: {e}")
+
 # Global reconciliation data storage
 reconciliation_data = {}
 
@@ -5997,21 +6007,56 @@ def upload_files_with_ml_ai():
         
         # Read primary file
         global uploaded_bank_df, uploaded_sap_df
-        if primary_file.filename.lower().endswith('.csv'):
-            for encoding in ['utf-8', 'latin-1', 'cp1252']:
-                for sep in [',', ';', '\t', '|']:
-                    try:
-                        primary_file.seek(0)
-                        uploaded_bank_df = pd.read_csv(primary_file, encoding=encoding, sep=sep)
-                        if len(uploaded_bank_df.columns) > 1 and len(uploaded_bank_df) > 0:
-                            print(f"📊 CSV read successfully: {encoding}, separator: '{sep}'")
+        
+        # Use Universal Data Adapter if available
+        if DATA_ADAPTER_AVAILABLE:
+            try:
+                print(f"🔄 Using Universal Data Adapter for {file_type} file")
+                # Save file temporarily to use with the adapter
+                temp_file_path = os.path.join('uploads', f"{file_type.lower()}_{primary_file.filename}")
+                primary_file.save(temp_file_path)
+                
+                # Use the adapter to load and preprocess the file
+                uploaded_bank_df = load_and_preprocess_file(temp_file_path)
+                
+                print(f"✅ Universal Data Adapter successfully processed {file_type} file")
+                print(f"🔍 Adapter mapped columns: {get_adaptation_report().get('column_mapping', {})}")
+            except Exception as e:
+                print(f"⚠️ Universal Data Adapter failed: {str(e)}. Falling back to standard loading.")
+                # Fall back to standard loading if adapter fails
+                if primary_file.filename.lower().endswith('.csv'):
+                    for encoding in ['utf-8', 'latin-1', 'cp1252']:
+                        for sep in [',', ';', '\t', '|']:
+                            try:
+                                primary_file.seek(0)
+                                uploaded_bank_df = pd.read_csv(primary_file, encoding=encoding, sep=sep)
+                                if len(uploaded_bank_df.columns) > 1 and len(uploaded_bank_df) > 0:
+                                    print(f"📊 CSV read successfully: {encoding}, separator: '{sep}'")
+                                    break
+                            except:
+                                continue
+                        if len(uploaded_bank_df.columns) > 1:
                             break
-                    except:
-                        continue
-                if len(uploaded_bank_df.columns) > 1:
-                    break
+                else:
+                    primary_file.seek(0)
+                    uploaded_bank_df = pd.read_excel(primary_file)
         else:
-            uploaded_bank_df = pd.read_excel(primary_file)
+            # Standard file loading without adapter
+            if primary_file.filename.lower().endswith('.csv'):
+                for encoding in ['utf-8', 'latin-1', 'cp1252']:
+                    for sep in [',', ';', '\t', '|']:
+                        try:
+                            primary_file.seek(0)
+                            uploaded_bank_df = pd.read_csv(primary_file, encoding=encoding, sep=sep)
+                            if len(uploaded_bank_df.columns) > 1 and len(uploaded_bank_df) > 0:
+                                print(f"📊 CSV read successfully: {encoding}, separator: '{sep}'")
+                                break
+                        except:
+                            continue
+                    if len(uploaded_bank_df.columns) > 1:
+                        break
+            else:
+                uploaded_bank_df = pd.read_excel(primary_file)
         
         print(f"🔍 DEBUG: After reading file - uploaded_bank_df type: {type(uploaded_bank_df)}")
         print(f"🔍 DEBUG: After reading file - uploaded_bank_df shape: {uploaded_bank_df.shape}")
@@ -6033,21 +6078,56 @@ def upload_files_with_ml_ai():
         
         # Handle second file if provided (SAP if bank was primary, or bank if SAP was primary)
         second_file = sap_file if bank_file and bank_file.filename else bank_file
+        second_file_type = "SAP" if bank_file and bank_file.filename else "Bank"
+        
         if second_file and second_file.filename:
-            if second_file.filename.lower().endswith('.csv'):
-                for encoding in ['utf-8', 'latin-1', 'cp1252']:
-                    for sep in [',', ';', '\t', '|']:
-                        try:
-                            second_file.seek(0)
-                            uploaded_sap_df = pd.read_csv(second_file, encoding=encoding, sep=sep)
+            # Use Universal Data Adapter if available
+            if DATA_ADAPTER_AVAILABLE:
+                try:
+                    print(f"🔄 Using Universal Data Adapter for {second_file_type} file")
+                    # Save file temporarily to use with the adapter
+                    temp_file_path = os.path.join('uploads', f"{second_file_type.lower()}_{second_file.filename}")
+                    second_file.save(temp_file_path)
+                    
+                    # Use the adapter to load and preprocess the file
+                    uploaded_sap_df = load_and_preprocess_file(temp_file_path)
+                    
+                    print(f"✅ Universal Data Adapter successfully processed {second_file_type} file")
+                    print(f"🔍 Adapter mapped columns: {get_adaptation_report().get('column_mapping', {})}")
+                except Exception as e:
+                    print(f"⚠️ Universal Data Adapter failed: {str(e)}. Falling back to standard loading.")
+                    # Fall back to standard loading if adapter fails
+                    if second_file.filename.lower().endswith('.csv'):
+                        for encoding in ['utf-8', 'latin-1', 'cp1252']:
+                            for sep in [',', ';', '\t', '|']:
+                                try:
+                                    second_file.seek(0)
+                                    uploaded_sap_df = pd.read_csv(second_file, encoding=encoding, sep=sep)
+                                    if len(uploaded_sap_df.columns) > 1:
+                                        break
+                                except:
+                                    continue
                             if len(uploaded_sap_df.columns) > 1:
                                 break
-                        except:
-                            continue
-                    if len(uploaded_sap_df.columns) > 1:
-                        break
+                    else:
+                        second_file.seek(0)
+                        uploaded_sap_df = pd.read_excel(second_file)
             else:
-                uploaded_sap_df = pd.read_excel(second_file)
+                # Standard file loading without adapter
+                if second_file.filename.lower().endswith('.csv'):
+                    for encoding in ['utf-8', 'latin-1', 'cp1252']:
+                        for sep in [',', ';', '\t', '|']:
+                            try:
+                                second_file.seek(0)
+                                uploaded_sap_df = pd.read_csv(second_file, encoding=encoding, sep=sep)
+                                if len(uploaded_sap_df.columns) > 1:
+                                    break
+                            except:
+                                continue
+                        if len(uploaded_sap_df.columns) > 1:
+                            break
+                else:
+                    uploaded_sap_df = pd.read_excel(second_file)
             
             uploaded_sap_df = universal_categorize_any_dataset(uploaded_sap_df)
             mode = "full_reconciliation"
@@ -9797,12 +9877,9 @@ def run_revenue_analysis():
         # ULTRA-FAST Revenue Analysis (Client-Friendly)
         print("🧠 Starting SMART OLLAMA Revenue Analysis (Optimized Ollama + XGBoost)...")
         
-        # Use minimal sample for ultra-fast results
-        if len(uploaded_bank_df) > 30:
-            print(f"⚡ Using sample of 30 transactions for ultra-fast analysis (from {len(uploaded_bank_df)} total)")
-            sample_df = uploaded_bank_df.sample(n=30, random_state=42)
-        else:
-            sample_df = uploaded_bank_df
+        # Use FULL DATASET for comprehensive analysis
+        print(f"📊 Using FULL DATASET: {len(uploaded_bank_df)} transactions for comprehensive analysis")
+        sample_df = uploaded_bank_df  # Use full dataset, not sample
             
         # SMART OLLAMA: Optimized Ollama + XGBoost (Fast but with Ollama)
         print("📊 Starting Revenue Analysis with AI/ML Models...")
@@ -9939,17 +10016,20 @@ def run_parameter_analysis():
                 'error': 'No data available. Please upload files first.'
             })
         
-        # Use sample for faster processing
-        if len(uploaded_bank_df) > 30:
-            sample_df = uploaded_bank_df.sample(n=30, random_state=42)
-        else:
-            sample_df = uploaded_bank_df
+        # Use FULL DATASET for comprehensive analysis
+        print(f"📊 Using FULL DATASET: {len(uploaded_bank_df)} transactions for comprehensive analysis")
+        sample_df = uploaded_bank_df  # Use full dataset, not sample
+        
+        # DEBUG: Check the data structure
+        print(f"🔍 DEBUG: sample_df shape: {sample_df.shape}")
+        print(f"🔍 DEBUG: sample_df columns: {list(sample_df.columns)}")
+        print(f"🔍 DEBUG: sample_df head: {sample_df.head(2).to_dict()}")
         
         print(f"🎯 Running {parameter_type} analysis...")
         
         # Run specific parameter analysis
         if parameter_type == 'A1_historical_trends':
-            results = advanced_revenue_ai.analyze_historical_revenue_trends(sample_df)
+            results = advanced_revenue_ai.enhanced_analyze_historical_revenue_trends(sample_df)
         elif parameter_type == 'A2_sales_forecast':
             results = advanced_revenue_ai.xgboost_sales_forecasting(sample_df)
         elif parameter_type == 'A3_customer_contracts':
@@ -9957,11 +10037,20 @@ def run_parameter_analysis():
         elif parameter_type == 'A4_pricing_models':
             results = advanced_revenue_ai.detect_pricing_models(sample_df)
         elif parameter_type == 'A5_ar_aging':
-            results = advanced_revenue_ai.calculate_dso_and_collection_probability(sample_df)
-        elif parameter_type == 'A1_historical_trends':
-            results = advanced_revenue_ai.enhanced_analyze_historical_revenue_trends(sample_df)
+            results = advanced_revenue_ai.enhanced_analyze_ar_aging(sample_df)
         elif parameter_type == 'A6_operating_expenses':
-            results = advanced_revenue_ai.enhanced_analyze_operating_expenses(sample_df)
+            print(f"🔍 DEBUG: About to call enhanced_analyze_operating_expenses")
+            print(f"🔍 DEBUG: sample_df shape: {sample_df.shape}")
+            print(f"🔍 DEBUG: sample_df columns: {list(sample_df.columns)}")
+            print(f"🔍 DEBUG: Amount column values: {sample_df['Amount'].head(3).tolist()}")
+            try:
+                results = advanced_revenue_ai.enhanced_analyze_operating_expenses(sample_df)
+                print(f"✅ Enhanced operating expenses analysis completed successfully")
+            except Exception as e:
+                print(f"❌ Enhanced operating expenses analysis failed: {e}")
+                import traceback
+                traceback.print_exc()
+                results = {'error': f'Enhanced expense analysis failed: {str(e)}'}
         elif parameter_type == 'A7_accounts_payable':
             results = advanced_revenue_ai.enhanced_analyze_accounts_payable_terms(sample_df)
         elif parameter_type == 'A8_inventory_turnover':
@@ -9989,7 +10078,7 @@ def run_parameter_analysis():
         # Add accuracy reporting for parameter analysis
         try:
             # Calculate accuracy based on data quality and model performance
-            data_quality_score = min(100, max(0, (len(sample_df) / 30) * 100))  # Based on sample size
+            data_quality_score = min(100, max(0, (len(sample_df) / 100) * 100))  # Based on full dataset size
             model_confidence = 85.0  # Base confidence for XGBoost + Ollama hybrid
             overall_accuracy = (data_quality_score + model_confidence) / 2
             

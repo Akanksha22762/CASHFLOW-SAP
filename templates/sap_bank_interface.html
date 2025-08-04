@@ -5637,6 +5637,8 @@
             // Handle different parameter types with better formatting
             if (parameterType === 'A1_historical_trends') {
                 html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
+                
+                // Basic Metrics
                 if (results.total_revenue) {
                     html += `<div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border-left: 4px solid #059669;">
                         <div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Total Revenue</div>
@@ -5655,19 +5657,102 @@
                         <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.trend_direction)}</div>
                     </div>`;
                 }
+                
+                // Advanced AI Features
+                if (results.advanced_ai_features) {
+                    const advanced = results.advanced_ai_features;
+                    
+                    // Cash Flow Metrics
+                    if (advanced.cash_flow_metrics) {
+                        const cfm = advanced.cash_flow_metrics;
+                        html += `<div style="background: #fef2f2; padding: 12px; border-radius: 8px; border-left: 4px solid #dc2626;">
+                            <div style="color: #dc2626; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Net Cash Flow</div>
+                            <div style="color: #1f2937; font-size: 16px; font-weight: bold;">₹${cfm.net_cash_flow?.toLocaleString() || 'N/A'}</div>
+                        </div>`;
+                        
+                        html += `<div style="background: #fef3c7; padding: 12px; border-radius: 8px; border-left: 4px solid #d97706;">
+                            <div style="color: #d97706; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Runway (Months)</div>
+                            <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${cfm.runway_months?.toFixed(1) || 'N/A'}</div>
+                        </div>`;
+                    }
+                    
+                    // Risk Assessment
+                    if (advanced.risk_assessment) {
+                        const risk = advanced.risk_assessment;
+                        html += `<div style="background: #fef2f2; padding: 12px; border-radius: 8px; border-left: 4px solid #dc2626;">
+                            <div style="color: #dc2626; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Risk Level</div>
+                            <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${risk.overall_risk || 'N/A'}</div>
+                        </div>`;
+                    }
+                    
+                    // Revenue Runway
+                    if (advanced.runway_analysis) {
+                        const runway = advanced.runway_analysis;
+                        html += `<div style="background: #ecfdf5; padding: 12px; border-radius: 8px; border-left: 4px solid #059669;">
+                            <div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Revenue Velocity</div>
+                            <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${runway.revenue_velocity?.toFixed(2) || 'N/A'}%</div>
+                        </div>`;
+                        
+                        html += `<div style="background: #f0f9ff; padding: 12px; border-radius: 8px; border-left: 4px solid #0ea5e9;">
+                            <div style="color: #0ea5e9; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Sustainability</div>
+                            <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${runway.sustainability_status || 'N/A'}</div>
+                        </div>`;
+                    }
+                    
+                    // AI Confidence
+                    if (advanced.hybrid_forecast) {
+                        html += `<div style="background: #faf5ff; padding: 12px; border-radius: 8px; border-left: 4px solid #8b5cf6;">
+                            <div style="color: #8b5cf6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">AI Confidence</div>
+                            <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${(advanced.hybrid_forecast.ai_confidence * 100).toFixed(1)}%</div>
+                        </div>`;
+                    }
+                }
+                
+                // Growth Rate (if available)
                 if (results.growth_rate !== undefined) {
                     html += `<div style="background: #f3e8ff; padding: 12px; border-radius: 8px; border-left: 4px solid #8b5cf6;">
                         <div style="color: #8b5cf6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Growth Rate</div>
                         <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.growth_rate).toFixed(2)}%</div>
                     </div>`;
                 }
+                
                 html += '</div>';
+                
+                // Add Actionable Insights Section
+                if (results.advanced_ai_features?.actionable_insights) {
+                    const insights = results.advanced_ai_features.actionable_insights;
+                    html += '<div style="margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">';
+                    html += '<h5 style="margin: 0 0 10px 0; color: #1f2937; font-size: 14px; font-weight: 600;">💡 Key Insights</h5>';
+                    
+                    if (insights.priority_actions && insights.priority_actions.length > 0) {
+                        html += '<div style="margin-bottom: 10px;">';
+                        html += '<div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 5px;">🚀 Priority Actions:</div>';
+                        html += '<ul style="margin: 0; padding-left: 20px; color: #374151; font-size: 12px;">';
+                        insights.priority_actions.slice(0, 2).forEach(action => {
+                            html += `<li style="margin-bottom: 3px;">${action}</li>`;
+                        });
+                        html += '</ul>';
+                        html += '</div>';
+                    }
+                    
+                    if (insights.expected_impact) {
+                        html += '<div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 5px;">📈 Expected Impact:</div>';
+                        html += '<div style="color: #374151; font-size: 12px;">';
+                        html += `Revenue Growth: ${insights.expected_impact.revenue_growth || 'N/A'}<br>`;
+                        html += `Risk Reduction: ${insights.expected_impact.risk_reduction || 'N/A'}`;
+                        html += '</div>';
+                    }
+                    
+                    html += '</div>';
+                }
             } else if (parameterType === 'A2_sales_forecast') {
                 html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
-                if (results.current_month_forecast) {
+                
+                // Basic Forecasts
+                if (results.next_month_forecast) {
                     html += `<div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border-left: 4px solid #059669;">
-                        <div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Current Month</div>
-                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.current_month_forecast)}</div>
+                        <div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Next Month</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.next_month_forecast)}</div>
                     </div>`;
                 }
                 if (results.next_quarter_forecast) {
@@ -5676,98 +5761,559 @@
                         <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.next_quarter_forecast)}</div>
                     </div>`;
                 }
-                if (results.confidence_level) {
+                if (results.growth_rate) {
                     html += `<div style="background: #fffbeb; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b;">
-                        <div style="color: #f59e0b; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Confidence</div>
-                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.confidence_level)}</div>
+                        <div style="color: #f59e0b; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Growth Rate</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.growth_rate)}</div>
                     </div>`;
                 }
+                
+                // Advanced AI Features
+                if (results.advanced_ai_features) {
+                    const advanced = results.advanced_ai_features;
+                    
+                    // Ensemble Forecast
+                    if (advanced.ensemble_forecast) {
+                        html += `<div style="background: #faf5ff; padding: 12px; border-radius: 8px; border-left: 4px solid #8b5cf6;">
+                            <div style="color: #8b5cf6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Ensemble Forecast</div>
+                            <div style="color: #1f2937; font-size: 16px; font-weight: bold;">₹${(advanced.ensemble_forecast.next_quarter/1000000).toFixed(1)}M</div>
+                        </div>`;
+                    }
+                    
+                    // Model Accuracy
+                    if (advanced.accuracy_metrics) {
+                        html += `<div style="background: #ecfdf5; padding: 12px; border-radius: 8px; border-left: 4px solid #059669;">
+                            <div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Model Accuracy</div>
+                            <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${advanced.accuracy_metrics.model_accuracy}%</div>
+                        </div>`;
+                    }
+                    
+                    // Forecast Confidence
+                    if (results.forecast_confidence) {
+                        html += `<div style="background: #fef3c7; padding: 12px; border-radius: 8px; border-left: 4px solid #d97706;">
+                            <div style="color: #d97706; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Forecast Confidence</div>
+                            <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${(results.forecast_confidence.confidence_level * 100).toFixed(1)}%</div>
+                        </div>`;
+                    }
+                    
+                    // Pipeline Health
+                    if (results.sales_performance) {
+                        html += `<div style="background: #fef2f2; padding: 12px; border-radius: 8px; border-left: 4px solid #dc2626;">
+                            <div style="color: #dc2626; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Pipeline Health</div>
+                            <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${results.sales_performance.pipeline_health}</div>
+                        </div>`;
+                    }
+                }
+                
                 html += '</div>';
+                
+                // Add Advanced Features Section
+                if (results.advanced_ai_features) {
+                    const advanced = results.advanced_ai_features;
+                    
+                    // What-if Scenarios
+                    if (advanced.what_if_scenarios) {
+                        html += '<div style="margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">';
+                        html += '<h5 style="margin: 0 0 10px 0; color: #1f2937; font-size: 14px; font-weight: 600;">🎯 What-if Scenarios</h5>';
+                        
+                        const scenarios = advanced.what_if_scenarios;
+                        html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">';
+                        
+                        if (scenarios.optimistic) {
+                            html += '<div style="background: #f0fdf4; padding: 8px; border-radius: 6px;">';
+                            html += '<div style="color: #059669; font-size: 11px; font-weight: 600;">🚀 Optimistic</div>';
+                            html += '<div style="color: #374151; font-size: 11px;">Market +30%: ₹' + (scenarios.optimistic.market_growth_30/1000000).toFixed(1) + 'M</div>';
+                            html += '</div>';
+                        }
+                        
+                        if (scenarios.pessimistic) {
+                            html += '<div style="background: #fef2f2; padding: 8px; border-radius: 6px;">';
+                            html += '<div style="color: #dc2626; font-size: 11px; font-weight: 600;">⚠️ Pessimistic</div>';
+                            html += '<div style="color: #374151; font-size: 11px;">Sales -40%: ₹' + (scenarios.pessimistic.sales_drop_40/1000000).toFixed(1) + 'M</div>';
+                            html += '</div>';
+                        }
+                        
+                        if (scenarios.realistic) {
+                            html += '<div style="background: #eff6ff; padding: 8px; border-radius: 6px;">';
+                            html += '<div style="color: #3b82f6; font-size: 11px; font-weight: 600;">📊 Realistic</div>';
+                            html += '<div style="color: #374151; font-size: 11px;">Current Trend: ₹' + (scenarios.realistic.current_trend/1000000).toFixed(1) + 'M</div>';
+                            html += '</div>';
+                        }
+                        
+                        html += '</div>';
+                        html += '</div>';
+                    }
+                    
+                    // Prescriptive Insights
+                    if (advanced.prescriptive_insights) {
+                        html += '<div style="margin-top: 15px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">';
+                        html += '<h5 style="margin: 0 0 10px 0; color: #1f2937; font-size: 14px; font-weight: 600;">💡 Prescriptive Insights</h5>';
+                        
+                        const insights = advanced.prescriptive_insights;
+                        if (insights.priority_actions && insights.priority_actions.length > 0) {
+                            html += '<div style="margin-bottom: 10px;">';
+                            html += '<div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 5px;">🚀 Priority Actions:</div>';
+                            html += '<ul style="margin: 0; padding-left: 20px; color: #374151; font-size: 12px;">';
+                            insights.priority_actions.slice(0, 2).forEach(action => {
+                                html += `<li style="margin-bottom: 3px;">${action}</li>`;
+                            });
+                            html += '</ul>';
+                            html += '</div>';
+                        }
+                        
+                        if (insights.growth_opportunities && insights.growth_opportunities.length > 0) {
+                            html += '<div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 5px;">📈 Growth Opportunities:</div>';
+                            html += '<ul style="margin: 0; padding-left: 20px; color: #374151; font-size: 12px;">';
+                            insights.growth_opportunities.slice(0, 2).forEach(opportunity => {
+                                html += `<li style="margin-bottom: 3px;">${opportunity}</li>`;
+                            });
+                            html += '</ul>';
+                        }
+                        
+                        html += '</div>';
+                    }
+                }
             } else if (parameterType === 'A3_customer_contracts') {
                 html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
-                if (results.unique_customers) {
+                
+                // Basic Contract Metrics
+                if (results.total_contracts) {
                     html += `<div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border-left: 4px solid #059669;">
-                        <div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Customers</div>
-                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.unique_customers)}</div>
+                        <div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Total Contracts</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.total_contracts)}</div>
                     </div>`;
                 }
-                if (results.contract_value) {
+                if (results.total_contract_value) {
                     html += `<div style="background: #eff6ff; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
                         <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Contract Value</div>
-                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.contract_value)}</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.total_contract_value)}</div>
                     </div>`;
                 }
-                if (results.retention_rate) {
+                if (results.recurring_revenue) {
                     html += `<div style="background: #fffbeb; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b;">
-                        <div style="color: #f59e0b; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Retention</div>
-                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.retention_rate)}</div>
+                        <div style="color: #f59e0b; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Recurring Revenue</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.recurring_revenue)}</div>
                     </div>`;
                 }
+                if (results.overall_churn_rate) {
+                    html += `<div style="background: #fef2f2; padding: 12px; border-radius: 8px; border-left: 4px solid #dc2626;">
+                        <div style="color: #dc2626; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Churn Rate</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.overall_churn_rate)}</div>
+                    </div>`;
+                }
+                
+                // Advanced AI Features
+                if (results.advanced_ai_features) {
+                    const advanced = results.advanced_ai_features;
+                    
+                    // Payment Behavior
+                    if (advanced.payment_behavior) {
+                        html += `<div style="background: #faf5ff; padding: 12px; border-radius: 8px; border-left: 4px solid #8b5cf6;">
+                            <div style="color: #8b5cf6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Payment Probability</div>
+                            <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${(advanced.payment_behavior.on_time_payment_probability * 100).toFixed(1)}%</div>
+                        </div>`;
+                    }
+                    
+                    // Contract Health Score
+                    if (results.contract_health_score) {
+                        html += `<div style="background: #ecfdf5; padding: 12px; border-radius: 8px; border-left: 4px solid #059669;">
+                            <div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Contract Health</div>
+                            <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${results.contract_health_score}%</div>
+                        </div>`;
+                    }
+                    
+                    // Churn Prediction
+                    if (advanced.churn_prediction) {
+                        html += `<div style="background: #fef3c7; padding: 12px; border-radius: 8px; border-left: 4px solid #d97706;">
+                            <div style="color: #d97706; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Churn Prediction</div>
+                            <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${(advanced.churn_prediction.churn_prediction_accuracy * 100).toFixed(1)}%</div>
+                        </div>`;
+                    }
+                    
+                    // Contract Risk Assessment
+                    if (advanced.contract_risk_assessment) {
+                        html += `<div style="background: #fef2f2; padding: 12px; border-radius: 8px; border-left: 4px solid #dc2626;">
+                            <div style="color: #dc2626; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Risk Assessment</div>
+                            <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${(advanced.contract_risk_assessment.risk_assessment_confidence * 100).toFixed(1)}%</div>
+                        </div>`;
+                    }
+                }
+                
                 html += '</div>';
+                
+                // Add Advanced Features Section
+                if (results.advanced_ai_features) {
+                    const advanced = results.advanced_ai_features;
+                    
+                    // Customer Clusters
+                    if (advanced.customer_clusters) {
+                        html += '<div style="margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">';
+                        html += '<h5 style="margin: 0 0 10px 0; color: #1f2937; font-size: 14px; font-weight: 600;">👥 Customer Clusters</h5>';
+                        
+                        const clusters = advanced.customer_clusters;
+                        html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">';
+                        
+                        if (clusters.loyal_customers) {
+                            html += '<div style="background: #f0fdf4; padding: 8px; border-radius: 6px;">';
+                            html += '<div style="color: #059669; font-size: 11px; font-weight: 600;">💎 Loyal Customers</div>';
+                            html += '<div style="color: #374151; font-size: 11px;">' + clusters.loyal_customers.count + ' customers</div>';
+                            html += '</div>';
+                        }
+                        
+                        if (clusters.growth_customers) {
+                            html += '<div style="background: #eff6ff; padding: 8px; border-radius: 6px;">';
+                            html += '<div style="color: #3b82f6; font-size: 11px; font-weight: 600;">📈 Growth Customers</div>';
+                            html += '<div style="color: #374151; font-size: 11px;">' + clusters.growth_customers.count + ' customers</div>';
+                            html += '</div>';
+                        }
+                        
+                        if (clusters.at_risk_customers) {
+                            html += '<div style="background: #fef2f2; padding: 8px; border-radius: 6px;">';
+                            html += '<div style="color: #dc2626; font-size: 11px; font-weight: 600;">⚠️ At-Risk Customers</div>';
+                            html += '<div style="color: #374151; font-size: 11px;">' + clusters.at_risk_customers.count + ' customers</div>';
+                            html += '</div>';
+                        }
+                        
+                        html += '</div>';
+                        html += '</div>';
+                    }
+                    
+                    // Prescriptive Insights
+                    if (advanced.prescriptive_insights) {
+                        html += '<div style="margin-top: 15px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">';
+                        html += '<h5 style="margin: 0 0 10px 0; color: #1f2937; font-size: 14px; font-weight: 600;">💡 Prescriptive Insights</h5>';
+                        
+                        const insights = advanced.prescriptive_insights;
+                        if (insights.priority_actions && insights.priority_actions.length > 0) {
+                            html += '<div style="margin-bottom: 10px;">';
+                            html += '<div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 5px;">🚀 Priority Actions:</div>';
+                            html += '<ul style="margin: 0; padding-left: 20px; color: #374151; font-size: 12px;">';
+                            insights.priority_actions.slice(0, 2).forEach(action => {
+                                html += `<li style="margin-bottom: 3px;">${action}</li>`;
+                            });
+                            html += '</ul>';
+                            html += '</div>';
+                        }
+                        
+                        if (insights.growth_opportunities && insights.growth_opportunities.length > 0) {
+                            html += '<div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 5px;">📈 Growth Opportunities:</div>';
+                            html += '<ul style="margin: 0; padding-left: 20px; color: #374151; font-size: 12px;">';
+                            insights.growth_opportunities.slice(0, 2).forEach(opportunity => {
+                                html += `<li style="margin-bottom: 3px;">${opportunity}</li>`;
+                            });
+                            html += '</ul>';
+                        }
+                        
+                        html += '</div>';
+                    }
+                }
             } else if (parameterType === 'A4_pricing_models') {
                 html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
-                if (results.pricing_models) {
+                
+                // Display pricing models in a user-friendly format
+                if (results.pricing_models && typeof results.pricing_models === 'object') {
+                    const models = results.pricing_models;
+                    
+                    // Subscription Model
+                    if (models.subscription) {
+                        html += `<div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border-left: 4px solid #059669;">
+                            <div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 4px;">📅 Subscription</div>
+                            <div style="color: #1f2937; font-size: 16px; font-weight: bold;">₹${(models.subscription.total_value / 1000000).toFixed(1)}M</div>
+                            <div style="color: #6b7280; font-size: 12px;">${models.subscription.count} transactions</div>
+                        </div>`;
+                    }
+                    
+                    // One-time Fees
+                    if (models.one_time_fees) {
+                        html += `<div style="background: #eff6ff; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                            <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">💰 One-time Fees</div>
+                            <div style="color: #1f2937; font-size: 16px; font-weight: bold;">₹${(models.one_time_fees.total_value / 1000000).toFixed(1)}M</div>
+                            <div style="color: #6b7280; font-size: 12px;">${models.one_time_fees.count} transactions</div>
+                        </div>`;
+                    }
+                    
+                    // Dynamic Pricing
+                    if (models.dynamic_pricing) {
+                        html += `<div style="background: #fffbeb; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                            <div style="color: #f59e0b; font-size: 12px; font-weight: 600; margin-bottom: 4px;">📈 Dynamic Pricing</div>
+                            <div style="color: #1f2937; font-size: 16px; font-weight: bold;">₹${(models.dynamic_pricing.total_value / 1000000).toFixed(1)}M</div>
+                            <div style="color: #6b7280; font-size: 12px;">${models.dynamic_pricing.count} transactions</div>
+                        </div>`;
+                    }
+                    
+                    // Volume-based
+                    if (models.volume_based) {
+                        html += `<div style="background: #fef2f2; padding: 12px; border-radius: 8px; border-left: 4px solid #ef4444;">
+                            <div style="color: #ef4444; font-size: 12px; font-weight: 600; margin-bottom: 4px;">📦 Volume-based</div>
+                            <div style="color: #1f2937; font-size: 16px; font-weight: bold;">₹${(models.volume_based.total_value / 1000000).toFixed(1)}M</div>
+                            <div style="color: #6b7280; font-size: 12px;">${models.volume_based.count} transactions</div>
+                        </div>`;
+                    }
+                }
+                
+                // Add pricing insights
+                if (results.price_volatility) {
+                    html += `<div style="background: #f3e8ff; padding: 12px; border-radius: 8px; border-left: 4px solid #8b5cf6;">
+                        <div style="color: #8b5cf6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">📊 Price Volatility</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.price_volatility)}</div>
+                    </div>`;
+                }
+                
+                if (results.price_trend) {
                     html += `<div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border-left: 4px solid #059669;">
-                        <div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Models</div>
-                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.pricing_models)}</div>
+                        <div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 4px;">📈 Price Trend</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.price_trend).replace('%%', '%')}</div>
                     </div>`;
                 }
-                if (results.price_range) {
-                    html += `<div style="background: #eff6ff; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
-                        <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Price Range</div>
-                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.price_range)}</div>
-                    </div>`;
-                }
+                
                 html += '</div>';
+                
+                // Add summary insights for pricing models
+                if (results.pricing_models && typeof results.pricing_models === 'object') {
+                    const models = results.pricing_models;
+                    let totalRevenue = 0;
+                    let totalTransactions = 0;
+                    
+                    // Calculate totals
+                    Object.values(models).forEach(model => {
+                        if (model && model.total_value) {
+                            totalRevenue += model.total_value;
+                            totalTransactions += model.count || 0;
+                        }
+                    });
+                    
+                    html += '<div style="grid-column: 1 / -1; margin-top: 16px; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">';
+                    html += '<div style="color: #1f2937; font-size: 14px; font-weight: 600; margin-bottom: 12px;">📊 Pricing Strategy Summary</div>';
+                    html += `<div style="color: #6b7280; font-size: 12px; line-height: 1.5;">
+                        • Total Revenue: ₹${(totalRevenue / 1000000).toFixed(1)}M<br>
+                        • Total Transactions: ${totalTransactions}<br>
+                        • Primary Model: ${Object.keys(models)[0] || 'Mixed'}<br>
+                        • Revenue Distribution: ${Object.keys(models).length} different pricing models
+                    </div>`;
+                    html += '</div>';
+                }
             } else if (parameterType === 'A5_ar_aging') {
                 html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
-                if (results.days_sales_outstanding) {
+                
+                // DSO Days
+                if (results.dso_days) {
                     html += `<div style="background: #fef2f2; padding: 12px; border-radius: 8px; border-left: 4px solid #ef4444;">
-                        <div style="color: #ef4444; font-size: 12px; font-weight: 600; margin-bottom: 4px;">DSO</div>
-                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.days_sales_outstanding)}</div>
+                        <div style="color: #ef4444; font-size: 12px; font-weight: 600; margin-bottom: 4px;">📅 DSO Days</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.dso_days)} days</div>
                     </div>`;
                 }
-                if (results.collection_probability) {
+                
+                // Collection Probability
+                if (results.weighted_collection_probability) {
                     html += `<div style="background: #eff6ff; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
-                        <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Collection</div>
-                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.collection_probability)}</div>
+                        <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">💰 Collection Probability</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.weighted_collection_probability)}</div>
                     </div>`;
+                }
+                
+                // Total Receivables
+                if (results.total_receivables) {
+                    html += `<div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border-left: 4px solid #059669;">
+                        <div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 4px;">📊 Total Receivables</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.total_receivables)}</div>
+                    </div>`;
+                }
+                
+                // Expected Collections
+                if (results.expected_collections) {
+                    html += `<div style="background: #fffbeb; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                        <div style="color: #f59e0b; font-size: 12px; font-weight: 600; margin-bottom: 4px;">🎯 Expected Collections</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.expected_collections)}</div>
+                    </div>`;
+                }
+                
+                // Bad Debt Estimate
+                if (results.bad_debt_estimate) {
+                    html += `<div style="background: #f3e8ff; padding: 12px; border-radius: 8px; border-left: 4px solid #8b5cf6;">
+                        <div style="color: #8b5cf6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">⚠️ Bad Debt Estimate</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.bad_debt_estimate)}</div>
+                    </div>`;
+                }
+                
+                html += '</div>';
+                
+                // Add Advanced AI Features section
+                if (results.advanced_ai_features) {
+                    html += '<div style="grid-column: 1 / -1; margin-top: 16px; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">';
+                    html += '<div style="color: #1f2937; font-size: 14px; font-weight: 600; margin-bottom: 12px;">🤖 Advanced AI Analysis</div>';
+                    
+                    // Create a grid for the advanced features
+                    html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">';
+                    
+                    // Collection Optimization
+                    if (results.advanced_ai_features.collection_optimization) {
+                        const collOpt = results.advanced_ai_features.collection_optimization;
+                        html += `<div style="background: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid #059669;">
+                            <div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 4px;">💰 COLLECTION OPTIMIZATION</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">₹${(collOpt.potential_savings || 0).toLocaleString(undefined, {maximumFractionDigits: 0})} potential savings</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                                Optimal resource allocation:
+                            </div>
+                            <div style="margin-top: 4px; display: flex; gap: 4px; flex-wrap: wrap;">
+                                <span style="background: #ecfdf5; color: #10b981; padding: 2px 6px; border-radius: 4px; font-size: 10px;">Current: ${collOpt.optimal_allocation?.current_accounts?.toFixed(1) || 0}%</span>
+                                <span style="background: #eff6ff; color: #3b82f6; padding: 2px 6px; border-radius: 4px; font-size: 10px;">30-60d: ${collOpt.optimal_allocation?.['30_60_days']?.toFixed(1) || 0}%</span>
+                                <span style="background: #fef2f2; color: #ef4444; padding: 2px 6px; border-radius: 4px; font-size: 10px;">60-90d: ${collOpt.optimal_allocation?.['60_90_days']?.toFixed(1) || 0}%</span>
+                                <span style="background: #f3e8ff; color: #8b5cf6; padding: 2px 6px; border-radius: 4px; font-size: 10px;">>90d: ${collOpt.optimal_allocation?.over_90_days?.toFixed(1) || 0}%</span>
+                            </div>
+                            <div style="color: #1f2937; font-size: 11px; margin-top: 8px; font-weight: 500;">Recommendations:</div>
+                            <ul style="color: #6b7280; font-size: 10px; margin-top: 2px; padding-left: 16px;">
+                                ${collOpt.recommended_actions ? collOpt.recommended_actions.slice(0, 2).map(r => `<li>${r}</li>`).join('') : ''}
+                            </ul>
+                        </div>`;
+                    }
+                    
+                    // Customer Segmentation
+                    if (results.advanced_ai_features.customer_segmentation) {
+                        const segments = results.advanced_ai_features.customer_segmentation;
+                        html += `<div style="background: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                            <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">👥 CUSTOMER SEGMENTATION</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">${segments.cluster_count || 0} payment behavior clusters</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                                Customer payment patterns:
+                            </div>`;
+                            
+                        if (segments.clusters) {
+                            html += `<div style="margin-top: 4px;">`;
+                            Object.entries(segments.clusters).forEach(([cluster, data]) => {
+                                const clusterColor = data.type === 'Prompt Payers' ? '#10b981' : 
+                                                   data.type === 'Average Payers' ? '#3b82f6' : 
+                                                   data.type === 'Late Payers' ? '#f59e0b' : '#ef4444';
+                                html += `<div style="display: flex; justify-content: space-between; font-size: 10px; margin-bottom: 2px;">
+                                    <span style="color: ${clusterColor};">${data.type}</span>
+                                    <span style="color: #6b7280;">${data.customer_count} customers (${data.percentage_of_total?.toFixed(1) || 0}%)</span>
+                                </div>`;
+                            });
+                            html += `</div>`;
+                        }
+                            
+                        html += `</div>`;
+                    }
+                    
+                    // Payment Prediction
+                    if (results.advanced_ai_features.payment_prediction) {
+                        const prediction = results.advanced_ai_features.payment_prediction;
+                        html += `<div style="background: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                            <div style="color: #f59e0b; font-size: 12px; font-weight: 600; margin-bottom: 4px;">📊 PAYMENT PREDICTION</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">₹${(prediction.next_3_months?.reduce((a, b) => a + b, 0) || 0).toLocaleString(undefined, {maximumFractionDigits: 0})} next 3 months</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                                Model accuracy: ${(prediction.model_accuracy * 100).toFixed(0)}%<br>
+                                Expected payment dates:
+                            </div>
+                            <div style="margin-top: 4px; display: flex; flex-direction: column; gap: 2px;">
+                                <div style="font-size: 10px; display: flex; justify-content: space-between;">
+                                    <span style="color: #6b7280;">${prediction.expected_payment_dates?.month_1 || ''}</span>
+                                    <span style="color: #1f2937;">₹${(prediction.next_3_months?.[0] || 0).toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                                </div>
+                                <div style="font-size: 10px; display: flex; justify-content: space-between;">
+                                    <span style="color: #6b7280;">${prediction.expected_payment_dates?.month_2 || ''}</span>
+                                    <span style="color: #1f2937;">₹${(prediction.next_3_months?.[1] || 0).toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                                </div>
+                                <div style="font-size: 10px; display: flex; justify-content: space-between;">
+                                    <span style="color: #6b7280;">${prediction.expected_payment_dates?.month_3 || ''}</span>
+                                    <span style="color: #1f2937;">₹${(prediction.next_3_months?.[2] || 0).toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                                </div>
+                            </div>
+                        </div>`;
+                    }
+                    
+                    // Risk Assessment
+                    if (results.advanced_ai_features.risk_assessment) {
+                        const risk = results.advanced_ai_features.risk_assessment;
+                        const riskColor = risk.overall_risk_level === 'Low' ? '#10b981' : 
+                                        risk.overall_risk_level === 'Medium' ? '#f59e0b' : 
+                                        risk.overall_risk_level === 'High' ? '#ef4444' : '#dc2626';
+                        
+                        html += `<div style="background: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid ${riskColor};">
+                            <div style="color: ${riskColor}; font-size: 12px; font-weight: 600; margin-bottom: 4px;">⚠️ RISK ASSESSMENT</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">${risk.overall_risk_level || 'Unknown'} Risk (${risk.overall_risk_score?.toFixed(0) || 0}/100)</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                                Risk factors:
+                            </div>
+                            <div style="margin-top: 4px; display: flex; flex-direction: column; gap: 2px;">`;
+                            
+                        if (risk.risk_factors) {
+                            Object.entries(risk.risk_factors).forEach(([factor, data]) => {
+                                const factorColor = data.level === 'Low' ? '#10b981' : 
+                                                 data.level === 'Medium' ? '#f59e0b' : 
+                                                 data.level === 'High' ? '#ef4444' : '#dc2626';
+                                html += `<div style="font-size: 10px; display: flex; justify-content: space-between;">
+                                    <span style="color: #6b7280;">${factor.replace('_', ' ')}</span>
+                                    <span style="color: ${factorColor};">${data.level}</span>
+                                </div>`;
+                            });
+                        }
+                            
+                        html += `</div>
+                            <div style="color: #1f2937; font-size: 11px; margin-top: 8px; font-weight: 500;">Mitigation strategies:</div>
+                            <ul style="color: #6b7280; font-size: 10px; margin-top: 2px; padding-left: 16px;">
+                                ${risk.mitigation_strategies ? risk.mitigation_strategies.slice(0, 2).map(s => `<li>${s}</li>`).join('') : ''}
+                            </ul>
+                        </div>`;
+                    }
+                    
+                    // Close the grid
+                    html += '</div>';
+                    
+                    // Add a summary section
+                    html += '<div style="margin-top: 16px; padding: 12px; background: #f1f5f9; border-radius: 8px; border: 1px dashed #cbd5e1;">';
+                    html += '<div style="color: #1f2937; font-size: 13px; font-weight: 600; margin-bottom: 8px;">💡 AI-Powered Insights</div>';
+                    html += '<div style="color: #6b7280; font-size: 12px; line-height: 1.5;">';
+                    html += 'The AR aging analysis uses XGBoost + Ollama hybrid AI to provide deep insights into your receivables. ';
+                    html += 'The system has optimized collection strategies, segmented customers by payment behavior, predicted future payments, and assessed collection risks.';
+                    html += '</div>';
+                    html += '</div>';
+                    
+                    html += '</div>';
                 }
                 
                 // Add aging bucket summaries
-                if (results.aging_buckets && typeof results.aging_buckets === 'object') {
-                    const agingBuckets = results.aging_buckets;
+                if (results.aging_analysis && typeof results.aging_analysis === 'object') {
+                    const agingAnalysis = results.aging_analysis;
                     
-                    if (agingBuckets.current && agingBuckets.current.summary) {
+                    html += '<div style="grid-column: 1 / -1; margin-top: 16px; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">';
+                    html += '<div style="color: #1f2937; font-size: 14px; font-weight: 600; margin-bottom: 12px;">📊 Aging Bucket Analysis</div>';
+                    html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
+                    
+                    if (agingAnalysis.current) {
                         html += `<div style="background: #eff6ff; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
                             <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Current (0-30 days)</div>
-                            <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${agingBuckets.current.summary}</div>
+                            <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${agingAnalysis.current.count} transactions</div>
+                            <div style="color: #6b7280; font-size: 12px;">₹${(agingAnalysis.current.amount / 1000000).toFixed(1)}M</div>
                         </div>`;
                     }
                     
-                    if (agingBuckets['30_days'] && agingBuckets['30_days'].summary) {
+                    if (agingAnalysis['30_60_days']) {
                         html += `<div style="background: #fffbeb; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b;">
                             <div style="color: #f59e0b; font-size: 12px; font-weight: 600; margin-bottom: 4px;">30-60 days</div>
-                            <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${agingBuckets['30_days'].summary}</div>
+                            <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${agingAnalysis['30_60_days'].count} transactions</div>
+                            <div style="color: #6b7280; font-size: 12px;">₹${(agingAnalysis['30_60_days'].amount / 1000000).toFixed(1)}M</div>
                         </div>`;
                     }
                     
-                    if (agingBuckets['60_days'] && agingBuckets['60_days'].summary) {
+                    if (agingAnalysis['60_90_days']) {
                         html += `<div style="background: #fef2f2; padding: 12px; border-radius: 8px; border-left: 4px solid #ef4444;">
                             <div style="color: #ef4444; font-size: 12px; font-weight: 600; margin-bottom: 4px;">60-90 days</div>
-                            <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${agingBuckets['60_days'].summary}</div>
+                            <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${agingAnalysis['60_90_days'].count} transactions</div>
+                            <div style="color: #6b7280; font-size: 12px;">₹${(agingAnalysis['60_90_days'].amount / 1000000).toFixed(1)}M</div>
                         </div>`;
                     }
                     
-                    if (agingBuckets['over_90_days'] && agingBuckets['over_90_days'].summary) {
+                    if (agingAnalysis['over_90_days']) {
                         html += `<div style="background: #f3e8ff; padding: 12px; border-radius: 8px; border-left: 4px solid #8b5cf6;">
                             <div style="color: #8b5cf6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Over 90 days</div>
-                            <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${agingBuckets['over_90_days'].summary}</div>
+                            <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${agingAnalysis['over_90_days'].count} transactions</div>
+                            <div style="color: #6b7280; font-size: 12px;">₹${(agingAnalysis['over_90_days'].amount / 1000000).toFixed(1)}M</div>
                         </div>`;
                     }
+                    
+                    html += '</div>';
+                    html += '</div>';
                 }
-                
-                html += '</div>';
             } else if (parameterType === 'A6_operating_expenses') {
                 html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
                 if (results.total_expenses) {
@@ -5800,27 +6346,93 @@
                     html += '<div style="grid-column: 1 / -1; margin-top: 16px; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">';
                     html += '<div style="color: #1f2937; font-size: 14px; font-weight: 600; margin-bottom: 12px;">🤖 Advanced AI Analysis</div>';
                     
-                    // Display AI features
-                    for (const [key, value] of Object.entries(results.advanced_ai_features)) {
-                        if (typeof value === 'object' && value !== null) {
-                            if (value.recommendations) {
-                                html += `<div style="margin-bottom: 12px;">
-                                    <div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 4px;">${key.replace(/_/g, ' ').toUpperCase()}</div>
-                                    <div style="color: #1f2937; font-size: 12px;">${value.recommendations.slice(0, 2).join(', ')}</div>
-                                </div>`;
-                            } else if (value.forecast_total) {
-                                html += `<div style="margin-bottom: 12px;">
-                                    <div style="color: #7c3aed; font-size: 12px; font-weight: 600; margin-bottom: 4px;">${key.replace(/_/g, ' ').toUpperCase()}</div>
-                                    <div style="color: #1f2937; font-size: 12px;">Forecast: ₹${safeValue(value.forecast_total)}</div>
-                                </div>`;
-                            } else if (value.count) {
-                                html += `<div style="margin-bottom: 12px;">
-                                    <div style="color: #dc2626; font-size: 12px; font-weight: 600; margin-bottom: 4px;">${key.replace(/_/g, ' ').toUpperCase()}</div>
-                                    <div style="color: #1f2937; font-size: 12px;">${safeValue(value.count)} detected</div>
-                                </div>`;
-                            }
-                        }
+                    // Create a grid for the advanced features
+                    html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">';
+                    
+                    // Cost Optimization
+                    if (results.advanced_ai_features.cost_optimization) {
+                        const costOpt = results.advanced_ai_features.cost_optimization;
+                        html += `<div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border-left: 4px solid #059669;">
+                            <div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 4px;">💰 COST OPTIMIZATION</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">₹${(costOpt.optimization_potential || 0).toLocaleString(undefined, {maximumFractionDigits: 0})} potential savings</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">Volatility: ${(costOpt.expense_volatility * 100 || 0).toFixed(1)}%</div>
+                            <div style="color: #1f2937; font-size: 11px; margin-top: 8px; font-weight: 500;">Recommendations:</div>
+                            <ul style="color: #6b7280; font-size: 11px; margin-top: 2px; padding-left: 16px;">
+                                ${costOpt.recommendations ? costOpt.recommendations.slice(0, 2).map(r => `<li>${r}</li>`).join('') : ''}
+                            </ul>
+                        </div>`;
                     }
+                    
+                    // Expense Anomalies
+                    if (results.advanced_ai_features.expense_anomalies) {
+                        const anomalies = results.advanced_ai_features.expense_anomalies;
+                        html += `<div style="background: #fef2f2; padding: 12px; border-radius: 8px; border-left: 4px solid #dc2626;">
+                            <div style="color: #dc2626; font-size: 12px; font-weight: 600; margin-bottom: 4px;">⚠️ EXPENSE ANOMALIES</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">${anomalies.count} unusual transactions detected</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">${anomalies.percentage.toFixed(1)}% of expenses are anomalous</div>
+                            <div style="color: #1f2937; font-size: 11px; margin-top: 8px; font-weight: 500;">Action needed:</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 2px;">Review and investigate unusual expense patterns</div>
+                        </div>`;
+                    }
+                    
+                    // Expense Forecast
+                    if (results.advanced_ai_features.expense_forecast) {
+                        const forecast = results.advanced_ai_features.expense_forecast;
+                        html += `<div style="background: #eff6ff; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                            <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">📊 EXPENSE FORECAST</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">₹${(forecast.forecast_total || 0).toLocaleString(undefined, {maximumFractionDigits: 0})} next 3 months</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">Based on historical patterns and external factors</div>
+                            <div style="color: #1f2937; font-size: 11px; margin-top: 8px; font-weight: 500;">Monthly breakdown:</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 2px;">
+                                ${forecast.next_3_months ? forecast.next_3_months.map((m, i) => `Month ${i+1}: ₹${m.toLocaleString(undefined, {maximumFractionDigits: 0})}`).join('<br>') : ''}
+                            </div>
+                        </div>`;
+                    }
+                    
+                    // Operational Impact
+                    if (results.advanced_ai_features.operational_impact) {
+                        const opImpact = results.advanced_ai_features.operational_impact;
+                        html += `<div style="background: #f3e8ff; padding: 12px; border-radius: 8px; border-left: 4px solid #8b5cf6;">
+                            <div style="color: #8b5cf6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">🔄 OPERATIONAL DRIVERS</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">Key expense drivers identified</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">Impact on total expenses</div>
+                            <div style="color: #1f2937; font-size: 11px; margin-top: 8px; font-weight: 500;">Key drivers:</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 2px;">
+                                Headcount: ₹${(opImpact.headcount_cost || 0).toLocaleString(undefined, {maximumFractionDigits: 2})}<br>
+                                Expansion: ₹${(opImpact.expansion_investment || 0).toLocaleString(undefined, {maximumFractionDigits: 2})}<br>
+                                Marketing ROI: ${((opImpact.marketing_roi || 0) * 100).toFixed(1)}%
+                            </div>
+                        </div>`;
+                    }
+                    
+                    // Modeling Considerations
+                    if (results.advanced_ai_features.modeling_considerations) {
+                        const modeling = results.advanced_ai_features.modeling_considerations;
+                        html += `<div style="background: #fffbeb; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                            <div style="color: #f59e0b; font-size: 12px; font-weight: 600; margin-bottom: 4px;">🧠 MODEL PARAMETERS</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">Advanced AI Configuration</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">Model settings for expense analysis</div>
+                            <div style="color: #1f2937; font-size: 11px; margin-top: 8px; font-weight: 500;">Settings:</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 2px;">
+                                Time granularity: ${modeling.time_granularity || 'Monthly'}<br>
+                                Forecast horizon: ${modeling.forecast_horizon || 12} months<br>
+                                Confidence intervals: ${modeling.confidence_intervals_enabled ? 'Enabled' : 'Disabled'}<br>
+                                Real-time adjustments: ${modeling.real_time_adjustments ? 'Enabled' : 'Disabled'}
+                            </div>
+                        </div>`;
+                    }
+                    
+                    // Close the grid
+                    html += '</div>';
+                    
+                    // Add a summary section
+                    html += '<div style="margin-top: 16px; padding: 12px; background: #f1f5f9; border-radius: 8px; border: 1px dashed #cbd5e1;">';
+                    html += '<div style="color: #1f2937; font-size: 13px; font-weight: 600; margin-bottom: 8px;">💡 AI-Powered Insights</div>';
+                    html += '<div style="color: #6b7280; font-size: 12px; line-height: 1.5;">';
+                    html += 'The expense analysis uses XGBoost + Ollama hybrid AI to provide deep insights into your operating expenses. ';
+                    html += 'The system has identified optimization opportunities, detected anomalies, and forecasted future expenses based on historical patterns and external economic factors.';
+                    html += '</div>';
+                    html += '</div>';
                     
                     html += '</div>';
                 }
@@ -5843,9 +6455,174 @@
                 if (results.vendor_analysis) {
                     html += `<div style="background: #fffbeb; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b;">
                         <div style="color: #f59e0b; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Vendor Analysis</div>
-                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.vendor_analysis)}</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.vendor_analysis)}</div>`;
+                        
+                    if (results.vendor_summary) {
+                        html += `<div style="margin-top: 8px; font-size: 12px;">
+                            <div style="color: #6b7280; margin-bottom: 2px;">Top Category: <span style="color: #1f2937; font-weight: 500;">${safeValue(results.vendor_summary.top_category)}</span></div>
+                            <div style="color: #6b7280; margin-bottom: 2px;">Concentration: <span style="color: #1f2937; font-weight: 500;">${safeValue(results.vendor_summary.payment_concentration)}</span></div>
+                            <div style="color: #6b7280; margin-bottom: 2px;">Avg Payment: <span style="color: #1f2937; font-weight: 500;">${safeValue(results.vendor_summary.avg_payment_size)}</span></div>
+                        </div>`;
+                    }
+                    
+                    html += `</div>`;
+                }
+                if (results.cash_flow_impact) {
+                    html += `<div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border-left: 4px solid #059669;">
+                        <div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Cash Flow Impact</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.cash_flow_impact)}</div>
                     </div>`;
                 }
+                html += '</div>';
+                
+                // Add Advanced AI Features section
+                if (results.advanced_ai_features) {
+                    html += '<div style="grid-column: 1 / -1; margin-top: 16px; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">';
+                    html += '<div style="color: #1f2937; font-size: 14px; font-weight: 600; margin-bottom: 12px;">🤖 Advanced AI Analysis</div>';
+                    
+                    // Create a grid for the advanced features
+                    html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">';
+                    
+                    // Payment Optimization
+                    if (results.advanced_ai_features.payment_optimization) {
+                        const payOpt = results.advanced_ai_features.payment_optimization;
+                        html += `<div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border-left: 4px solid #059669;">
+                            <div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 4px;">💰 PAYMENT OPTIMIZATION</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">₹${(payOpt.potential_savings || 0).toLocaleString(undefined, {maximumFractionDigits: 0})} potential savings</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">Current DPO: ${payOpt.current_dpo.toFixed(1)} days (Optimal: ${payOpt.optimal_dpo} days)</div>
+                            <div style="color: #1f2937; font-size: 11px; margin-top: 8px; font-weight: 500;">Recommendations:</div>
+                            <ul style="color: #6b7280; font-size: 11px; margin-top: 2px; padding-left: 16px;">
+                                ${payOpt.recommendations ? payOpt.recommendations.slice(0, 2).map(r => `<li>${r}</li>`).join('') : ''}
+                            </ul>
+                        </div>`;
+                    }
+                    
+                    // Vendor Clusters
+                    if (results.advanced_ai_features.vendor_clusters) {
+                        const clusters = results.advanced_ai_features.vendor_clusters;
+                        html += `<div style="background: #eff6ff; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                            <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">👥 VENDOR SEGMENTATION</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">${clusters.clusters ? clusters.clusters.length : 0} vendor segments identified</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">Based on payment behavior and transaction patterns</div>
+                            <div style="color: #1f2937; font-size: 11px; margin-top: 8px; font-weight: 500;">Key segments:</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 2px;">`;
+                            
+                        if (clusters.clusters && clusters.clusters.length > 0) {
+                            clusters.clusters.forEach(cluster => {
+                                html += `${cluster.name}: ${cluster.count} vendors (₹${Math.round(cluster.avg_spend).toLocaleString()})<br>`;
+                            });
+                        } else {
+                            html += `No vendor segments available`;
+                        }
+                            
+                        html += `</div>
+                        </div>`;
+                    }
+                    
+                    // Payable Forecast
+                    if (results.advanced_ai_features.payable_forecast) {
+                        const forecast = results.advanced_ai_features.payable_forecast;
+                        html += `<div style="background: #fef2f2; padding: 12px; border-radius: 8px; border-left: 4px solid #ef4444;">
+                            <div style="color: #ef4444; font-size: 12px; font-weight: 600; margin-bottom: 4px;">📊 PAYABLES FORECAST</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">₹${(forecast.forecast_total || 0).toLocaleString(undefined, {maximumFractionDigits: 0})} next 3 months</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">Predicted outflows based on historical patterns</div>
+                            <div style="color: #1f2937; font-size: 11px; margin-top: 8px; font-weight: 500;">Monthly breakdown:</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 2px;">
+                                ${forecast.next_3_months ? forecast.next_3_months.map((m, i) => `Month ${i+1}: ₹${m.toLocaleString(undefined, {maximumFractionDigits: 0})}`).join('<br>') : ''}
+                            </div>
+                        </div>`;
+                    }
+                    
+                    // Payment Terms Distribution
+                    if (results.payment_terms_distribution) {
+                        const terms = results.payment_terms_distribution;
+                        // Calculate total and percentages
+                        const totalTerms = (terms.immediate || 0) + (terms.net_30 || 0) + (terms.net_60 || 0) + (terms.net_90 || 0);
+                        const pctImmediate = totalTerms > 0 ? Math.round((terms.immediate || 0) / totalTerms * 100) : 0;
+                        const pctNet30 = totalTerms > 0 ? Math.round((terms.net_30 || 0) / totalTerms * 100) : 0;
+                        const pctNet60 = totalTerms > 0 ? Math.round((terms.net_60 || 0) / totalTerms * 100) : 0;
+                        const pctNet90 = totalTerms > 0 ? Math.round((terms.net_90 || 0) / totalTerms * 100) : 0;
+                        
+                        html += `<div style="background: #f3e8ff; padding: 12px; border-radius: 8px; border-left: 4px solid #8b5cf6;">
+                            <div style="color: #8b5cf6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">📅 PAYMENT TERMS</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">Payment terms analysis</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">Distribution of payment terms</div>
+                            <div style="color: #1f2937; font-size: 11px; margin-top: 8px; font-weight: 500;">Terms breakdown:</div>
+                            
+                            <!-- Visual bar chart -->
+                            <div style="margin-top: 8px; margin-bottom: 8px;">
+                                <div style="height: 12px; width: 100%; display: flex; border-radius: 6px; overflow: hidden;">
+                                    <div style="width: ${pctImmediate}%; background-color: #10b981; height: 100%;" title="Immediate: ${pctImmediate}%"></div>
+                                    <div style="width: ${pctNet30}%; background-color: #3b82f6; height: 100%;" title="Net 30: ${pctNet30}%"></div>
+                                    <div style="width: ${pctNet60}%; background-color: #f59e0b; height: 100%;" title="Net 60: ${pctNet60}%"></div>
+                                    <div style="width: ${pctNet90}%; background-color: #ef4444; height: 100%;" title="Net 90+: ${pctNet90}%"></div>
+                                </div>
+                            </div>
+                            
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 2px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                                    <span><span style="color: #10b981; font-weight: bold;">■</span> Immediate:</span> 
+                                    <span>${terms.immediate || 0} transactions (${pctImmediate}%)</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                                    <span><span style="color: #3b82f6; font-weight: bold;">■</span> Net 30:</span> 
+                                    <span>${terms.net_30 || 0} transactions (${pctNet30}%)</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                                    <span><span style="color: #f59e0b; font-weight: bold;">■</span> Net 60:</span> 
+                                    <span>${terms.net_60 || 0} transactions (${pctNet60}%)</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span><span style="color: #ef4444; font-weight: bold;">■</span> Net 90+:</span> 
+                                    <span>${terms.net_90 || 0} transactions (${pctNet90}%)</span>
+                                </div>
+                            </div>
+                        </div>`;
+                    }
+                    
+                    // Close the grid
+                    html += '</div>';
+                    
+                    // Add a summary section
+                    html += '<div style="margin-top: 16px; padding: 12px; background: #f1f5f9; border-radius: 8px; border: 1px dashed #cbd5e1;">';
+                    html += '<div style="color: #1f2937; font-size: 13px; font-weight: 600; margin-bottom: 8px;">💡 AI-Powered Insights</div>';
+                    html += '<div style="color: #6b7280; font-size: 12px; line-height: 1.5;">';
+                    html += 'The accounts payable analysis uses XGBoost + Ollama hybrid AI to provide deep insights into your payment patterns. ';
+                    html += 'The system has identified optimization opportunities, segmented vendors, and forecasted future payables based on historical patterns.';
+                    html += '</div>';
+                    html += '</div>';
+                    
+                    html += '</div>';
+                }
+                
+                // Add vendor breakdown if available
+                if (results.vendor_breakdown) {
+                    html += '<div style="grid-column: 1 / -1; margin-top: 16px; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">';
+                    html += '<div style="color: #1f2937; font-size: 14px; font-weight: 600; margin-bottom: 12px;">📊 Vendor Category Breakdown</div>';
+                    
+                    html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
+                    
+                    for (const [category, data] of Object.entries(results.vendor_breakdown)) {
+                        const colorMap = {
+                            'raw_materials': '#059669', // green
+                            'services': '#3b82f6',      // blue
+                            'utilities': '#f59e0b',     // amber
+                            'logistics': '#8b5cf6'      // purple
+                        };
+                        
+                        const color = colorMap[category] || '#6b7280';
+                        
+                        html += `<div style="background: #ffffff; padding: 12px; border-radius: 8px; border-left: 4px solid ${color};">
+                            <div style="color: ${color}; font-size: 12px; font-weight: 600; margin-bottom: 4px;">${category.replace(/_/g, ' ').toUpperCase()}</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">₹${(data.amount || 0).toLocaleString(undefined, {maximumFractionDigits: 0})}</div>
+                            <div style="color: #6b7280; font-size: 11px;">${data.count || 0} transactions (${data.percentage?.toFixed(1) || 0}%)</div>
+                        </div>`;
+                    }
+                    
+                    html += '</div>';
+                    html += '</div>';
+                }
+                
                 html += '</div>';
             } else if (parameterType === 'A8_inventory_turnover') {
                 html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
@@ -5859,14 +6636,156 @@
                     html += `<div style="background: #eff6ff; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
                         <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Turnover Ratio</div>
                         <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.turnover_ratio)}</div>
+                        ${results.days_inventory_held ? `<div style="color: #6b7280; font-size: 12px; margin-top: 4px;">${safeValue(results.days_inventory_held)} to sell inventory</div>` : ''}
                     </div>`;
                 }
                 if (results.inventory_analysis) {
                     html += `<div style="background: #fffbeb; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b;">
                         <div style="color: #f59e0b; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Analysis</div>
                         <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.inventory_analysis)}</div>
+                        ${results.inventory_management_insights ? 
+                            `<div style="color: #6b7280; font-size: 12px; margin-top: 4px;">
+                                Largest category: ${safeValue(results.inventory_management_insights.largest_inventory_category)}<br>
+                                Concentration: ${safeValue(results.inventory_management_insights.inventory_concentration)}<br>
+                                Efficiency: ${safeValue(results.inventory_management_insights.turnover_efficiency)}
+                            </div>` : ''}
                     </div>`;
                 }
+                if (results.cash_flow_impact && results.cash_flow_impact.cash_tied_up) {
+                    html += `<div style="background: #fef2f2; padding: 12px; border-radius: 8px; border-left: 4px solid #ef4444;">
+                        <div style="color: #ef4444; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Cash Flow Impact</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.cash_flow_impact.cash_tied_up)}</div>
+                        <div style="color: #6b7280; font-size: 12px; margin-top: 4px;">
+                            Monthly: ${safeValue(results.cash_flow_impact.monthly_cash_requirement)}
+                        </div>
+                    </div>`;
+                }
+                html += '</div>';
+                
+                // Add Advanced AI Features section
+                if (results.advanced_ai_features) {
+                    html += '<div style="grid-column: 1 / -1; margin-top: 16px; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">';
+                    html += '<div style="color: #1f2937; font-size: 14px; font-weight: 600; margin-bottom: 12px;">🤖 Advanced AI Analysis</div>';
+                    
+                    // Create a grid for the advanced features
+                    html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">';
+                    
+                    // Inventory Optimization
+                    if (results.advanced_ai_features.inventory_optimization) {
+                        const invOpt = results.advanced_ai_features.inventory_optimization;
+                        html += `<div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border-left: 4px solid #059669;">
+                            <div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 4px;">💰 INVENTORY OPTIMIZATION</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">₹${(invOpt.potential_savings || 0).toLocaleString(undefined, {maximumFractionDigits: 0})} potential savings</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                                Current: ${invOpt.current_turnover?.toFixed(1) || 0} turns (${invOpt.current_days?.toFixed(0) || 0} days)<br>
+                                Target: ${invOpt.target_turnover?.toFixed(1) || 0} turns (${invOpt.target_days?.toFixed(0) || 0} days)
+                            </div>
+                            <div style="color: #1f2937; font-size: 11px; margin-top: 8px; font-weight: 500;">Recommendations:</div>
+                            <ul style="color: #6b7280; font-size: 11px; margin-top: 2px; padding-left: 16px;">
+                                ${invOpt.recommendations ? invOpt.recommendations.slice(0, 2).map(r => `<li>${r}</li>`).join('') : ''}
+                            </ul>
+                        </div>`;
+                    }
+                    
+                    // Inventory Risk
+                    if (results.advanced_ai_features.inventory_risk) {
+                        const risk = results.advanced_ai_features.inventory_risk;
+                        html += `<div style="background: #fef2f2; padding: 12px; border-radius: 8px; border-left: 4px solid #ef4444;">
+                            <div style="color: #ef4444; font-size: 12px; font-weight: 600; margin-bottom: 4px;">⚠️ INVENTORY RISK</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">${risk.risk_level} Risk Level</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                                Obsolescence risk: ${risk.obsolescence_risk?.toFixed(1) || 0}%<br>
+                                Stockout risk: ${risk.stockout_risk?.toFixed(1) || 0}%<br>
+                                Cash locked: ₹${(risk.cash_locked || 0).toLocaleString(undefined, {maximumFractionDigits: 0})}
+                            </div>
+                            <div style="margin-top: 8px;">
+                                <div style="height: 8px; width: 100%; background-color: #f3f4f6; border-radius: 4px; overflow: hidden;">
+                                    <div style="height: 100%; width: ${risk.obsolescence_risk || 0}%; background-color: #ef4444;"></div>
+                                </div>
+                            </div>
+                        </div>`;
+                    }
+                    
+                    // Demand Forecast
+                    if (results.advanced_ai_features.demand_forecast) {
+                        const forecast = results.advanced_ai_features.demand_forecast;
+                        html += `<div style="background: #eff6ff; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                            <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">📊 DEMAND FORECAST</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">₹${(forecast.forecast_total || 0).toLocaleString(undefined, {maximumFractionDigits: 0})} next 6 months</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                                ${forecast.is_estimated ? 'Estimated based on available data' : 'Based on XGBoost prediction model'}
+                                ${forecast.forecast_accuracy ? `<br>Model accuracy: ${(forecast.forecast_accuracy * 100).toFixed(0)}%` : ''}
+                            </div>
+                            <div style="margin-top: 8px; height: 40px;">
+                                <div style="display: flex; justify-content: space-between; height: 100%;">
+                                    ${forecast.next_6_months ? forecast.next_6_months.map((m, i) => {
+                                        const height = Math.max(5, Math.min(40, (m / Math.max(...forecast.next_6_months)) * 40));
+                                        return `<div style="width: 8px; height: ${height}px; background-color: #3b82f6; align-self: flex-end;" title="Month ${i+1}: ₹${m.toLocaleString(undefined, {maximumFractionDigits: 0})}"></div>`;
+                                    }).join('') : ''}
+                                </div>
+                            </div>
+                        </div>`;
+                    }
+                    
+                    // Seasonal Analysis
+                    if (results.advanced_ai_features.seasonal_analysis) {
+                        const seasonal = results.advanced_ai_features.seasonal_analysis;
+                        html += `<div style="background: #f3e8ff; padding: 12px; border-radius: 8px; border-left: 4px solid #8b5cf6;">
+                            <div style="color: #8b5cf6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">🔄 SEASONAL PATTERNS</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">
+                                ${seasonal.has_significant_seasonality ? 'Significant seasonality detected' : 'Low seasonality detected'}
+                            </div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                                Peak month: ${seasonal.peak_month_name || 'Unknown'}<br>
+                                Low month: ${seasonal.low_month_name || 'Unknown'}<br>
+                                Seasonality strength: ${(seasonal.seasonality_strength * 100).toFixed(1)}%
+                            </div>
+                        </div>`;
+                    }
+                    
+                    // Close the grid
+                    html += '</div>';
+                    
+                    // Add a summary section
+                    html += '<div style="margin-top: 16px; padding: 12px; background: #f1f5f9; border-radius: 8px; border: 1px dashed #cbd5e1;">';
+                    html += '<div style="color: #1f2937; font-size: 13px; font-weight: 600; margin-bottom: 8px;">💡 AI-Powered Insights</div>';
+                    html += '<div style="color: #6b7280; font-size: 12px; line-height: 1.5;">';
+                    html += 'The inventory analysis uses XGBoost + Ollama hybrid AI to provide deep insights into your inventory management. ';
+                    html += 'The system has identified optimization opportunities, analyzed seasonal patterns, and forecasted future demand based on historical patterns.';
+                    html += '</div>';
+                    html += '</div>';
+                    
+                    html += '</div>';
+                }
+                
+                // Add inventory breakdown if available
+                if (results.inventory_breakdown) {
+                    html += '<div style="grid-column: 1 / -1; margin-top: 16px; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">';
+                    html += '<div style="color: #1f2937; font-size: 14px; font-weight: 600; margin-bottom: 12px;">📊 Inventory Category Breakdown</div>';
+                    
+                    html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
+                    
+                    for (const [category, data] of Object.entries(results.inventory_breakdown)) {
+                        const colorMap = {
+                            'raw_materials': '#059669', // green
+                            'work_in_progress': '#3b82f6', // blue
+                            'finished_goods': '#f59e0b', // amber
+                            'spare_parts': '#8b5cf6' // purple
+                        };
+                        
+                        const color = colorMap[category] || '#6b7280';
+                        
+                        html += `<div style="background: #ffffff; padding: 12px; border-radius: 8px; border-left: 4px solid ${color};">
+                            <div style="color: ${color}; font-size: 12px; font-weight: 600; margin-bottom: 4px;">${category.replace(/_/g, ' ').toUpperCase()}</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">₹${(data.amount || 0).toLocaleString(undefined, {maximumFractionDigits: 0})}</div>
+                            <div style="color: #6b7280; font-size: 11px;">${data.count || 0} transactions (${data.percentage?.toFixed(1) || 0}%)</div>
+                        </div>`;
+                    }
+                    
+                    html += '</div>';
+                    html += '</div>';
+                }
+                
                 html += '</div>';
             } else if (parameterType === 'A9_loan_repayments') {
                 html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
@@ -5874,20 +6793,172 @@
                     html += `<div style="background: #fef2f2; padding: 12px; border-radius: 8px; border-left: 4px solid #ef4444;">
                         <div style="color: #ef4444; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Total Repayments</div>
                         <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.total_repayments)}</div>
+                        ${results.loan_term ? `<div style="color: #6b7280; font-size: 12px; margin-top: 4px;">${safeValue(results.loan_term)} term</div>` : ''}
                     </div>`;
                 }
                 if (results.monthly_payment) {
                     html += `<div style="background: #eff6ff; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
                         <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Monthly Payment</div>
                         <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.monthly_payment)}</div>
+                        ${results.interest_rate ? `<div style="color: #6b7280; font-size: 12px; margin-top: 4px;">${safeValue(results.interest_rate)} interest</div>` : ''}
                     </div>`;
                 }
                 if (results.loan_analysis) {
                     html += `<div style="background: #fffbeb; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b;">
                         <div style="color: #f59e0b; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Loan Analysis</div>
                         <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.loan_analysis)}</div>
+                        ${results.loan_type ? `<div style="color: #6b7280; font-size: 12px; margin-top: 4px;">Type: ${safeValue(results.loan_type)}</div>` : ''}
                     </div>`;
                 }
+                if (results.cash_flow_impact) {
+                    html += `<div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border-left: 4px solid #059669;">
+                        <div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Cash Flow Impact</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.cash_flow_impact)}</div>
+                    </div>`;
+                }
+                html += '</div>';
+                
+                // Add Advanced AI Features section
+                if (results.advanced_ai_features) {
+                    html += '<div style="grid-column: 1 / -1; margin-top: 16px; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">';
+                    html += '<div style="color: #1f2937; font-size: 14px; font-weight: 600; margin-bottom: 12px;">🤖 Advanced AI Analysis</div>';
+                    
+                    // Create a grid for the advanced features
+                    html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">';
+                    
+                    // Risk Assessment
+                    if (results.advanced_ai_features.risk_assessment) {
+                        const risk = results.advanced_ai_features.risk_assessment;
+                        const riskColor = risk.risk_level === 'High' ? '#ef4444' : risk.risk_level === 'Medium' ? '#f59e0b' : '#059669';
+                        
+                        html += `<div style="background: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid ${riskColor};">
+                            <div style="color: ${riskColor}; font-size: 12px; font-weight: 600; margin-bottom: 4px;">⚠️ RISK ASSESSMENT</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">${risk.risk_level} Risk Level</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                                DSCR: ${risk.debt_service_coverage_ratio?.toFixed(2) || 0}<br>
+                                Payment/Revenue: ${risk.payment_to_revenue_ratio?.toFixed(1) || 0}%<br>
+                                Debt-to-Income: ${(risk.debt_to_income * 100)?.toFixed(1) || 0}%
+                            </div>
+                            <div style="margin-top: 8px;">
+                                <div style="height: 8px; width: 100%; background-color: #f3f4f6; border-radius: 4px; overflow: hidden;">
+                                    <div style="height: 100%; width: ${Math.min(100, risk.risk_score || 0)}%; background-color: ${riskColor};"></div>
+                                </div>
+                                <div style="color: #6b7280; font-size: 10px; text-align: right; margin-top: 2px;">Risk Score: ${risk.risk_score || 0}/100</div>
+                            </div>
+                        </div>`;
+                    }
+                    
+                    // Payment Optimization
+                    if (results.advanced_ai_features.payment_optimization) {
+                        const opt = results.advanced_ai_features.payment_optimization;
+                        html += `<div style="background: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                            <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">💰 PAYMENT OPTIMIZATION</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">₹${(opt.potential_savings?.total_potential || 0).toLocaleString(undefined, {maximumFractionDigits: 0})} potential savings</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                                Estimated principal: ₹${(opt.estimated_principal || 0).toLocaleString(undefined, {maximumFractionDigits: 0})}<br>
+                                Optimal timing: ${opt.optimal_payment_timing || 'Early in month'}<br>
+                                Monthly payment: ₹${(opt.current_monthly_payment || 0).toLocaleString(undefined, {maximumFractionDigits: 0})}
+                            </div>
+                            <div style="color: #1f2937; font-size: 11px; margin-top: 8px; font-weight: 500;">Savings strategies:</div>
+                            <ul style="color: #6b7280; font-size: 11px; margin-top: 2px; padding-left: 16px;">
+                                ${opt.potential_savings ? `
+                                <li>Bi-weekly: ₹${(opt.potential_savings.biweekly_payments || 0).toLocaleString(undefined, {maximumFractionDigits: 0})}</li>
+                                <li>Refinancing: ₹${(opt.potential_savings.refinancing || 0).toLocaleString(undefined, {maximumFractionDigits: 0})}</li>
+                                <li>Extra payments: ₹${(opt.potential_savings.extra_payments || 0).toLocaleString(undefined, {maximumFractionDigits: 0})}</li>
+                                ` : ''}
+                            </ul>
+                        </div>`;
+                    }
+                    
+                    // Repayment Forecast
+                    if (results.advanced_ai_features.repayment_forecast) {
+                        const forecast = results.advanced_ai_features.repayment_forecast;
+                        html += `<div style="background: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid #8b5cf6;">
+                            <div style="color: #8b5cf6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">📊 REPAYMENT FORECAST</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">₹${(forecast.forecast_total || 0).toLocaleString(undefined, {maximumFractionDigits: 0})} next 12 months</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                                ${forecast.is_estimated ? 'Estimated based on available data' : 'Based on XGBoost prediction model'}
+                                ${forecast.estimated_remaining_term ? `<br>Est. remaining term: ${forecast.estimated_remaining_term} months` : ''}
+                                ${forecast.forecast_accuracy ? `<br>Model accuracy: ${(forecast.forecast_accuracy * 100).toFixed(0)}%` : ''}
+                            </div>
+                            <div style="margin-top: 8px; height: 40px;">
+                                <div style="display: flex; justify-content: space-between; height: 100%;">
+                                    ${forecast.next_12_months ? forecast.next_12_months.map((m, i) => {
+                                        const height = Math.max(5, Math.min(40, (m / Math.max(...forecast.next_12_months)) * 40));
+                                        return `<div style="width: 6px; height: ${height}px; background-color: #8b5cf6; align-self: flex-end;" title="Month ${i+1}: ₹${m.toLocaleString(undefined, {maximumFractionDigits: 0})}"></div>`;
+                                    }).join('') : ''}
+                                </div>
+                            </div>
+                        </div>`;
+                    }
+                    
+                    // Interest Rate Impact
+                    if (results.advanced_ai_features.interest_rate_impact) {
+                        const impact = results.advanced_ai_features.interest_rate_impact;
+                        html += `<div style="background: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid #059669;">
+                            <div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 4px;">📈 INTEREST RATE IMPACT</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">Current rate: ${impact.current_rate?.toFixed(1) || 0}%</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">Payment impact scenarios:</div>
+                            <table style="width: 100%; font-size: 10px; margin-top: 4px; border-collapse: collapse;">
+                                <tr style="border-bottom: 1px solid #e5e7eb;">
+                                    <td style="padding: 2px 0; color: #6b7280;">Current</td>
+                                    <td style="padding: 2px 0; text-align: right; font-weight: 500;">₹${(impact.payment_impacts?.current || 0).toLocaleString(undefined, {maximumFractionDigits: 0})}</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #e5e7eb;">
+                                    <td style="padding: 2px 0; color: #6b7280;">+1% Rate</td>
+                                    <td style="padding: 2px 0; text-align: right; font-weight: 500; color: #ef4444;">₹${(impact.payment_impacts?.increase_1pct || 0).toLocaleString(undefined, {maximumFractionDigits: 0})}</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #e5e7eb;">
+                                    <td style="padding: 2px 0; color: #6b7280;">-1% Rate</td>
+                                    <td style="padding: 2px 0; text-align: right; font-weight: 500; color: #059669;">₹${(impact.payment_impacts?.decrease_1pct || 0).toLocaleString(undefined, {maximumFractionDigits: 0})}</td>
+                                </tr>
+                            </table>
+                        </div>`;
+                    }
+                    
+                    // Close the grid
+                    html += '</div>';
+                    
+                    // Add a summary section
+                    html += '<div style="margin-top: 16px; padding: 12px; background: #f1f5f9; border-radius: 8px; border: 1px dashed #cbd5e1;">';
+                    html += '<div style="color: #1f2937; font-size: 13px; font-weight: 600; margin-bottom: 8px;">💡 AI-Powered Insights</div>';
+                    html += '<div style="color: #6b7280; font-size: 12px; line-height: 1.5;">';
+                    html += 'The loan repayment analysis uses XGBoost + Ollama hybrid AI to provide deep insights into your debt management. ';
+                    html += 'The system has assessed risk levels, identified optimization opportunities, and forecasted future repayments based on historical patterns.';
+                    html += '</div>';
+                    html += '</div>';
+                    
+                    html += '</div>';
+                }
+                
+                // Add loan breakdown if available
+                if (results.loan_breakdown) {
+                    html += '<div style="grid-column: 1 / -1; margin-top: 16px; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">';
+                    html += '<div style="color: #1f2937; font-size: 14px; font-weight: 600; margin-bottom: 12px;">📊 Loan Breakdown</div>';
+                    
+                    html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
+                    
+                    for (const [category, data] of Object.entries(results.loan_breakdown)) {
+                        const colorMap = {
+                            'principal': '#059669', // green
+                            'interest': '#ef4444', // red
+                            'term_loan': '#3b82f6', // blue
+                            'working_capital': '#8b5cf6' // purple
+                        };
+                        
+                        const color = colorMap[category] || '#6b7280';
+                        
+                        html += `<div style="background: #ffffff; padding: 12px; border-radius: 8px; border-left: 4px solid ${color};">
+                            <div style="color: ${color}; font-size: 12px; font-weight: 600; margin-bottom: 4px;">${category.replace(/_/g, ' ').toUpperCase()}</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">₹${(data.amount || 0).toLocaleString(undefined, {maximumFractionDigits: 0})}</div>
+                            <div style="color: #6b7280; font-size: 11px;">${data.count || 0} transactions (${data.percentage?.toFixed(1) || 0}%)</div>
+                        </div>`;
+                    }
+                    
+                    html += '</div>';
+                    html += '</div>';
+                }
+                
                 html += '</div>';
             } else if (parameterType === 'A10_tax_obligations') {
                 html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
@@ -5895,20 +6966,171 @@
                     html += `<div style="background: #fef2f2; padding: 12px; border-radius: 8px; border-left: 4px solid #ef4444;">
                         <div style="color: #ef4444; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Total Taxes</div>
                         <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.total_taxes)}</div>
+                        ${results.effective_tax_rate ? `<div style="color: #6b7280; font-size: 12px; margin-top: 4px;">${safeValue(results.effective_tax_rate)} of revenue</div>` : ''}
                     </div>`;
                 }
                 if (results.gst_taxes) {
                     html += `<div style="background: #eff6ff; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
                         <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">GST Taxes</div>
                         <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.gst_taxes)}</div>
+                        ${results.gst_percentage ? `<div style="color: #6b7280; font-size: 12px; margin-top: 4px;">${safeValue(results.gst_percentage)}% of total taxes</div>` : ''}
                     </div>`;
                 }
                 if (results.tax_analysis) {
                     html += `<div style="background: #fffbeb; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b;">
                         <div style="color: #f59e0b; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Tax Analysis</div>
                         <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.tax_analysis)}</div>
+                        ${results.tax_compliance ? `<div style="color: #6b7280; font-size: 12px; margin-top: 4px;">Compliance: ${safeValue(results.tax_compliance)}</div>` : ''}
                     </div>`;
                 }
+                if (results.income_taxes) {
+                    html += `<div style="background: #f3e8ff; padding: 12px; border-radius: 8px; border-left: 4px solid #8b5cf6;">
+                        <div style="color: #8b5cf6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Income Taxes</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.income_taxes)}</div>
+                    </div>`;
+                }
+                html += '</div>';
+                
+                // Add Advanced AI Features section
+                if (results.advanced_ai_features) {
+                    html += '<div style="grid-column: 1 / -1; margin-top: 16px; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">';
+                    html += '<div style="color: #1f2937; font-size: 14px; font-weight: 600; margin-bottom: 12px;">🤖 Advanced AI Analysis</div>';
+                    
+                    // Create a grid for the advanced features
+                    html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">';
+                    
+                    // Tax Optimization
+                    if (results.advanced_ai_features.tax_optimization) {
+                        const opt = results.advanced_ai_features.tax_optimization;
+                        html += `<div style="background: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid #059669;">
+                            <div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 4px;">💰 TAX OPTIMIZATION</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">₹${(opt.optimization_potential || 0).toLocaleString(undefined, {maximumFractionDigits: 0})} potential savings</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                                Effective tax rate: ${opt.effective_tax_rate?.toFixed(1) || 0}%<br>
+                                ${opt.tax_breakdown ? `Tax types: ${Object.keys(opt.tax_breakdown).length}` : ''}
+                            </div>
+                            <div style="color: #1f2937; font-size: 11px; margin-top: 8px; font-weight: 500;">Recommendations:</div>
+                            <ul style="color: #6b7280; font-size: 11px; margin-top: 2px; padding-left: 16px;">
+                                ${opt.recommendations ? opt.recommendations.slice(0, 2).map(r => `<li>${r}</li>`).join('') : ''}
+                            </ul>
+                        </div>`;
+                    }
+                    
+                    // Compliance Monitoring
+                    if (results.advanced_ai_features.compliance_monitoring) {
+                        const comp = results.advanced_ai_features.compliance_monitoring;
+                        const statusColor = comp.compliance_status === 'High' ? '#059669' : comp.compliance_status === 'Medium' ? '#f59e0b' : '#ef4444';
+                        
+                        html += `<div style="background: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid ${statusColor};">
+                            <div style="color: ${statusColor}; font-size: 12px; font-weight: 600; margin-bottom: 4px;">📋 COMPLIANCE STATUS</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">${comp.compliance_status} Compliance</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                                Payment consistency: ${comp.payment_consistency?.toFixed(1) || 0}%<br>
+                                Late payments: ${comp.late_payments?.length || 0} quarters<br>
+                                Risk score: ${comp.risk_score || 0}/100
+                            </div>
+                            <div style="margin-top: 8px;">
+                                <div style="height: 8px; width: 100%; background-color: #f3f4f6; border-radius: 4px; overflow: hidden;">
+                                    <div style="height: 100%; width: ${Math.min(100, comp.risk_score || 0)}%; background-color: ${statusColor};"></div>
+                                </div>
+                            </div>
+                        </div>`;
+                    }
+                    
+                    // Tax Forecast
+                    if (results.advanced_ai_features.tax_forecast) {
+                        const forecast = results.advanced_ai_features.tax_forecast;
+                        html += `<div style="background: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                            <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">📊 TAX FORECAST</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">₹${(forecast.forecast_total || 0).toLocaleString(undefined, {maximumFractionDigits: 0})} next 12 months</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                                ${forecast.is_estimated ? 'Estimated based on available data' : 'Based on XGBoost prediction model'}
+                                ${forecast.monthly_average ? `<br>Monthly average: ₹${(forecast.monthly_average).toLocaleString(undefined, {maximumFractionDigits: 0})}` : ''}
+                                ${forecast.peak_month ? `<br>Peak in month ${forecast.peak_month}` : ''}
+                            </div>
+                            <div style="margin-top: 8px; height: 40px;">
+                                <div style="display: flex; justify-content: space-between; height: 100%;">
+                                    ${forecast.next_12_months ? forecast.next_12_months.map((m, i) => {
+                                        const height = Math.max(5, Math.min(40, (m / Math.max(...forecast.next_12_months)) * 40));
+                                        return `<div style="width: 6px; height: ${height}px; background-color: #3b82f6; align-self: flex-end;" title="Month ${i+1}: ₹${m.toLocaleString(undefined, {maximumFractionDigits: 0})}"></div>`;
+                                    }).join('') : ''}
+                                </div>
+                            </div>
+                        </div>`;
+                    }
+                    
+                    // Tax Planning
+                    if (results.advanced_ai_features.tax_planning) {
+                        const planning = results.advanced_ai_features.tax_planning;
+                        html += `<div style="background: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid #8b5cf6;">
+                            <div style="color: #8b5cf6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">🧩 TAX PLANNING SCENARIOS</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">₹${(planning.potential_savings || 0).toLocaleString(undefined, {maximumFractionDigits: 0})} potential savings</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                                Recommended: ${planning.recommended_scenario || 'Optimized'}<br>
+                                Complexity: ${planning.implementation_complexity || 'Medium'}
+                            </div>
+                            <table style="width: 100%; font-size: 10px; margin-top: 8px; border-collapse: collapse;">
+                                <tr style="border-bottom: 1px solid #e5e7eb;">
+                                    <td style="padding: 2px 0; color: #6b7280;">Current</td>
+                                    <td style="padding: 2px 0; text-align: right; font-weight: 500;">₹${(planning.scenarios?.current?.tax_amount || 0).toLocaleString(undefined, {maximumFractionDigits: 0})}</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #e5e7eb;">
+                                    <td style="padding: 2px 0; color: #6b7280;">Optimized</td>
+                                    <td style="padding: 2px 0; text-align: right; font-weight: 500; color: #059669;">₹${(planning.scenarios?.optimized?.tax_amount || 0).toLocaleString(undefined, {maximumFractionDigits: 0})}</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #e5e7eb;">
+                                    <td style="padding: 2px 0; color: #6b7280;">Restructured</td>
+                                    <td style="padding: 2px 0; text-align: right; font-weight: 500; color: #059669;">₹${(planning.scenarios?.restructured?.tax_amount || 0).toLocaleString(undefined, {maximumFractionDigits: 0})}</td>
+                                </tr>
+                            </table>
+                        </div>`;
+                    }
+                    
+                    // Close the grid
+                    html += '</div>';
+                    
+                    // Add a summary section
+                    html += '<div style="margin-top: 16px; padding: 12px; background: #f1f5f9; border-radius: 8px; border: 1px dashed #cbd5e1;">';
+                    html += '<div style="color: #1f2937; font-size: 13px; font-weight: 600; margin-bottom: 8px;">💡 AI-Powered Insights</div>';
+                    html += '<div style="color: #6b7280; font-size: 12px; line-height: 1.5;">';
+                    html += 'The tax obligations analysis uses XGBoost + Ollama hybrid AI to provide deep insights into your tax management. ';
+                    html += 'The system has identified optimization opportunities, assessed compliance status, and forecasted future tax obligations based on historical patterns.';
+                    html += '</div>';
+                    html += '</div>';
+                    
+                    html += '</div>';
+                }
+                
+                // Add tax breakdown if available
+                if (results.advanced_ai_features?.tax_optimization?.tax_breakdown) {
+                    const tax_breakdown = results.advanced_ai_features.tax_optimization.tax_breakdown;
+                    html += '<div style="grid-column: 1 / -1; margin-top: 16px; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">';
+                    html += '<div style="color: #1f2937; font-size: 14px; font-weight: 600; margin-bottom: 12px;">📊 Tax Breakdown by Type</div>';
+                    
+                    html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
+                    
+                    for (const [tax_type, data] of Object.entries(tax_breakdown)) {
+                        const colorMap = {
+                            'gst': '#3b82f6', // blue
+                            'income_tax': '#ef4444', // red
+                            'tds': '#059669', // green
+                            'property_tax': '#f59e0b', // amber
+                            'customs_duty': '#8b5cf6' // purple
+                        };
+                        
+                        const color = colorMap[tax_type] || '#6b7280';
+                        
+                        html += `<div style="background: #ffffff; padding: 12px; border-radius: 8px; border-left: 4px solid ${color};">
+                            <div style="color: ${color}; font-size: 12px; font-weight: 600; margin-bottom: 4px;">${tax_type.replace(/_/g, ' ').toUpperCase()}</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">₹${(data.amount || 0).toLocaleString(undefined, {maximumFractionDigits: 0})}</div>
+                            <div style="color: #6b7280; font-size: 11px;">${data.count || 0} transactions (${data.percentage?.toFixed(1) || 0}%)</div>
+                        </div>`;
+                    }
+                    
+                    html += '</div>';
+                    html += '</div>';
+                }
+                
                 html += '</div>';
             } else if (parameterType === 'A11_capital_expenditure') {
                 html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
@@ -5916,20 +7138,176 @@
                     html += `<div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border-left: 4px solid #059669;">
                         <div style="color: #059669; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Total CapEx</div>
                         <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.total_capex)}</div>
+                        ${results.capex_to_revenue ? `<div style="color: #6b7280; font-size: 12px; margin-top: 4px;">${safeValue(results.capex_to_revenue)}% of revenue</div>` : ''}
                     </div>`;
                 }
                 if (results.equipment_capex) {
                     html += `<div style="background: #eff6ff; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
                         <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Equipment</div>
                         <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.equipment_capex)}</div>
+                        ${results.equipment_percentage ? `<div style="color: #6b7280; font-size: 12px; margin-top: 4px;">${safeValue(results.equipment_percentage)}% of total CapEx</div>` : ''}
                     </div>`;
                 }
                 if (results.capex_analysis) {
                     html += `<div style="background: #fffbeb; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b;">
                         <div style="color: #f59e0b; font-size: 12px; font-weight: 600; margin-bottom: 4px;">CapEx Analysis</div>
                         <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.capex_analysis)}</div>
+                        ${results.strategic_position ? `<div style="color: #6b7280; font-size: 12px; margin-top: 4px;">Strategy: ${safeValue(results.strategic_position)}</div>` : ''}
                     </div>`;
                 }
+                if (results.infrastructure_capex) {
+                    html += `<div style="background: #f3e8ff; padding: 12px; border-radius: 8px; border-left: 4px solid #8b5cf6;">
+                        <div style="color: #8b5cf6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Infrastructure</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.infrastructure_capex)}</div>
+                    </div>`;
+                }
+                html += '</div>';
+                
+                // Add Advanced AI Features section
+                if (results.advanced_ai_features) {
+                    html += '<div style="grid-column: 1 / -1; margin-top: 16px; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">';
+                    html += '<div style="color: #1f2937; font-size: 14px; font-weight: 600; margin-bottom: 12px;">🤖 Advanced AI Analysis</div>';
+                    
+                    // Create a grid for the advanced features
+                    html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">';
+                    
+                    // ROI Analysis
+                    if (results.advanced_ai_features.roi_analysis) {
+                        const roi = results.advanced_ai_features.roi_analysis;
+                        const roiColor = roi.investment_grade === 'A' ? '#059669' : 
+                                         roi.investment_grade === 'B' ? '#3b82f6' : 
+                                         roi.investment_grade === 'C' ? '#f59e0b' : '#ef4444';
+                        
+                        html += `<div style="background: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid ${roiColor};">
+                            <div style="color: ${roiColor}; font-size: 12px; font-weight: 600; margin-bottom: 4px;">💹 ROI ANALYSIS</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">${roi.overall_roi?.toFixed(1) || 0}% Expected ROI</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                                Investment Grade: ${roi.investment_grade || 'C'}<br>
+                                Payback Period: ${roi.overall_payback_years?.toFixed(1) || 0} years<br>
+                                ${Object.keys(roi.roi_by_category || {}).length > 0 ? `Categories analyzed: ${Object.keys(roi.roi_by_category).length}` : ''}
+                            </div>
+                            <div style="color: #1f2937; font-size: 11px; margin-top: 8px; font-weight: 500;">Top recommendations:</div>
+                            <ul style="color: #6b7280; font-size: 11px; margin-top: 2px; padding-left: 16px;">
+                                ${roi.recommendations ? roi.recommendations.slice(0, 2).map(r => `<li>${r}</li>`).join('') : ''}
+                            </ul>
+                        </div>`;
+                    }
+                    
+                    // Investment Optimization
+                    if (results.advanced_ai_features.investment_optimization) {
+                        const opt = results.advanced_ai_features.investment_optimization;
+                        html += `<div style="background: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                            <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">⚙️ INVESTMENT OPTIMIZATION</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">Optimal timing: ${opt.optimal_timing || 'Q4 2024'}</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                                Recommended amount: ₹${(opt.recommended_amount || 0).toLocaleString(undefined, {maximumFractionDigits: 0})}<br>
+                                Risk-adjusted ROI: ${opt.risk_adjusted_roi?.toFixed(1) || 0}%<br>
+                                ${opt.phased_investment ? `Phased approach: ${opt.phased_investment[0].percentage}%/${opt.phased_investment[1].percentage}%/${opt.phased_investment[2].percentage}%` : ''}
+                            </div>
+                            <div style="color: #1f2937; font-size: 11px; margin-top: 8px; font-weight: 500;">Risk factors:</div>
+                            <div style="color: #6b7280; font-size: 10px; display: flex; gap: 8px; margin-top: 4px;">
+                                ${opt.risk_factors ? Object.entries(opt.risk_factors).map(([k, v]) => 
+                                    `<span style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">${k.replace('_', ' ')}: ${(v*100).toFixed(0)}%</span>`
+                                ).join('') : ''}
+                            </div>
+                        </div>`;
+                    }
+                    
+                    // CapEx Forecast
+                    if (results.advanced_ai_features.capex_forecast) {
+                        const forecast = results.advanced_ai_features.capex_forecast;
+                        html += `<div style="background: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                            <div style="color: #f59e0b; font-size: 12px; font-weight: 600; margin-bottom: 4px;">📊 CAPEX FORECAST</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">₹${(forecast.forecast_total || 0).toLocaleString(undefined, {maximumFractionDigits: 0})} next 12 months</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                                ${forecast.is_estimated ? 'Estimated based on available data' : 'Based on XGBoost prediction model'}
+                                ${forecast.monthly_average ? `<br>Monthly average: ₹${(forecast.monthly_average).toLocaleString(undefined, {maximumFractionDigits: 0})}` : ''}
+                                ${forecast.peak_month ? `<br>Peak in month ${forecast.peak_month}` : ''}
+                            </div>
+                            <div style="margin-top: 8px; height: 40px;">
+                                <div style="display: flex; justify-content: space-between; height: 100%;">
+                                    ${forecast.next_12_months ? forecast.next_12_months.map((m, i) => {
+                                        const height = Math.max(5, Math.min(40, (m / Math.max(...forecast.next_12_months)) * 40));
+                                        return `<div style="width: 6px; height: ${height}px; background-color: #f59e0b; align-self: flex-end;" title="Month ${i+1}: ₹${m.toLocaleString(undefined, {maximumFractionDigits: 0})}"></div>`;
+                                    }).join('') : ''}
+                                </div>
+                            </div>
+                        </div>`;
+                    }
+                    
+                    // Strategic Analysis
+                    if (results.advanced_ai_features.strategic_analysis) {
+                        const strategy = results.advanced_ai_features.strategic_analysis;
+                        const positionColor = 
+                            strategy.strategic_position === 'Aggressive Expansion' ? '#ef4444' :
+                            strategy.strategic_position === 'Balanced Growth' ? '#059669' :
+                            strategy.strategic_position === 'Maintenance Mode' ? '#3b82f6' : '#f59e0b';
+                        
+                        html += `<div style="background: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid ${positionColor};">
+                            <div style="color: ${positionColor}; font-size: 12px; font-weight: 600; margin-bottom: 4px;">🎯 STRATEGIC POSITION</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">${strategy.strategic_position || 'Balanced Growth'}</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                                CapEx/Revenue: ${strategy.capex_to_revenue_ratio?.toFixed(1) || 0}%<br>
+                                Industry benchmark: ${strategy.industry_benchmark?.toFixed(1) || 0}%<br>
+                                Competitive stance: ${strategy.competitive_stance || 'Balanced'}
+                            </div>
+                            <div style="margin-top: 8px;">
+                                <div style="height: 8px; width: 100%; background-color: #f3f4f6; border-radius: 4px; overflow: hidden;">
+                                    <div style="height: 100%; width: ${Math.min(100, (strategy.capex_to_revenue_ratio / strategy.industry_benchmark * 100) || 0)}%; background-color: ${positionColor};"></div>
+                                </div>
+                                <div style="color: #6b7280; font-size: 10px; text-align: center; margin-top: 2px;">vs. Industry Benchmark</div>
+                            </div>
+                        </div>`;
+                    }
+                    
+                    // Close the grid
+                    html += '</div>';
+                    
+                    // Add a summary section
+                    html += '<div style="margin-top: 16px; padding: 12px; background: #f1f5f9; border-radius: 8px; border: 1px dashed #cbd5e1;">';
+                    html += '<div style="color: #1f2937; font-size: 13px; font-weight: 600; margin-bottom: 8px;">💡 AI-Powered Insights</div>';
+                    html += '<div style="color: #6b7280; font-size: 12px; line-height: 1.5;">';
+                    html += 'The capital expenditure analysis uses XGBoost + Ollama hybrid AI to provide deep insights into your investment strategy. ';
+                    html += 'The system has assessed ROI by category, identified optimal investment timing, and forecasted future CapEx needs based on historical patterns.';
+                    html += '</div>';
+                    html += '</div>';
+                    
+                    html += '</div>';
+                }
+                
+                // Add CapEx breakdown if available
+                if (results.advanced_ai_features?.roi_analysis?.roi_by_category) {
+                    const roi_by_category = results.advanced_ai_features.roi_analysis.roi_by_category;
+                    html += '<div style="grid-column: 1 / -1; margin-top: 16px; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">';
+                    html += '<div style="color: #1f2937; font-size: 14px; font-weight: 600; margin-bottom: 12px;">📊 CapEx ROI by Category</div>';
+                    
+                    html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
+                    
+                    for (const [capex_type, data] of Object.entries(roi_by_category)) {
+                        const colorMap = {
+                            'equipment': '#059669', // green
+                            'infrastructure': '#3b82f6', // blue
+                            'technology': '#8b5cf6', // purple
+                            'vehicles': '#f59e0b', // amber
+                            'land': '#ef4444' // red
+                        };
+                        
+                        const color = colorMap[capex_type] || '#6b7280';
+                        
+                        html += `<div style="background: #ffffff; padding: 12px; border-radius: 8px; border-left: 4px solid ${color};">
+                            <div style="color: ${color}; font-size: 12px; font-weight: 600; margin-bottom: 4px;">${capex_type.replace(/_/g, ' ').toUpperCase()}</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">${data.roi_rate?.toFixed(1) || 0}% ROI</div>
+                            <div style="color: #6b7280; font-size: 11px;">
+                                Expected return: ₹${(data.expected_return || 0).toLocaleString(undefined, {maximumFractionDigits: 0})}<br>
+                                Payback: ${data.payback_years?.toFixed(1) || 0} years
+                            </div>
+                        </div>`;
+                    }
+                    
+                    html += '</div>';
+                    html += '</div>';
+                }
+                
                 html += '</div>';
             } else if (parameterType === 'A12_equity_debt_inflows') {
                 html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
@@ -5945,6 +7323,12 @@
                         <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.equity_inflows)}</div>
                     </div>`;
                 }
+                if (results.debt_inflows) {
+                    html += `<div style="background: #fef3c7; padding: 12px; border-radius: 8px; border-left: 4px solid #d97706;">
+                        <div style="color: #d97706; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Debt Inflows</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.debt_inflows)}</div>
+                    </div>`;
+                }
                 if (results.funding_analysis) {
                     html += `<div style="background: #fffbeb; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b;">
                         <div style="color: #f59e0b; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Funding Analysis</div>
@@ -5952,6 +7336,136 @@
                     </div>`;
                 }
                 html += '</div>';
+                
+                // Add Advanced AI Features section
+                if (results.advanced_ai_features) {
+                    html += '<div style="grid-column: 1 / -1; margin-top: 16px; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">';
+                    html += '<div style="color: #1f2937; font-size: 14px; font-weight: 600; margin-bottom: 12px;">🤖 Advanced AI Analysis</div>';
+                    
+                    // Create a grid for the advanced features
+                    html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">';
+                    
+                    // Capital Structure Analysis
+                    if (results.advanced_ai_features.capital_structure) {
+                        const cs = results.advanced_ai_features.capital_structure;
+                        const csColor = cs.leverage_assessment === 'Low' ? '#059669' : 
+                                       cs.leverage_assessment === 'Moderate' ? '#f59e0b' : '#ef4444';
+                        
+                        html += `<div style="background: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid ${csColor};">
+                            <div style="color: ${csColor}; font-size: 12px; font-weight: 600; margin-bottom: 4px;">🏗️ CAPITAL STRUCTURE</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">D/E Ratio: ${cs.debt_to_equity?.toFixed(2) || 'N/A'}</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                                Industry Benchmark: ${cs.industry_debt_to_equity?.toFixed(2) || 'N/A'}<br>
+                                Leverage: ${cs.leverage_assessment || 'Unknown'}<br>
+                                Coverage: ${cs.coverage_assessment || 'Unknown'}
+                            </div>
+                            <div style="margin-top: 8px;">
+                                <div style="height: 8px; width: 100%; background-color: #f3f4f6; border-radius: 4px; overflow: hidden;">
+                                    <div style="height: 100%; width: ${Math.min(100, (cs.debt_to_equity / cs.industry_debt_to_equity * 100) || 0)}%; background-color: ${csColor};"></div>
+                                </div>
+                                <div style="color: #6b7280; font-size: 10px; text-align: center; margin-top: 2px;">vs. Industry Benchmark</div>
+                            </div>
+                        </div>`;
+                    }
+                    
+                    // Funding Optimization
+                    if (results.advanced_ai_features.funding_optimization) {
+                        const opt = results.advanced_ai_features.funding_optimization;
+                        html += `<div style="background: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                            <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">⚙️ FUNDING OPTIMIZATION</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">WACC: ${opt.wacc?.toFixed(2) || 0}%</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                                Optimal Equity: ${opt.optimal_equity_ratio?.toFixed(1) || 0}%<br>
+                                Cost of Equity: ${opt.cost_of_equity?.toFixed(2) || 0}%<br>
+                                Cost of Debt: ${opt.effective_cost_of_debt?.toFixed(2) || 0}% (after tax)
+                            </div>
+                            <div style="margin-top: 8px; height: 20px; display: flex;">
+                                <div style="height: 100%; width: ${opt.optimal_equity_ratio || 0}%; background-color: #3b82f6; display: flex; align-items: center; justify-content: center;">
+                                    <span style="color: white; font-size: 10px; font-weight: bold;">Equity</span>
+                                </div>
+                                <div style="height: 100%; width: ${100 - (opt.optimal_equity_ratio || 0)}%; background-color: #f59e0b; display: flex; align-items: center; justify-content: center;">
+                                    <span style="color: white; font-size: 10px; font-weight: bold;">Debt</span>
+                                </div>
+                            </div>
+                        </div>`;
+                    }
+                    
+                    // Risk Assessment
+                    if (results.advanced_ai_features.risk_assessment) {
+                        const risk = results.advanced_ai_features.risk_assessment;
+                        const riskColor = risk.funding_risk_level === 'Low' ? '#059669' : 
+                                         risk.funding_risk_level === 'Medium' ? '#f59e0b' : '#ef4444';
+                        
+                        html += `<div style="background: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid ${riskColor};">
+                            <div style="color: ${riskColor}; font-size: 12px; font-weight: 600; margin-bottom: 4px;">🛡️ RISK ASSESSMENT</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">${risk.funding_risk_level || 'Medium'} Risk (${risk.funding_risk_score?.toFixed(1) || 50}/100)</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                                Funding Stability: ${risk.funding_stability?.toFixed(1) || 0}%<br>
+                                Debt Ratio: ${risk.debt_ratio?.toFixed(1) || 0}%
+                            </div>
+                            <div style="color: #1f2937; font-size: 11px; margin-top: 8px; font-weight: 500;">Interest Rate Sensitivity:</div>
+                            <div style="color: #6b7280; font-size: 10px; display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap;">
+                                ${risk.interest_rate_sensitivity ? Object.entries(risk.interest_rate_sensitivity).map(([k, v]) => 
+                                    `<span style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">${k}: ${v >= 0 ? '+' : ''}${v.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>`
+                                ).join('') : ''}
+                            </div>
+                        </div>`;
+                    }
+                    
+                    // Funding Forecast
+                    if (results.advanced_ai_features.funding_forecast) {
+                        const forecast = results.advanced_ai_features.funding_forecast;
+                        const trendColor = forecast.trend_direction === 'Increasing' ? '#059669' : 
+                                          forecast.trend_direction === 'Decreasing' ? '#ef4444' : '#f59e0b';
+                        
+                        html += `<div style="background: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid ${trendColor};">
+                            <div style="color: ${trendColor}; font-size: 12px; font-weight: 600; margin-bottom: 4px;">📊 FUNDING FORECAST</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">₹${(forecast.forecast_total || 0).toLocaleString(undefined, {maximumFractionDigits: 0})} next 12 months</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                                Trend: ${forecast.trend_direction || 'Stable'}<br>
+                                Seasonality: ${forecast.has_seasonality ? 'Detected' : 'Not detected'}<br>
+                                Model: ${forecast.model_type || 'Hybrid'} (${forecast.forecast_accuracy * 100}% accuracy)
+                            </div>
+                            <div style="margin-top: 8px; height: 40px;">
+                                <div style="display: flex; justify-content: space-between; height: 100%;">
+                                    ${forecast.next_12_months ? forecast.next_12_months.map((m, i) => {
+                                        const height = Math.max(5, Math.min(40, (m / Math.max(...forecast.next_12_months)) * 40));
+                                        return `<div style="width: 6px; height: ${height}px; background-color: ${trendColor}; align-self: flex-end;" title="Month ${i+1}: ₹${m.toLocaleString(undefined, {maximumFractionDigits: 0})}"></div>`;
+                                    }).join('') : ''}
+                                </div>
+                            </div>
+                        </div>`;
+                    }
+                    
+                    // Close the grid
+                    html += '</div>';
+                    
+                    // Add a summary section
+                    html += '<div style="margin-top: 16px; padding: 12px; background: #f1f5f9; border-radius: 8px; border: 1px dashed #cbd5e1;">';
+                    html += '<div style="color: #1f2937; font-size: 13px; font-weight: 600; margin-bottom: 8px;">💡 AI-Powered Insights</div>';
+                    html += '<div style="color: #6b7280; font-size: 12px; line-height: 1.5;">';
+                    html += 'The equity & debt inflows analysis uses XGBoost + Ollama hybrid AI to provide deep insights into your funding structure. ';
+                    html += 'The system has assessed capital structure efficiency, calculated optimal funding mix, and forecasted future funding needs based on historical patterns.';
+                    html += '</div>';
+                    html += '</div>';
+                    
+                    html += '</div>';
+                }
+                
+                // Add recommendations if available
+                if (results.advanced_ai_features?.capital_structure?.recommendations) {
+                    const recommendations = results.advanced_ai_features.capital_structure.recommendations;
+                    html += '<div style="grid-column: 1 / -1; margin-top: 16px; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">';
+                    html += '<div style="color: #1f2937; font-size: 14px; font-weight: 600; margin-bottom: 12px;">🎯 Capital Structure Recommendations</div>';
+                    
+                    html += '<ul style="color: #4b5563; font-size: 13px; margin: 0; padding-left: 20px;">';
+                    recommendations.forEach(rec => {
+                        html += `<li style="margin-bottom: 8px;">${rec}</li>`;
+                    });
+                    html += '</ul>';
+                    
+                    html += '</div>';
+                }
             } else if (parameterType === 'A13_other_income_expenses') {
                 html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
                 if (results.total_other) {
@@ -5966,6 +7480,12 @@
                         <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.other_income)}</div>
                     </div>`;
                 }
+                if (results.other_expenses) {
+                    html += `<div style="background: #fee2e2; padding: 12px; border-radius: 8px; border-left: 4px solid #ef4444;">
+                        <div style="color: #ef4444; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Other Expenses</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.other_expenses)}</div>
+                    </div>`;
+                }
                 if (results.other_analysis) {
                     html += `<div style="background: #fffbeb; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b;">
                         <div style="color: #f59e0b; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Other Analysis</div>
@@ -5973,6 +7493,240 @@
                     </div>`;
                 }
                 html += '</div>';
+                
+                // Add Advanced AI Features section
+                if (results.advanced_ai_features) {
+                    html += '<div style="grid-column: 1 / -1; margin-top: 16px; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">';
+                    html += '<div style="color: #1f2937; font-size: 14px; font-weight: 600; margin-bottom: 12px;">🤖 Advanced AI Analysis</div>';
+                    
+                    // Create a grid for the advanced features
+                    html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">';
+                    
+                    // Pattern Recognition
+                    if (results.advanced_ai_features.pattern_recognition) {
+                        const pattern = results.advanced_ai_features.pattern_recognition;
+                        html += `<div style="background: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                            <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">🔍 PATTERN RECOGNITION</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">${pattern.recurring_transactions || 0} recurring patterns</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                                Pattern strength: ${(pattern.pattern_strength || 0).toFixed(2)}<br>
+                                Categories found: ${pattern.categorized_transactions ? Object.keys(pattern.categorized_transactions).length : 0}
+                            </div>`;
+                            
+                        // Show top categories if available
+                        if (pattern.categorized_transactions && Object.keys(pattern.categorized_transactions).length > 0) {
+                            html += `<div style="color: #1f2937; font-size: 11px; margin-top: 8px; font-weight: 500;">Top categories:</div>
+                            <div style="color: #6b7280; font-size: 10px; margin-top: 4px;">`;
+                            
+                            Object.entries(pattern.categorized_transactions).slice(0, 3).forEach(([category, data]) => {
+                                html += `<div style="margin-bottom: 2px;">${category.replace('_', ' ')}: ${data.percentage.toFixed(1)}%</div>`;
+                            });
+                            
+                            html += `</div>`;
+                        }
+                        
+                        html += `</div>`;
+                    }
+                    
+                    // Anomaly Detection
+                    if (results.advanced_ai_features.anomaly_detection) {
+                        const anomaly = results.advanced_ai_features.anomaly_detection;
+                        const anomalyColor = anomaly.anomaly_count > 5 ? '#ef4444' : 
+                                          anomaly.anomaly_count > 0 ? '#f59e0b' : '#059669';
+                        
+                        html += `<div style="background: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid ${anomalyColor};">
+                            <div style="color: ${anomalyColor}; font-size: 12px; font-weight: 600; margin-bottom: 4px;">⚠️ ANOMALY DETECTION</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">${anomaly.anomaly_count || 0} anomalies detected</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                                Anomaly rate: ${(anomaly.anomaly_percentage || 0).toFixed(2)}% of transactions<br>
+                                ${anomaly.anomaly_count > 0 ? 'Requires investigation' : 'No action needed'}
+                            </div>`;
+                            
+                        // Show top anomalies if available
+                        if (anomaly.anomaly_data && anomaly.anomaly_data.length > 0) {
+                            html += `<div style="color: #1f2937; font-size: 11px; margin-top: 8px; font-weight: 500;">Top anomalies:</div>
+                            <div style="color: #6b7280; font-size: 10px; margin-top: 4px; max-height: 60px; overflow-y: auto;">`;
+                            
+                            anomaly.anomaly_data.slice(0, 3).forEach(item => {
+                                const impactColor = item.impact === 'High' ? '#ef4444' : item.impact === 'Medium' ? '#f59e0b' : '#059669';
+                                html += `<div style="margin-bottom: 3px; display: flex; align-items: center;">
+                                    <span style="width: 8px; height: 8px; background-color: ${impactColor}; border-radius: 50%; margin-right: 4px;"></span>
+                                    <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">${item.description}</span>
+                                    <span style="margin-left: auto;">${item.amount.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                                </div>`;
+                            });
+                            
+                            html += `</div>`;
+                        }
+                        
+                        html += `</div>`;
+                    }
+                    
+                    // Optimization Analysis
+                    if (results.advanced_ai_features.optimization_analysis) {
+                        const opt = results.advanced_ai_features.optimization_analysis;
+                        const impactColor = opt.impact_level === 'High' ? '#ef4444' : 
+                                          opt.impact_level === 'Medium' ? '#f59e0b' : '#059669';
+                        
+                        html += `<div style="background: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid ${impactColor};">
+                            <div style="color: ${impactColor}; font-size: 12px; font-weight: 600; margin-bottom: 4px;">💹 OPTIMIZATION ANALYSIS</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">${opt.impact_level || 'Low'} Impact (${(opt.impact_percentage || 0).toFixed(1)}%)</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                                Net other income: ${opt.net_other_income?.toLocaleString(undefined, {maximumFractionDigits: 0}) || 0}<br>
+                                Optimization potential: ${opt.optimization_potential?.toLocaleString(undefined, {maximumFractionDigits: 0}) || 0}
+                            </div>
+                            <div style="color: #1f2937; font-size: 11px; margin-top: 8px; font-weight: 500;">Key strategies:</div>
+                            <ul style="color: #6b7280; font-size: 10px; margin-top: 2px; padding-left: 16px;">
+                                ${opt.strategies ? opt.strategies.slice(0, 2).map(s => `<li>${s}</li>`).join('') : ''}
+                            </ul>
+                        </div>`;
+                    }
+                    
+                    // Other Forecast
+                    if (results.advanced_ai_features.other_forecast) {
+                        const forecast = results.advanced_ai_features.other_forecast;
+                        const reliabilityColor = forecast.forecast_reliability > 0.7 ? '#059669' : 
+                                               forecast.forecast_reliability > 0.4 ? '#f59e0b' : '#ef4444';
+                        
+                        html += `<div style="background: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid ${reliabilityColor};">
+                            <div style="color: ${reliabilityColor}; font-size: 12px; font-weight: 600; margin-bottom: 4px;">📊 FORECAST (${(forecast.forecast_reliability * 100).toFixed(0)}% RELIABLE)</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">₹${(forecast.forecast_total || 0).toLocaleString(undefined, {maximumFractionDigits: 0})} next 6 months</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                                Volatility: ${(forecast.volatility_index * 100).toFixed(1) || 0}%<br>
+                                Model: ${forecast.model_type || 'Hybrid'}
+                            </div>
+                            <div style="margin-top: 8px; height: 40px;">
+                                <div style="display: flex; justify-content: space-between; height: 100%;">
+                                    ${forecast.next_6_months ? forecast.next_6_months.map((m, i) => {
+                                        const height = Math.max(5, Math.min(40, (Math.abs(m) / Math.max(...forecast.next_6_months.map(v => Math.abs(v)))) * 40));
+                                        const color = m >= 0 ? '#059669' : '#ef4444';
+                                        return `<div style="width: 8px; height: ${height}px; background-color: ${color}; align-self: flex-end;" title="Month ${i+1}: ₹${m.toLocaleString(undefined, {maximumFractionDigits: 0})}"></div>`;
+                                    }).join('') : ''}
+                                </div>
+                            </div>
+                        </div>`;
+                    }
+                    
+                    // Cash Flow Impact
+                    if (results.advanced_ai_features.cash_flow_impact) {
+                        const impact = results.advanced_ai_features.cash_flow_impact;
+                        const incomeColor = impact.income_significance === 'High' ? '#ef4444' : 
+                                          impact.income_significance === 'Medium' ? '#f59e0b' : '#059669';
+                        const expenseColor = impact.expense_significance === 'High' ? '#ef4444' : 
+                                           impact.expense_significance === 'Medium' ? '#f59e0b' : '#059669';
+                        
+                        html += `<div style="background: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid #8b5cf6;">
+                            <div style="color: #8b5cf6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">💰 CASH FLOW IMPACT</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">Income: ${impact.income_significance || 'Low'} | Expense: ${impact.expense_significance || 'Low'}</div>
+                            <div style="display: flex; gap: 8px; margin-top: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="color: #6b7280; font-size: 10px; margin-bottom: 2px;">Income Impact</div>
+                                    <div style="height: 8px; width: 100%; background-color: #f3f4f6; border-radius: 4px; overflow: hidden;">
+                                        <div style="height: 100%; width: ${Math.min(100, impact.income_impact_percentage || 0)}%; background-color: ${incomeColor};"></div>
+                                    </div>
+                                    <div style="color: #6b7280; font-size: 9px; text-align: right; margin-top: 2px;">${(impact.income_impact_percentage || 0).toFixed(1)}%</div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="color: #6b7280; font-size: 10px; margin-bottom: 2px;">Expense Impact</div>
+                                    <div style="height: 8px; width: 100%; background-color: #f3f4f6; border-radius: 4px; overflow: hidden;">
+                                        <div style="height: 100%; width: ${Math.min(100, impact.expense_impact_percentage || 0)}%; background-color: ${expenseColor};"></div>
+                                    </div>
+                                    <div style="color: #6b7280; font-size: 9px; text-align: right; margin-top: 2px;">${(impact.expense_impact_percentage || 0).toFixed(1)}%</div>
+                                </div>
+                            </div>
+                        </div>`;
+                    }
+                    
+                    // Close the grid
+                    html += '</div>';
+                    
+                    // Add a summary section
+                    html += '<div style="margin-top: 16px; padding: 12px; background: #f1f5f9; border-radius: 8px; border: 1px dashed #cbd5e1;">';
+                    html += '<div style="color: #1f2937; font-size: 13px; font-weight: 600; margin-bottom: 8px;">💡 AI-Powered Insights</div>';
+                    html += '<div style="color: #6b7280; font-size: 12px; line-height: 1.5;">';
+                    html += 'The other income/expenses analysis uses XGBoost + Ollama hybrid AI to provide deep insights into one-off transactions. ';
+                    html += 'The system has detected patterns, identified anomalies, and assessed the impact of extraordinary items on your cash flow.';
+                    html += '</div>';
+                    html += '</div>';
+                    
+                    html += '</div>';
+                }
+                
+                // Add categorized transactions if available
+                if (results.advanced_ai_features?.pattern_recognition?.categorized_transactions) {
+                    const categories = results.advanced_ai_features.pattern_recognition.categorized_transactions;
+                    if (Object.keys(categories).length > 0) {
+                        html += '<div style="grid-column: 1 / -1; margin-top: 16px; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">';
+                        html += '<div style="color: #1f2937; font-size: 14px; font-weight: 600; margin-bottom: 12px;">📊 Categorized Transactions</div>';
+                        
+                        html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
+                        
+                        const colorMap = {
+                            'asset_sales': '#059669',
+                            'forex_gains_losses': '#3b82f6',
+                            'penalties_fines': '#ef4444',
+                            'insurance_claims': '#f59e0b',
+                            'investment_income': '#8b5cf6',
+                            'extraordinary_items': '#ec4899'
+                        };
+                        
+                        Object.entries(categories).forEach(([category, data]) => {
+                            const color = colorMap[category] || '#6b7280';
+                            const formattedCategory = category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                            
+                            html += `<div style="background: #ffffff; padding: 12px; border-radius: 8px; border-left: 4px solid ${color};">
+                                <div style="color: ${color}; font-size: 12px; font-weight: 600; margin-bottom: 4px;">${formattedCategory}</div>
+                                <div style="color: #1f2937; font-size: 14px; font-weight: bold;">₹${data.amount.toLocaleString(undefined, {maximumFractionDigits: 0})}</div>
+                                <div style="color: #6b7280; font-size: 11px;">
+                                    Transactions: ${data.count}<br>
+                                    Average: ₹${data.average.toLocaleString(undefined, {maximumFractionDigits: 0})}<br>
+                                    Percentage: ${data.percentage.toFixed(1)}%
+                                </div>
+                            </div>`;
+                        });
+                        
+                        html += '</div>';
+                        html += '</div>';
+                    }
+                }
+                
+                // Add anomalies table if available
+                if (results.advanced_ai_features?.anomaly_detection?.anomaly_data?.length > 0) {
+                    const anomalies = results.advanced_ai_features.anomaly_detection.anomaly_data;
+                    html += '<div style="grid-column: 1 / -1; margin-top: 16px; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">';
+                    html += '<div style="color: #1f2937; font-size: 14px; font-weight: 600; margin-bottom: 12px;">⚠️ Anomalous Transactions</div>';
+                    
+                    html += '<div style="overflow-x: auto;">';
+                    html += '<table style="width: 100%; border-collapse: collapse;">';
+                    html += `<thead>
+                        <tr style="background: #f1f5f9;">
+                            <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e2e8f0;">Description</th>
+                            <th style="padding: 8px; text-align: right; border-bottom: 1px solid #e2e8f0;">Amount</th>
+                            <th style="padding: 8px; text-align: center; border-bottom: 1px solid #e2e8f0;">Date</th>
+                            <th style="padding: 8px; text-align: center; border-bottom: 1px solid #e2e8f0;">Impact</th>
+                            <th style="padding: 8px; text-align: right; border-bottom: 1px solid #e2e8f0;">Deviation</th>
+                        </tr>
+                    </thead>`;
+                    
+                    html += '<tbody>';
+                    anomalies.forEach(item => {
+                        const impactColor = item.impact === 'High' ? '#ef4444' : item.impact === 'Medium' ? '#f59e0b' : '#059669';
+                        html += `<tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 8px; text-align: left;">${item.description}</td>
+                            <td style="padding: 8px; text-align: right;">₹${item.amount.toLocaleString(undefined, {maximumFractionDigits: 0})}</td>
+                            <td style="padding: 8px; text-align: center;">${item.date}</td>
+                            <td style="padding: 8px; text-align: center;">
+                                <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; background-color: ${impactColor}; color: white; font-size: 10px; font-weight: bold;">${item.impact}</span>
+                            </td>
+                            <td style="padding: 8px; text-align: right;">${item.deviation.toFixed(1)}σ</td>
+                        </tr>`;
+                    });
+                    html += '</tbody>';
+                    html += '</table>';
+                    html += '</div>';
+                    
+                    html += '</div>';
+                }
             } else if (parameterType === 'A14_cash_flow_types') {
                 html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
                 if (results.total_transactions) {
@@ -5987,6 +7741,18 @@
                         <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.total_amount)}</div>
                     </div>`;
                 }
+                if (results.inflow_count) {
+                    html += `<div style="background: #ecfdf5; padding: 12px; border-radius: 8px; border-left: 4px solid #10b981;">
+                        <div style="color: #10b981; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Inflows</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.inflow_count)} transactions</div>
+                    </div>`;
+                }
+                if (results.outflow_count) {
+                    html += `<div style="background: #fef2f2; padding: 12px; border-radius: 8px; border-left: 4px solid #ef4444;">
+                        <div style="color: #ef4444; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Outflows</div>
+                        <div style="color: #1f2937; font-size: 16px; font-weight: bold;">${safeValue(results.outflow_count)} transactions</div>
+                    </div>`;
+                }
                 if (results.cash_flow_analysis) {
                     html += `<div style="background: #fffbeb; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b;">
                         <div style="color: #f59e0b; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Flow Analysis</div>
@@ -5994,6 +7760,274 @@
                     </div>`;
                 }
                 html += '</div>';
+                
+                // Add Advanced AI Features section
+                if (results.advanced_ai_features) {
+                    html += '<div style="grid-column: 1 / -1; margin-top: 16px; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">';
+                    html += '<div style="color: #1f2937; font-size: 14px; font-weight: 600; margin-bottom: 12px;">🤖 Advanced AI Analysis</div>';
+                    
+                    // Create a grid for the advanced features
+                    html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">';
+                    
+                    // Flow Optimization
+                    if (results.advanced_ai_features.flow_optimization) {
+                        const flow = results.advanced_ai_features.flow_optimization;
+                        const flowColor = flow.efficiency_rating === 'High' ? '#059669' : 
+                                        flow.efficiency_rating === 'Balanced' ? '#3b82f6' : '#ef4444';
+                        
+                        html += `<div style="background: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid ${flowColor};">
+                            <div style="color: ${flowColor}; font-size: 12px; font-weight: 600; margin-bottom: 4px;">⚡ FLOW EFFICIENCY</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">${flow.efficiency_rating || 'Unknown'} (${(flow.flow_efficiency * 100).toFixed(1)}%)</div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                                Stability: ${flow.stability_rating || 'Unknown'}<br>
+                                Buffer: ${flow.cash_buffer_months?.toFixed(1) || 0} months<br>
+                                Optimization potential: ₹${(flow.optimization_potential || 0).toLocaleString(undefined, {maximumFractionDigits: 0})}
+                            </div>
+                            <div style="margin-top: 8px; height: 8px; width: 100%; background-color: #f3f4f6; border-radius: 4px; overflow: hidden;">
+                                <div style="height: 100%; width: ${Math.min(100, flow.flow_efficiency * 100)}%; background-color: ${flowColor};"></div>
+                            </div>
+                        </div>`;
+                    }
+                    
+                    // Payment Timing
+                    if (results.advanced_ai_features.payment_timing) {
+                        const timing = results.advanced_ai_features.payment_timing;
+                        
+                        html += `<div style="background: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid #8b5cf6;">
+                            <div style="color: #8b5cf6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">🕒 PAYMENT TIMING</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">
+                                ${timing.optimal_inflow_day?.day_name || 'Unknown'} / ${timing.optimal_outflow_day?.day_name || 'Unknown'}
+                            </div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                                Peak month: ${timing.peak_month?.month_name || 'Unknown'}<br>
+                                Recurring days: ${timing.recurring_payment_days?.slice(0, 3).join(', ') || 'None detected'}<br>
+                                ${Object.keys(timing.payment_cycles || {}).length > 0 ? 
+                                    `Cycles: ${Object.keys(timing.payment_cycles).join(', ')}` : 
+                                    'No regular cycles detected'}
+                            </div>
+                        </div>`;
+                    }
+                    
+                    // Cash Flow Classification
+                    if (results.advanced_ai_features.cash_flow_classification) {
+                        const classification = results.advanced_ai_features.cash_flow_classification;
+                        
+                        html += `<div style="background: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                            <div style="color: #f59e0b; font-size: 12px; font-weight: 600; margin-bottom: 4px;">🔍 FLOW CLASSIFICATION</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">
+                                ${classification.inflow_categories_count || 0} inflow / ${classification.outflow_categories_count || 0} outflow types
+                            </div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                                Inflow coverage: ${classification.categorization_coverage?.inflow?.toFixed(1) || 0}%<br>
+                                Outflow coverage: ${classification.categorization_coverage?.outflow?.toFixed(1) || 0}%
+                            </div>
+                            <div style="margin-top: 8px; display: flex; gap: 4px;">
+                                ${Object.keys(classification.inflow_breakdown || {}).slice(0, 3).map(category => 
+                                    `<span style="background: #ecfdf5; color: #10b981; padding: 2px 6px; border-radius: 4px; font-size: 10px;">${category.replace(/_/g, ' ')}</span>`
+                                ).join('')}
+                                ${Object.keys(classification.outflow_breakdown || {}).slice(0, 3).map(category => 
+                                    `<span style="background: #fef2f2; color: #ef4444; padding: 2px 6px; border-radius: 4px; font-size: 10px;">${category.replace(/_/g, ' ')}</span>`
+                                ).join('')}
+                            </div>
+                        </div>`;
+                    }
+                    
+                    // Cash Flow Forecast
+                    if (results.advanced_ai_features.cash_flow_forecast) {
+                        const forecast = results.advanced_ai_features.cash_flow_forecast;
+                        const trajectoryColor = forecast.trajectory === 'Improving' ? '#059669' : 
+                                             forecast.trajectory === 'Stable' ? '#3b82f6' : '#ef4444';
+                        
+                        html += `<div style="background: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid ${trajectoryColor};">
+                            <div style="color: ${trajectoryColor}; font-size: 12px; font-weight: 600; margin-bottom: 4px;">📈 CASH FLOW FORECAST</div>
+                            <div style="color: #1f2937; font-size: 14px; font-weight: bold;">
+                                ${forecast.trajectory || 'Unknown'} Trajectory
+                            </div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                                Next 6 months: ₹${(forecast.forecast_total || 0).toLocaleString(undefined, {maximumFractionDigits: 0})}<br>
+                                Model: ${forecast.model_type || 'Hybrid'} (${forecast.forecast_accuracy * 100}% accuracy)
+                            </div>
+                            <div style="margin-top: 8px; height: 40px;">
+                                <div style="display: flex; justify-content: space-between; height: 100%;">
+                                    ${forecast.next_6_months ? forecast.next_6_months.map((m, i) => {
+                                        const height = Math.max(5, Math.min(40, (Math.abs(m) / Math.max(...forecast.next_6_months.map(v => Math.abs(v)))) * 40));
+                                        const color = m >= 0 ? '#059669' : '#ef4444';
+                                        return `<div style="width: 8px; height: ${height}px; background-color: ${color}; align-self: flex-end;" title="Month ${i+1}: ₹${m.toLocaleString(undefined, {maximumFractionDigits: 0})}"></div>`;
+                                    }).join('') : ''}
+                                </div>
+                            </div>
+                        </div>`;
+                    }
+                    
+                    // Close the grid
+                    html += '</div>';
+                    
+                    // Add a summary section
+                    html += '<div style="margin-top: 16px; padding: 12px; background: #f1f5f9; border-radius: 8px; border: 1px dashed #cbd5e1;">';
+                    html += '<div style="color: #1f2937; font-size: 13px; font-weight: 600; margin-bottom: 8px;">💡 AI-Powered Insights</div>';
+                    html += '<div style="color: #6b7280; font-size: 12px; line-height: 1.5;">';
+                    html += 'The cash flow types analysis uses XGBoost + Ollama hybrid AI to provide deep insights into your transaction patterns. ';
+                    html += 'The system has classified cash flows, identified optimal payment timing, and forecasted future cash flow trajectory.';
+                    html += '</div>';
+                    html += '</div>';
+                    
+                    html += '</div>';
+                }
+                
+                // Add Cash Flow Classification breakdown if available
+                if (results.advanced_ai_features?.cash_flow_classification) {
+                    const classification = results.advanced_ai_features.cash_flow_classification;
+                    
+                    // Only show if we have meaningful classification data
+                    if ((Object.keys(classification.inflow_breakdown || {}).length > 0) || 
+                        (Object.keys(classification.outflow_breakdown || {}).length > 0)) {
+                        
+                        html += '<div style="grid-column: 1 / -1; margin-top: 16px; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">';
+                        html += '<div style="color: #1f2937; font-size: 14px; font-weight: 600; margin-bottom: 12px;">📊 Cash Flow Classification</div>';
+                        
+                        // Create two columns for inflow and outflow
+                        html += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">';
+                        
+                        // Inflow breakdown
+                        html += '<div>';
+                        html += '<div style="color: #10b981; font-size: 13px; font-weight: 600; margin-bottom: 8px;">Inflow Categories</div>';
+                        
+                        if (Object.keys(classification.inflow_breakdown || {}).length > 0) {
+                            html += '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px;">';
+                            
+                            Object.entries(classification.inflow_breakdown || {}).forEach(([category, data]) => {
+                                const formattedCategory = category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                                
+                                html += `<div style="background: #f0fdf4; padding: 10px; border-radius: 6px;">
+                                    <div style="color: #10b981; font-size: 11px; font-weight: 600; margin-bottom: 2px;">${formattedCategory}</div>
+                                    <div style="color: #1f2937; font-size: 13px; font-weight: bold;">₹${data.amount.toLocaleString(undefined, {maximumFractionDigits: 0})}</div>
+                                    <div style="color: #6b7280; font-size: 10px;">
+                                        ${data.count} transactions (${data.percentage.toFixed(1)}%)
+                                    </div>
+                                </div>`;
+                            });
+                            
+                            html += '</div>';
+                        } else {
+                            html += '<div style="color: #6b7280; font-size: 12px; font-style: italic;">No inflow categories detected</div>';
+                        }
+                        
+                        html += '</div>';
+                        
+                        // Outflow breakdown
+                        html += '<div>';
+                        html += '<div style="color: #ef4444; font-size: 13px; font-weight: 600; margin-bottom: 8px;">Outflow Categories</div>';
+                        
+                        if (Object.keys(classification.outflow_breakdown || {}).length > 0) {
+                            html += '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px;">';
+                            
+                            Object.entries(classification.outflow_breakdown || {}).forEach(([category, data]) => {
+                                const formattedCategory = category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                                
+                                html += `<div style="background: #fef2f2; padding: 10px; border-radius: 6px;">
+                                    <div style="color: #ef4444; font-size: 11px; font-weight: 600; margin-bottom: 2px;">${formattedCategory}</div>
+                                    <div style="color: #1f2937; font-size: 13px; font-weight: bold;">₹${data.amount.toLocaleString(undefined, {maximumFractionDigits: 0})}</div>
+                                    <div style="color: #6b7280; font-size: 10px;">
+                                        ${data.count} transactions (${data.percentage.toFixed(1)}%)
+                                    </div>
+                                </div>`;
+                            });
+                            
+                            html += '</div>';
+                        } else {
+                            html += '<div style="color: #6b7280; font-size: 12px; font-style: italic;">No outflow categories detected</div>';
+                        }
+                        
+                        html += '</div>';
+                        
+                        html += '</div>'; // End of two columns
+                        html += '</div>'; // End of classification section
+                    }
+                }
+                
+                // Add Payment Timing details if available
+                if (results.advanced_ai_features?.payment_timing?.payment_cycles) {
+                    const timing = results.advanced_ai_features.payment_timing;
+                    const cycles = timing.payment_cycles;
+                    
+                    if (Object.keys(cycles).length > 0) {
+                        html += '<div style="grid-column: 1 / -1; margin-top: 16px; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">';
+                        html += '<div style="color: #1f2937; font-size: 14px; font-weight: 600; margin-bottom: 12px;">🔄 Payment Cycles</div>';
+                        
+                        html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">';
+                        
+                        // Weekly cycle
+                        if (cycles.weekly) {
+                            html += `<div style="background: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                                <div style="color: #3b82f6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">WEEKLY CYCLE</div>
+                                <div style="color: #1f2937; font-size: 14px; font-weight: bold;">Primary day: ${cycles.weekly.primary_day}</div>
+                                <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                                    Confidence: ${(cycles.weekly.confidence * 100).toFixed(0)}%<br>
+                                    Transactions: ${cycles.weekly.transaction_count}
+                                </div>
+                                <div style="margin-top: 8px; display: flex; gap: 2px;">
+                                    ${['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => 
+                                        `<div style="flex: 1; height: 20px; background-color: ${day === cycles.weekly.primary_day ? '#3b82f6' : '#e5e7eb'}; border-radius: 2px;" title="${day}"></div>`
+                                    ).join('')}
+                                </div>
+                            </div>`;
+                        }
+                        
+                        // Monthly cycle
+                        if (cycles.monthly) {
+                            html += `<div style="background: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid #8b5cf6;">
+                                <div style="color: #8b5cf6; font-size: 12px; font-weight: 600; margin-bottom: 4px;">MONTHLY CYCLE</div>
+                                <div style="color: #1f2937; font-size: 14px; font-weight: bold;">Primary days: ${cycles.monthly.primary_days.join(', ')}</div>
+                                <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                                    Confidence: ${(cycles.monthly.confidence * 100).toFixed(0)}%<br>
+                                    Transactions: ${cycles.monthly.transaction_count}
+                                </div>
+                                <div style="margin-top: 8px; height: 30px; display: flex; align-items: flex-end;">
+                                    ${Array.from({length: 31}, (_, i) => i + 1).map(day => {
+                                        const isRecurring = cycles.monthly.primary_days.includes(day);
+                                        const height = isRecurring ? 30 : 5;
+                                        return `<div style="flex: 1; height: ${height}px; background-color: ${isRecurring ? '#8b5cf6' : '#e5e7eb'}; margin: 0 1px;" title="Day ${day}"></div>`;
+                                    }).join('')}
+                                </div>
+                            </div>`;
+                        }
+                        
+                        // Quarterly cycle
+                        if (cycles.quarterly) {
+                            html += `<div style="background: #fff; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                                <div style="color: #f59e0b; font-size: 12px; font-weight: 600; margin-bottom: 4px;">QUARTERLY CYCLE</div>
+                                <div style="color: #1f2937; font-size: 14px; font-weight: bold;">Primary quarter: ${cycles.quarterly.primary_quarter}</div>
+                                <div style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                                    Confidence: ${(cycles.quarterly.confidence * 100).toFixed(0)}%<br>
+                                    Transactions: ${cycles.quarterly.transaction_count}
+                                </div>
+                                <div style="margin-top: 8px; display: flex; gap: 4px;">
+                                    ${['Q1', 'Q2', 'Q3', 'Q4'].map(quarter => 
+                                        `<div style="flex: 1; height: 24px; background-color: ${quarter === cycles.quarterly.primary_quarter ? '#f59e0b' : '#e5e7eb'}; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                            <span style="font-size: 10px; color: ${quarter === cycles.quarterly.primary_quarter ? 'white' : '#6b7280'};">${quarter}</span>
+                                        </div>`
+                                    ).join('')}
+                                </div>
+                            </div>`;
+                        }
+                        
+                        html += '</div>'; // End of grid
+                        
+                        // Add recommendations
+                        if (timing.timing_recommendations && timing.timing_recommendations.length > 0) {
+                            html += '<div style="margin-top: 16px;">';
+                            html += '<div style="color: #1f2937; font-size: 13px; font-weight: 600; margin-bottom: 8px;">💡 Timing Recommendations</div>';
+                            html += '<ul style="color: #4b5563; font-size: 12px; margin: 0; padding-left: 20px;">';
+                            timing.timing_recommendations.forEach(rec => {
+                                html += `<li style="margin-bottom: 4px;">${rec}</li>`;
+                            });
+                            html += '</ul>';
+                            html += '</div>';
+                        }
+                        
+                        html += '</div>'; // End of payment timing section
+                    }
+                }
             }
             
             // Show error if present
