@@ -70,7 +70,7 @@ class OllamaSimpleIntegration:
             response = requests.post(
                 f"{self.base_url}/api/generate",
                 json=payload,
-                timeout=10
+                timeout=30
             )
             
             if response.status_code == 200:
