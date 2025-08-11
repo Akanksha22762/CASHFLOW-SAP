@@ -4722,6 +4722,48 @@
             color: #007bff !important;
             font-weight: 600;
         }
+
+        /* Vendor Analysis Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .vendor-analysis-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .vendor-analysis-btn:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body>
@@ -6015,61 +6057,8 @@
                 return;
             }
             
-            // Show loading state for specific parameter
-            // Handle special cases for card IDs
-            let cardId;
-            if (parameterType === 'A5_ar_aging') {
-                cardId = 'A5_AR_Aging_Card';
-            } else if (parameterType === 'A6_operating_expenses') {
-                cardId = 'A6_Operating_Expenses_Card';
-            } else {
-                cardId = parameterType.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('_') + '_Card';
-            }
-            const card = document.getElementById(cardId);
-            if (!card) {
-                showAlert(`❌ Card not found for parameter: ${parameterType}`, 'error');
-                return;
-            }
-            
-            const runBtn = card.querySelector('.btn-primary');
-            if (!runBtn) {
-                showAlert(`❌ Run button not found for parameter: ${parameterType}`, 'error');
-                return;
-            }
-            
-            const originalText = runBtn.innerHTML;
-            
-            runBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running...';
-            runBtn.disabled = true;
-            
-            fetch('/run-parameter-analysis', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    parameter_type: parameterType
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    // Show results in the card
-                    showParameterResults(parameterType, data.results);
-                    showAlert(`✅ ${getParameterTitle(parameterType)} analysis completed!`, 'success');
-                } else {
-                    showAlert(`❌ ${getParameterTitle(parameterType)} analysis failed: ${data.error}`, 'error');
-                    // Reset button
-                    runBtn.innerHTML = originalText;
-                    runBtn.disabled = false;
-                }
-            })
-            .catch(error => {
-                showAlert(`❌ ${getParameterTitle(parameterType)} analysis error: ${error.message}`, 'error');
-                // Reset button
-                runBtn.innerHTML = originalText;
-                runBtn.disabled = false;
-            });
+            // Show vendor selection modal for vendor-wise analysis
+            showVendorSelectionModal(parameterType);
         }
 
         function showParameterResults(parameterType, results) {
@@ -15466,6 +15455,275 @@ async function loadVendorList() {
                 addNotification('Welcome to the enhanced Bank Statement Analysis Platform!', 'success');
             }, 1000);
         });
+
+        // Vendor Selection Modal Functions
+        function showVendorSelectionModal(parameterType) {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+            `;
+            
+            modal.innerHTML = `
+                <div class="modal-content" style="
+                    background: white;
+                    padding: 30px;
+                    border-radius: 12px;
+                    max-width: 500px;
+                    width: 90%;
+                    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+                ">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <h3 style="color: #1f2937; margin-bottom: 10px;">
+                            <i class="fas fa-chart-line"></i> ${getParameterTitle(parameterType)} Analysis
+                        </h3>
+                        <p style="color: #6b7280;">Choose analysis scope:</p>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <button onclick="runFullAnalysis('${parameterType}')" class="btn btn-primary" style="width: 100%; margin-bottom: 10px; padding: 12px;">
+                            <i class="fas fa-globe"></i> Run Full Analysis (All Data)
+                        </button>
+                        
+                        <div style="text-align: center; margin: 15px 0;">
+                            <span style="color: #6b7280;">OR</span>
+                        </div>
+                        
+                        <label style="display: block; margin-bottom: 8px; color: #374151; font-weight: 500;">
+                            <i class="fas fa-building"></i> Select Vendor for Analysis:
+                        </label>
+                        <select id="vendorAnalysisSelect" class="form-control" style="margin-bottom: 15px;">
+                            <option value="">Choose a vendor...</option>
+                        </select>
+                        
+                        <button onclick="runVendorAnalysisForParameter('${parameterType}')" class="btn btn-success" style="width: 100%; padding: 12px;">
+                            <i class="fas fa-filter"></i> Run Vendor-Wise Analysis
+                        </button>
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <button onclick="closeVendorSelectionModal()" class="btn btn-secondary" style="padding: 8px 16px;">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Populate vendor dropdown
+            populateVendorAnalysisDropdown();
+        }
+
+        function populateVendorAnalysisDropdown() {
+            const vendorSelect = document.getElementById('vendorAnalysisSelect');
+            if (!vendorSelect) return;
+            
+            // Get vendors from existing data or extract from bank data
+            if (window.uploadedFiles && window.uploadedFiles.bank) {
+                // Extract vendors from bank data descriptions
+                fetch('/extract-vendors-for-analysis', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'extract_vendors' })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.vendors && data.vendors.length > 0) {
+                        vendorSelect.innerHTML = '<option value="">Choose a vendor...</option>';
+                        data.vendors.forEach(vendor => {
+                            const option = document.createElement('option');
+                            option.value = vendor;
+                            option.textContent = vendor;
+                            vendorSelect.appendChild(option);
+                        });
+                    } else {
+                        vendorSelect.innerHTML = '<option value="">No vendors found</option>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error extracting vendors:', error);
+                    vendorSelect.innerHTML = '<option value="">Error loading vendors</option>';
+                });
+            }
+        }
+
+        function closeVendorSelectionModal() {
+            const modal = document.querySelector('.modal-overlay');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        function runFullAnalysis(parameterType) {
+            closeVendorSelectionModal();
+            runParameterAnalysisOriginal(parameterType);
+        }
+
+        function runVendorAnalysisForParameter(parameterType) {
+            const vendorSelect = document.getElementById('vendorAnalysisSelect');
+            const selectedVendor = vendorSelect.value;
+            
+            if (!selectedVendor) {
+                showAlert('⚠️ Please select a vendor first!', 'warning');
+                return;
+            }
+            
+            closeVendorSelectionModal();
+            runParameterAnalysisWithVendor(parameterType, selectedVendor);
+        }
+
+        function runParameterAnalysisWithVendor(parameterType, vendorName) {
+            // Show loading state for specific parameter
+            let cardId;
+            if (parameterType === 'A5_ar_aging') {
+                cardId = 'A5_AR_Aging_Card';
+            } else if (parameterType === 'A6_operating_expenses') {
+                cardId = 'A6_Operating_Expenses_Card';
+            } else {
+                cardId = parameterType.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('_') + '_Card';
+            }
+            const card = document.getElementById(cardId);
+            if (!card) {
+                showAlert(`❌ Card not found for parameter: ${parameterType}`, 'error');
+                return;
+            }
+            
+            const runBtn = card.querySelector('.btn-primary');
+            if (!runBtn) {
+                showAlert(`❌ Run button not found for parameter: ${parameterType}`, 'error');
+                return;
+            }
+            
+            const originalText = runBtn.innerHTML;
+            
+            runBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running Vendor Analysis...';
+            runBtn.disabled = true;
+            
+            fetch('/run-parameter-analysis', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    parameter_type: parameterType,
+                    vendor_name: vendorName
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Show results in the card with vendor info
+                    showParameterResults(parameterType, data.results, vendorName);
+                    showAlert(`✅ ${getParameterTitle(parameterType)} analysis for ${vendorName} completed!`, 'success');
+                } else {
+                    showAlert(`❌ ${getParameterTitle(parameterType)} analysis for ${vendorName} failed: ${data.error}`, 'error');
+                    // Reset button
+                    runBtn.innerHTML = originalText;
+                    runBtn.disabled = false;
+                }
+            })
+            .catch(error => {
+                showAlert(`❌ ${getParameterTitle(parameterType)} analysis for ${vendorName} error: ${error.message}`, 'error');
+                // Reset button
+                runBtn.innerHTML = originalText;
+                runBtn.disabled = false;
+            });
+        }
+
+        // Helper functions for vendor analysis
+        function getParameterTitle(parameterType) {
+            const titles = {
+                'A1_historical_revenue_trends': 'Historical Revenue Trends',
+                'A2_sales_forecast': 'Sales Forecast',
+                'A3_customer_contracts': 'Customer Contracts',
+                'A4_pricing_models': 'Pricing Models',
+                'A5_ar_aging': 'AR Aging',
+                'A6_operating_expenses': 'Operating Expenses (OPEX)',
+                'A7_accounts_payable_terms': 'Accounts Payable Terms',
+                'A8_inventory_turnover': 'Inventory Turnover',
+                'A9_loan_repayments': 'Loan Repayments',
+                'A10_tax_obligations': 'Tax Obligations',
+                'A11_capital_expenditure': 'Capital Expenditure (CapEx)',
+                'A12_equity_debt_inflows': 'Equity & Debt Inflows',
+                'A13_other_income_expenses': 'Other Income/Expenses',
+                'A14_cash_flow_types': 'Cash Flow Types'
+            };
+            return titles[parameterType] || parameterType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
+
+        function runParameterAnalysisOriginal(parameterType) {
+            // This is the original analysis without vendor filtering
+            // Check if files are uploaded first
+            if (!window.uploadedFiles || !window.uploadedFiles.bank) {
+                showAlert('⚠️ Please upload a Bank Statement file first! Go to Step 1 and upload your file, then come back to run the analysis.', 'warning');
+                return;
+            }
+            
+            // Show loading state for specific parameter
+            let cardId;
+            if (parameterType === 'A5_ar_aging') {
+                cardId = 'A5_AR_Aging_Card';
+            } else if (parameterType === 'A6_operating_expenses') {
+                cardId = 'A6_Operating_Expenses_Card';
+            } else {
+                cardId = parameterType.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('_') + '_Card';
+            }
+            const card = document.getElementById(cardId);
+            if (!card) {
+                showAlert(`❌ Card not found for parameter: ${parameterType}`, 'error');
+                return;
+            }
+            
+            const runBtn = card.querySelector('.btn-primary');
+            if (!runBtn) {
+                showAlert(`❌ Run button not found for parameter: ${parameterType}`, 'error');
+                return;
+            }
+            
+            const originalText = runBtn.innerHTML;
+            
+            runBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running Analysis...';
+            runBtn.disabled = true;
+            
+            fetch('/run-parameter-analysis', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    parameter_type: parameterType
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Show results in the card
+                    showParameterResults(parameterType, data.results);
+                    showAlert(`✅ ${getParameterTitle(parameterType)} analysis completed!`, 'success');
+                } else {
+                    showAlert(`❌ ${getParameterTitle(parameterType)} analysis failed: ${data.error}`, 'error');
+                    // Reset button
+                    runBtn.innerHTML = originalText;
+                    runBtn.disabled = false;
+                }
+            })
+            .catch(error => {
+                showAlert(`❌ ${getParameterTitle(parameterType)} analysis error: ${error.message}`, 'error');
+                // Reset button
+                runBtn.innerHTML = originalText;
+                runBtn.disabled = false;
+            });
+        }
     </script>
 
 

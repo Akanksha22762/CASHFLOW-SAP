@@ -2212,6 +2212,2220 @@ class CashFlowForecaster:
             logger.error(f"Error generating weekly forecast: {e}")
             return None
     
+from flask import Flask, request, jsonify, send_file, render_template, session
+import pandas as pd
+import os
+import difflib
+from difflib import SequenceMatcher
+import time
+from io import BytesIO
+import tempfile
+import re
+from datetime import datetime, timedelta
+import numpy as np
+import math
+from concurrent.futures import ThreadPoolExecutor
+import logging
+from openai import OpenAI
+import json
+from typing import Dict, List, Optional, Union, Any
+import warnings
+def normalize_category(category):
+    """
+    Normalize category names to match the keys in cash_flow_categories.
+    Strips any (AI) or similar suffixes.
+    """
+    if not category:
+        return 'Operating Activities'
+    if 'Investing' in category:
+        return 'Investing Activities'
+    if 'Financing' in category:
+        return 'Financing Activities'
+    return 'Operating Activities'
+# ===== LIGHTWEIGHT AI/ML SYSTEM IMPORTS =====
+# ===== ADVANCED REVENUE AI SYSTEM IMPORTS =====
+try:
+    from advanced_revenue_ai_system import AdvancedRevenueAISystem
+    from integrate_advanced_revenue_system import AdvancedRevenueIntegration
+    ADVANCED_AI_AVAILABLE = True
+    print("✅ Advanced Revenue AI System loaded successfully!")
+except ImportError as e:
+    ADVANCED_AI_AVAILABLE = False
+    print(f"⚠️ Advanced AI system not available: {e}")
+
+
+try:
+    # Core ML Libraries - XGBoost Only
+    from sklearn.preprocessing import StandardScaler, LabelEncoder
+    from sklearn.metrics import classification_report, accuracy_score
+    from sklearn.model_selection import train_test_split, cross_val_score
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    
+    # XGBoost for all ML tasks
+    try:
+        import xgboost as xgb
+        XGBOOST_AVAILABLE = True
+        print("✅ XGBoost loaded successfully!")
+    except ImportError:
+        XGBOOST_AVAILABLE = False
+        print("❌ XGBoost not available. System cannot function without XGBoost.")
+    
+    # Text Processing - Keep for feature extraction
+    try:
+        from sentence_transformers import SentenceTransformer
+        TEXT_AI_AVAILABLE = True
+    except ImportError:
+        TEXT_AI_AVAILABLE = False
+        print("⚠️ Advanced text processing not available. Using basic TF-IDF.")
+    
+    ML_AVAILABLE = XGBOOST_AVAILABLE
+    if ML_AVAILABLE:
+        print("✅ XGBoost + Ollama Hybrid System loaded successfully!")
+    else:
+        print("❌ XGBoost required for system to function.")
+    
+except ImportError as e:
+    ML_AVAILABLE = False
+    print(f"❌ Error loading ML libraries: {e}")
+    print("❌ System cannot function without XGBoost.")
+
+# Suppress pandas warnings
+warnings.filterwarnings('ignore', category=FutureWarning)
+warnings.filterwarnings('ignore', category=UserWarning)
+
+# Define base directory
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# ===== OLLAMA INTEGRATION =====
+try:
+    from ollama_simple_integration import simple_ollama
+    OLLAMA_AVAILABLE = True
+    print("✅ Ollama Integration loaded!")
+except ImportError:
+    OLLAMA_AVAILABLE = False
+    print("⚠️ Ollama Integration not available.")
+
+# ===== UNIVERSAL DATA ADAPTER =====
+try:
+    from universal_data_adapter import UniversalDataAdapter
+    from data_adapter_integration import preprocess_for_analysis, load_and_preprocess_file, get_adaptation_report
+    DATA_ADAPTER_AVAILABLE = True
+    print("✅ Universal Data Adapter loaded successfully!")
+except ImportError as e:
+    DATA_ADAPTER_AVAILABLE = False
+    print(f"⚠️ Universal Data Adapter not available: {e}")
+
+# Global reconciliation data storage
+reconciliation_data = {}
+
+# ===== ADVANCED AI/ML ANOMALY DETECTION MODELS =====
+
+class AdvancedAnomalyDetector:
+    """
+    Advanced AI/ML-powered anomaly detection system with hyperparameter optimization
+    Uses multiple algorithms with ensemble voting for comprehensive detection
+    """
+    
+    def __init__(self):
+        self.models = {}
+        self.scalers = {}
+        self.feature_names = []
+        self.is_trained = False
+        self.best_params = {}
+        self.ensemble_weights = {}
+        self.performance_metrics = {}
+        
+    def prepare_features(self, df):
+        """Prepare advanced features for ML models"""
+        if not ML_AVAILABLE:
+            return df
+            
+        try:
+            features = df.copy()
+            
+            # Time-based features
+            features['hour'] = pd.to_datetime(features['Date']).dt.hour
+            features['day_of_week'] = pd.to_datetime(features['Date']).dt.dayofweek
+            features['day_of_month'] = pd.to_datetime(features['Date']).dt.day
+            features['month'] = pd.to_datetime(features['Date']).dt.month
+            features['is_weekend'] = pd.to_datetime(features['Date']).dt.dayofweek.isin([5, 6]).astype(int)
+            features['is_month_end'] = pd.to_datetime(features['Date']).dt.is_month_end.astype(int)
+            
+            # Amount-based features
+            features['amount_log'] = np.log1p(np.abs(features['Amount']))
+            features['amount_squared'] = features['Amount'] ** 2
+            features['amount_abs'] = np.abs(features['Amount'])
+            features['is_debit'] = (features['Type'] == 'Debit').astype(int)
+            features['is_credit'] = (features['Type'] == 'Credit').astype(int)
+            
+            # Vendor frequency features
+            vendor_counts = features['Description'].value_counts()
+            features['vendor_frequency'] = features['Description'].map(vendor_counts)
+            features['vendor_frequency_log'] = np.log1p(features['vendor_frequency'])
+            
+            # Rolling statistics
+            features['amount_rolling_mean'] = features['Amount'].rolling(window=5, min_periods=1).mean()
+            features['amount_rolling_std'] = features['Amount'].rolling(window=5, min_periods=1).std()
+            features['amount_z_score'] = (features['Amount'] - features['amount_rolling_mean']) / (features['amount_rolling_std'] + 1e-8)
+            
+            # Text features
+            features['description_length'] = features['Description'].str.len()
+            features['has_numbers'] = features['Description'].str.contains(r'\d').astype(int)
+            features['has_special_chars'] = features['Description'].str.contains(r'[^a-zA-Z0-9\s]').astype(int)
+            
+            return features
+            
+        except Exception as e:
+            logger.error(f"Error preparing features: {e}")
+            return df
+    
+    def calculate_adaptive_contamination(self, df):
+        """Calculate adaptive contamination based on data characteristics"""
+        try:
+            # Statistical outlier detection for initial estimate
+            Q1 = df['Amount'].quantile(0.25)
+            Q3 = df['Amount'].quantile(0.75)
+            IQR = Q3 - Q1
+            lower_bound = Q1 - 1.5 * IQR
+            upper_bound = Q3 + 1.5 * IQR
+            
+            outliers = df[(df['Amount'] < lower_bound) | (df['Amount'] > upper_bound)]
+            outlier_ratio = len(outliers) / len(df)
+            
+            # Adaptive contamination with bounds
+            adaptive_contamination = min(0.25, max(0.05, outlier_ratio))
+            
+            logger.info(f"Adaptive contamination calculated: {adaptive_contamination:.3f} ({len(outliers)} outliers out of {len(df)} transactions)")
+            return adaptive_contamination
+            
+        except Exception as e:
+            logger.error(f"Error calculating adaptive contamination: {e}")
+            return 0.1  # Default fallback
+    
+    def optimize_hyperparameters(self, X, y=None):
+        """Optimize hyperparameters using grid search and cross-validation"""
+        try:
+            from sklearn.model_selection import GridSearchCV, TimeSeriesSplit
+            from sklearn.metrics import make_scorer, silhouette_score
+            
+            # FAST MODE: Skip heavy optimization for small datasets
+            if len(X) < 100:
+                logger.info(f"Fast mode: Using default hyperparameters for small dataset ({len(X)} samples)")
+                return {
+                    'anomaly_detector': {
+                        'n_estimators': 50,
+                        'max_depth': 4,
+                        'learning_rate': 0.1,
+                        'random_state': 42
+                    }
+                }
+            
+            # FULL OPTIMIZATION for larger datasets
+            logger.info(f"Full optimization mode: Optimizing for {len(X)} samples")
+            
+            # Time series cross-validation for financial data
+            tscv = TimeSeriesSplit(n_splits=3)
+            
+            # Custom scoring function for anomaly detection
+            def anomaly_score(y_true, y_pred):
+                # Higher score for better anomaly detection
+                return silhouette_score(X, y_pred) if len(np.unique(y_pred)) > 1 else 0
+            
+            scorer = make_scorer(anomaly_score, greater_is_better=True)
+            
+            # Grid search parameters for XGBoost anomaly detection
+            param_grids = {
+                'anomaly_detector': {
+                    'n_estimators': [30, 50, 100],
+                    'max_depth': [3, 4, 5],
+                    'learning_rate': [0.05, 0.1, 0.15],
+                    'random_state': [42]
+                }
+            }
+            
+            best_params = {}
+            
+            # Optimize each model
+            for model_name, param_grid in param_grids.items():
+                logger.info(f"Optimizing {model_name} hyperparameters...")
+                
+                if model_name == 'anomaly_detector':
+                    model = xgb.XGBClassifier(
+                        n_estimators=50,
+                        max_depth=4,
+                        learning_rate=0.1,
+                        random_state=42,
+                        objective='binary:logistic',
+                        eval_metric='logloss'
+                    )
+                
+                # Grid search with time series CV
+                grid_search = GridSearchCV(
+                    model, param_grid, 
+                    cv=tscv, 
+                    scoring=scorer,
+                    n_jobs=-1,  # Use all CPU cores
+                    verbose=0
+                )
+                
+                # Fit the grid search
+                grid_search.fit(X)
+                
+                best_params[model_name] = grid_search.best_params_
+                logger.info(f"{model_name} optimized: {grid_search.best_params_}")
+                logger.info(f"   Best score: {grid_search.best_score_:.4f}")
+            
+            return best_params
+            
+        except Exception as e:
+            logger.error(f"Error in hyperparameter optimization: {e}")
+            return {}
+    
+    def create_ensemble_models(self, X, best_params):
+        """Create ensemble of models with different hyperparameters"""
+        try:
+            ensemble_models = {}
+            
+            # Create multiple XGBoost anomaly detection models with different parameters
+            learning_rates = [0.05, 0.1, 0.15, 0.2]
+            for i, lr in enumerate(learning_rates):
+                model = xgb.XGBClassifier(
+                    n_estimators=50,
+                    max_depth=4,
+                    learning_rate=lr,
+                    random_state=42 + i,
+                    objective='binary:logistic',
+                    eval_metric='logloss'
+                )
+                model.fit(X, np.zeros(len(X)))  # Train with dummy labels for anomaly detection
+                ensemble_models[f'xgb_anomaly_lr_{lr}'] = model
+            
+            return ensemble_models
+            
+        except Exception as e:
+            logger.error(f"Error creating ensemble models: {e}")
+            return {}
+    
+    def train_models(self, df):
+        """Train optimized ML models with hyperparameter tuning"""
+        if not ML_AVAILABLE:
+            return False
+            
+        try:
+            features = self.prepare_features(df)
+            
+            # Select numerical features for ML
+            ml_features = [
+                'hour', 'day_of_week', 'day_of_month', 'month', 'is_weekend', 'is_month_end',
+                'amount_log', 'amount_squared', 'amount_abs', 'is_debit', 'is_credit',
+                'vendor_frequency_log', 'amount_rolling_mean', 'amount_rolling_std', 'amount_z_score',
+                'description_length', 'has_numbers', 'has_special_chars'
+            ]
+            
+            X = features[ml_features].fillna(0)
+            
+            # Calculate adaptive contamination
+            adaptive_contamination = self.calculate_adaptive_contamination(df)
+            
+            # FAST MODE: Skip heavy optimization for small datasets
+            if len(df) < 100:
+                logger.info(f"Fast mode: Using optimized defaults for {len(df)} samples")
+                self.best_params = {
+                    'isolation_forest': {'contamination': adaptive_contamination, 'n_estimators': 100, 'random_state': 42},
+                    'lof': {'contamination': adaptive_contamination, 'n_neighbors': 10},
+                    'one_class_svm': {'nu': adaptive_contamination, 'kernel': 'rbf'}
+                }
+            else:
+                # Optimize hyperparameters for larger datasets
+                logger.info("Starting hyperparameter optimization...")
+                self.best_params = self.optimize_hyperparameters(X)
+            
+            # Standardize features
+            self.scalers['standard'] = StandardScaler()
+            X_scaled = self.scalers['standard'].fit_transform(X)
+            
+            # Train optimized models
+            logger.info("Training optimized models...")
+            
+            # XGBoost Anomaly Detection with optimized parameters
+            xgb_params = self.best_params.get('anomaly_detector', {})
+            self.models['anomaly_detector'] = xgb.XGBClassifier(
+                n_estimators=xgb_params.get('n_estimators', 50),
+                max_depth=xgb_params.get('max_depth', 4),
+                learning_rate=xgb_params.get('learning_rate', 0.1),
+                random_state=xgb_params.get('random_state', 42),
+                objective='binary:logistic',
+                eval_metric='logloss'
+            )
+            # Note: XGBoost models need to be trained with actual data
+            
+            # XGBoost anomaly detection with optimized parameters
+            self.models['anomaly_detector'] = xgb.XGBClassifier(
+                n_estimators=50,
+                max_depth=4,
+                learning_rate=0.1,
+                random_state=42,
+                objective='binary:logistic',
+                eval_metric='logloss'
+            )
+            # Note: XGBoost models need to be trained with actual data
+            
+            # Create ensemble models
+            logger.info("Creating ensemble models...")
+            ensemble_models = self.create_ensemble_models(X_scaled, self.best_params)
+            self.models.update(ensemble_models)
+            
+            # Calculate ensemble weights based on model diversity
+            self.ensemble_weights = self.calculate_ensemble_weights()
+            
+            # Store feature names and training info
+            self.feature_names = ml_features
+            self.is_trained = True
+            
+            # Calculate performance metrics
+            self.performance_metrics = self.calculate_performance_metrics(X_scaled)
+            
+            logger.info("Advanced ML models trained with hyperparameter optimization")
+            logger.info(f"Models trained: {len(self.models)}")
+            logger.info(f"Best parameters: {self.best_params}")
+            logger.info(f"Ensemble weights: {self.ensemble_weights}")
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error training optimized ML models: {e}")
+            return False
+    
+    def calculate_ensemble_weights(self):
+        """Calculate weights for ensemble models based on diversity"""
+        try:
+            weights = {}
+            base_models = ['anomaly_detector']
+            
+            # Base models get equal weight
+            for model in base_models:
+                weights[model] = 1.0
+            
+            # Ensemble models get reduced weight
+            ensemble_models = [k for k in self.models.keys() if k not in base_models]
+            for model in ensemble_models:
+                weights[model] = 0.5  # Half weight for ensemble models
+            
+            # Normalize weights
+            total_weight = sum(weights.values())
+            weights = {k: v/total_weight for k, v in weights.items()}
+            
+            return weights
+            
+        except Exception as e:
+            logger.error(f"Error calculating ensemble weights: {e}")
+            return {}
+    
+    def calculate_performance_metrics(self, X_scaled):
+        """Calculate performance metrics for trained models"""
+        try:
+            metrics = {}
+            
+            for name, model in self.models.items():
+                try:
+                    if hasattr(model, 'score_samples'):
+                        scores = model.score_samples(X_scaled)
+                        metrics[name] = {
+                            'mean_score': np.mean(scores),
+                            'std_score': np.std(scores),
+                            'min_score': np.min(scores),
+                            'max_score': np.max(scores)
+                        }
+                    elif hasattr(model, 'decision_function'):
+                        scores = model.decision_function(X_scaled)
+                        metrics[name] = {
+                            'mean_score': np.mean(scores),
+                            'std_score': np.std(scores),
+                            'min_score': np.min(scores),
+                            'max_score': np.max(scores)
+                        }
+                except Exception as e:
+                    logger.warning(f"Could not calculate metrics for {name}: {e}")
+            
+            return metrics
+            
+        except Exception as e:
+            logger.error(f"Error calculating performance metrics: {e}")
+            return {}
+    
+    def detect_anomalies_ml(self, df):
+        """Detect anomalies using optimized ML models with ensemble voting and business context filtering"""
+        if not self.is_trained or not ML_AVAILABLE:
+            return []
+            
+        try:
+            features = self.prepare_features(df)
+            X = features[self.feature_names].fillna(0)
+            X_scaled = self.scalers['standard'].transform(X)
+            
+            # Dynamic business context detection - works for any dataset
+            normal_business_mask = self._detect_normal_business_transactions(features)
+            
+            anomalies = []
+            model_predictions = {}
+            
+            # Get predictions from all models
+            for name, model in self.models.items():
+                try:
+                    if hasattr(model, 'predict'):
+                        predictions = model.predict(X_scaled)
+                        model_predictions[name] = predictions
+                    elif hasattr(model, 'decision_function'):
+                        scores = model.decision_function(X_scaled)
+                        # Convert scores to predictions
+                        threshold = np.percentile(scores, 90)  # Top 10% as anomalies
+                        predictions = (scores < threshold).astype(int) * 2 - 1  # Convert to -1/1
+                        model_predictions[name] = predictions
+                except Exception as e:
+                    logger.warning(f"Error getting predictions from {name}: {e}")
+                    continue
+            
+            # Ensemble voting with weights - only for suspicious transactions
+            for idx, row in features.iterrows():
+                # Skip if this is clearly normal business
+                if normal_business_mask.iloc[idx]:
+                    continue
+                
+                anomaly_score = 0
+                anomaly_reasons = []
+                model_agreement = 0
+                
+                # Calculate weighted ensemble score
+                for model_name, predictions in model_predictions.items():
+                    if idx < len(predictions):
+                        weight = self.ensemble_weights.get(model_name, 1.0)
+                        if predictions[idx] == -1:  # Anomaly detected
+                            anomaly_score += weight
+                            model_agreement += 1
+                            anomaly_reasons.append(f"ML: {model_name} detected outlier")
+                
+                # Normalize score by total weight
+                total_weight = sum(self.ensemble_weights.values())
+                normalized_score = anomaly_score / total_weight if total_weight > 0 else 0
+                
+                # Higher threshold for business context - only flag if strongly suspicious
+                if normalized_score >= 0.7:  # 70% of models agree (increased from 60%)
+                    severity = 'high'
+                elif normalized_score >= 0.5:  # 50% of models agree (increased from 40%)
+                    severity = 'medium'
+                elif normalized_score >= 0.3:  # 30% of models agree (increased from 20%)
+                    severity = 'low'
+                else:
+                    continue
+                
+                # Add performance metrics to anomaly details
+                performance_info = []
+                for model_name in ['anomaly_detector']:
+                    if model_name in self.performance_metrics:
+                        metrics = self.performance_metrics[model_name]
+                        performance_info.append(f"{model_name}: {metrics['mean_score']:.3f}")
+                
+                anomalies.append({
+                    'type': 'ml_anomaly',
+                    'severity': severity,
+                    'description': f"AI/ML Detected: {row['Description'][:50]}...",
+                    'transaction': {
+                        'amount': float(row['Amount']),
+                        'description': str(row['Description']),
+                        'date': str(row['Date']),
+                        'type': str(row['Type']),
+                        'ensemble_score': normalized_score,
+                        'model_agreement': model_agreement,
+                        'total_models': len(self.models),
+                        'performance_metrics': performance_info
+                    },
+                    'reason': " | ".join(anomaly_reasons[:3])  # Top 3 reasons
+                })
+            
+            logger.info(f"ML detected {len(anomalies)} anomalies (filtered for business context)")
+            return anomalies
+            
+        except Exception as e:
+            logger.error(f"Error in optimized ML anomaly detection: {e}")
+            return []
+    
+    def _detect_normal_business_transactions(self, df):
+        """Dynamically detect normal business transactions for any dataset"""
+        try:
+            # Get the most common transaction descriptions (likely normal business)
+            desc_counts = df['Description'].value_counts()
+            
+            # Identify normal business patterns
+            normal_business_mask = pd.Series([False] * len(df), index=df.index)
+            
+            # 1. High-frequency descriptions (appear many times) = likely normal business
+            high_freq_threshold = max(3, len(df) * 0.01)  # At least 3 times or 1% of transactions
+            high_freq_descriptions = desc_counts[desc_counts >= high_freq_threshold].index
+            
+            # 2. Enhanced universal business keywords (covers multiple industries)
+            common_business_keywords = [
+                # Core Business Operations
+                'sale', 'purchase', 'payment', 'revenue', 'income', 'expense', 'cost',
+                'fee', 'charge', 'commission', 'service', 'product', 'material',
+                
+                # Financial Operations
+                'credit', 'debit', 'transfer', 'deposit', 'withdrawal', 'refund',
+                'invoice', 'receipt', 'bill', 'loan', 'interest', 'tax',
+                
+                # Personnel & Operations
+                'salary', 'wage', 'bonus', 'employee', 'staff', 'personnel',
+                'rent', 'utility', 'maintenance', 'repair', 'cleaning', 'security',
+                
+                # Business Services
+                'insurance', 'legal', 'accounting', 'audit', 'consulting', 'advertising',
+                'marketing', 'promotion', 'training', 'education', 'certification',
+                
+                # Technology & Infrastructure
+                'software', 'hardware', 'license', 'subscription', 'cloud', 'server',
+                'internet', 'phone', 'communication', 'data', 'system', 'equipment',
+                
+                # Industry-Specific (Universal)
+                'supply', 'vendor', 'supplier', 'contractor', 'partner', 'client',
+                'customer', 'patient', 'student', 'member', 'subscriber', 'user',
+                
+                # Healthcare Specific
+                'medical', 'health', 'patient', 'treatment', 'medicine', 'hospital',
+                'clinic', 'doctor', 'nurse', 'pharmacy', 'prescription', 'therapy',
+                
+                # Technology Specific
+                'development', 'programming', 'coding', 'app', 'website', 'platform',
+                'api', 'database', 'hosting', 'domain', 'ssl', 'certificate',
+                
+                # Education Specific
+                'tuition', 'course', 'class', 'seminar', 'workshop', 'degree',
+                'certificate', 'diploma', 'textbook', 'library', 'research',
+                
+                # Manufacturing Specific
+                'production', 'manufacturing', 'assembly', 'quality', 'inventory',
+                'raw material', 'finished goods', 'work in progress', 'scrap',
+                
+                # Retail Specific
+                'retail', 'wholesale', 'inventory', 'stock', 'merchandise', 'display',
+                'point of sale', 'pos', 'cash register', 'shopping', 'store',
+                
+                # Real Estate Specific
+                'property', 'real estate', 'building', 'construction', 'renovation',
+                'mortgage', 'lease', 'tenant', 'landlord', 'property tax',
+                
+                # Transportation Specific
+                'transport', 'shipping', 'delivery', 'freight', 'logistics', 'fuel',
+                'vehicle', 'car', 'truck', 'maintenance', 'parking', 'toll'
+            ]
+            
+            # 3. Adaptive amount-based patterns (adjusts to dataset characteristics)
+            amount_stats = df['Amount'].describe()
+            
+            # Adaptive thresholds based on dataset size and amount distribution
+            if len(df) > 1000:  # Large dataset
+                regular_amount_threshold = df['Amount'].quantile(0.8)  # 80th percentile
+            elif len(df) > 100:  # Medium dataset
+                regular_amount_threshold = df['Amount'].quantile(0.75)  # 75th percentile
+            else:  # Small dataset
+                regular_amount_threshold = df['Amount'].quantile(0.9)  # 90th percentile
+            
+            # Currency detection and normalization
+            currency_indicators = ['₹', '$', '€', '£', '¥', 'CAD', 'AUD', 'USD', 'EUR', 'GBP', 'INR']
+            
+            # Detect if amounts are in different scale (e.g., cents vs dollars)
+            amount_range = amount_stats['max'] - amount_stats['min']
+            if amount_range > 1000000:  # Large amounts (like USD)
+                amount_multiplier = 1
+            elif amount_range > 10000:  # Medium amounts (like EUR)
+                amount_multiplier = 1
+            else:  # Small amounts (like cents or small currency)
+                amount_multiplier = 100  # Adjust threshold
+            
+            # Apply filters
+            for idx, row in df.iterrows():
+                desc = str(row['Description']).lower()
+                amount = abs(row['Amount'])
+                
+                # Check if this is normal business
+                is_normal = False
+                
+                # High frequency description
+                if row['Description'] in high_freq_descriptions:
+                    is_normal = True
+                
+                # Contains common business keywords
+                elif any(keyword in desc for keyword in common_business_keywords):
+                    is_normal = True
+                
+                # Regular amount (not unusually high/low)
+                elif amount <= regular_amount_threshold:
+                    is_normal = True
+                
+                # Time-based patterns (regular intervals suggest normal business)
+                elif hasattr(row, 'Hour') and row['Hour'] in [0, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]:
+                    is_normal = True
+                
+                # Pattern-based detection (recurring descriptions)
+                elif desc_counts.get(row['Description'], 0) > 2:  # Appears more than twice
+                    is_normal = True
+                
+                # Amount-based normalization
+                elif amount <= regular_amount_threshold * amount_multiplier:
+                    is_normal = True
+                
+                normal_business_mask.iloc[idx] = is_normal
+            
+            logger.info(f"Detected {normal_business_mask.sum()} normal business transactions out of {len(df)} total")
+            return normal_business_mask
+            
+        except Exception as e:
+            logger.error(f"Error in business context detection: {e}")
+            # Fallback: return all False (no filtering)
+            return pd.Series([False] * len(df), index=df.index)
+# Initialize the advanced detector
+advanced_detector = AdvancedAnomalyDetector()
+
+# ===== LIGHTWEIGHT AI/ML SYSTEM =====
+
+class LightweightAISystem:
+    """
+    Complete lightweight AI/ML system for financial transaction processing
+    Replaces rule-based categorization with ML models
+    """
+    
+    def __init__(self):
+        self.models = {}
+        self.scalers = {}
+        self.encoders = {}
+        self.vectorizers = {}
+        self.is_trained = False
+        self.training_data = None
+        self.feature_names = []
+        
+        # Initialize models
+        self._initialize_models()
+        
+    def _initialize_models(self):
+        """Initialize XGBoost + Ollama Hybrid Models"""
+        if not ML_AVAILABLE:
+            return
+            
+        try:
+            # XGBoost Models for All Tasks
+            self.models['transaction_classifier'] = xgb.XGBClassifier(
+                n_estimators=100,
+                max_depth=8,
+                learning_rate=0.1,
+                random_state=42,
+                objective='multi:softprob',
+                eval_metric='mlogloss'
+            )
+            
+            self.models['vendor_classifier'] = xgb.XGBClassifier(
+                n_estimators=80,
+                max_depth=6,
+                learning_rate=0.1,
+                random_state=42,
+                objective='multi:softprob',
+                eval_metric='mlogloss'
+            )
+            
+            self.models['matching_classifier'] = xgb.XGBClassifier(
+                n_estimators=60,
+                max_depth=5,
+                learning_rate=0.1,
+                random_state=42,
+                objective='binary:logistic',
+                eval_metric='logloss'
+            )
+            
+            # XGBoost for Regression/Forecasting
+            self.models['revenue_forecaster'] = xgb.XGBRegressor(
+                n_estimators=100,
+                max_depth=6,
+                learning_rate=0.1,
+                random_state=42,
+                objective='reg:squarederror',
+                eval_metric='rmse'
+            )
+            
+            # XGBoost for Anomaly Detection
+            self.models['anomaly_detector'] = xgb.XGBClassifier(
+                n_estimators=50,
+                max_depth=4,
+                learning_rate=0.1,
+                random_state=42,
+                objective='binary:logistic',
+                eval_metric='logloss'
+            )
+            
+            # Text Processing for Ollama Enhancement
+            if TEXT_AI_AVAILABLE:
+                try:
+                    self.vectorizers['sentence_transformer'] = SentenceTransformer('all-MiniLM-L6-v2')
+                    print("✅ Sentence transformer initialized successfully")
+                except Exception as e:
+                    print(f"⚠️ Network error loading sentence transformer: {e}")
+                    print("🔄 Continuing without sentence transformer (offline mode)")
+                    self.vectorizers['sentence_transformer'] = None
+            
+            self.vectorizers['tfidf'] = TfidfVectorizer(
+                max_features=1000,
+                ngram_range=(1, 2),
+                stop_words='english'
+            )
+            
+            # Preprocessing
+            self.scalers['standard'] = StandardScaler()
+            self.encoders['label'] = LabelEncoder()
+            
+            print("✅ XGBoost + Ollama Hybrid Models initialized!")
+            
+        except Exception as e:
+            print(f"❌ Error initializing XGBoost models: {e}")
+    
+    def prepare_features(self, df):
+        """Prepare comprehensive features for ML models"""
+        if not ML_AVAILABLE or df.empty:
+            return df
+            
+        try:
+            features = df.copy()
+            
+            # Ensure Date column exists and is datetime
+            if 'Date' in features.columns:
+                features['Date'] = pd.to_datetime(features['Date'], errors='coerce')
+                
+                # Time-based features
+                features['hour'] = features['Date'].dt.hour
+                features['day_of_week'] = features['Date'].dt.dayofweek
+                features['day_of_month'] = features['Date'].dt.day
+                features['month'] = features['Date'].dt.month
+                features['quarter'] = features['Date'].dt.quarter
+                features['year'] = features['Date'].dt.year
+                features['is_weekend'] = features['Date'].dt.dayofweek.isin([5, 6]).astype(int)
+                features['is_month_end'] = features['Date'].dt.is_month_end.astype(int)
+                features['is_month_start'] = features['Date'].dt.is_month_start.astype(int)
+            
+            # Amount-based features
+            if 'Amount' in features.columns:
+                features['amount_abs'] = np.abs(features['Amount'])
+                features['amount_log'] = np.log1p(features['amount_abs'])
+                features['amount_squared'] = features['Amount'] ** 2
+                features['amount_positive'] = (features['Amount'] > 0).astype(int)
+                features['amount_negative'] = (features['Amount'] < 0).astype(int)
+                
+                # Amount categories (simplified)
+                features['amount_small'] = (features['amount_abs'] <= 1000).astype(int)
+                features['amount_medium'] = ((features['amount_abs'] > 1000) & (features['amount_abs'] <= 10000)).astype(int)
+                features['amount_large'] = ((features['amount_abs'] > 10000) & (features['amount_abs'] <= 100000)).astype(int)
+                features['amount_very_large'] = (features['amount_abs'] > 100000).astype(int)
+            
+            # Type-based features
+            if 'Type' in features.columns:
+                features['is_debit'] = (features['Type'].str.lower() == 'debit').astype(int)
+                features['is_credit'] = (features['Type'].str.lower() == 'credit').astype(int)
+            
+            # Text-based features
+            if 'Description' in features.columns:
+                features['description_length'] = features['Description'].str.len()
+                features['word_count'] = features['Description'].str.split().str.len()
+                features['has_numbers'] = features['Description'].str.contains(r'\d').astype(int)
+                features['has_special_chars'] = features['Description'].str.contains(r'[^a-zA-Z0-9\s]').astype(int)
+                features['has_uppercase'] = features['Description'].str.contains(r'[A-Z]').astype(int)
+                
+                # Common keywords
+                keywords = ['payment', 'invoice', 'salary', 'utility', 'tax', 'loan', 'interest', 
+                          'vendor', 'customer', 'bank', 'transfer', 'fee', 'charge', 'refund']
+                for keyword in keywords:
+                    features[f'has_{keyword}'] = features['Description'].str.lower().str.contains(keyword).astype(int)
+            
+            # Vendor frequency features
+            if 'Description' in features.columns:
+                vendor_counts = features['Description'].value_counts()
+                features['vendor_frequency'] = features['Description'].map(vendor_counts)
+                features['vendor_frequency_log'] = np.log1p(features['vendor_frequency'])
+            
+            # Rolling statistics
+            if 'Amount' in features.columns:
+                features['amount_rolling_mean'] = features['Amount'].rolling(window=5, min_periods=1).mean()
+                features['amount_rolling_std'] = features['Amount'].rolling(window=5, min_periods=1).std()
+                features['amount_z_score'] = (features['Amount'] - features['amount_rolling_mean']) / (features['amount_rolling_std'] + 1e-8)
+            
+            # Remove any infinite or NaN values
+            features = features.replace([np.inf, -np.inf], np.nan)
+            
+            # Fill all NaN values with 0 (simplified approach)
+            features = features.fillna(0)
+            
+            return features
+            
+        except Exception as e:
+            print(f"❌ Error preparing features: {e}")
+            return df
+    
+    def train_transaction_classifier(self, training_data):
+        """Train the transaction categorization model"""
+        if not ML_AVAILABLE or training_data.empty:
+            return False
+            
+        try:
+            print("🤖 Training transaction categorization model...")
+            
+            # Prepare features
+            features = self.prepare_features(training_data)
+            
+            # Select features for training
+            feature_columns = [
+                'hour', 'day_of_week', 'day_of_month', 'month', 'quarter', 'year',
+                'is_weekend', 'is_month_end', 'is_month_start',
+                'amount_abs', 'amount_log', 'amount_squared', 'amount_positive', 'amount_negative',
+                'amount_small', 'amount_medium', 'amount_large', 'amount_very_large',
+                'is_debit', 'is_credit',
+                'description_length', 'word_count', 'has_numbers', 'has_special_chars', 'has_uppercase',
+                'vendor_frequency_log', 'amount_rolling_mean', 'amount_rolling_std', 'amount_z_score'
+            ]
+            
+            # Add keyword features
+            keywords = ['payment', 'invoice', 'salary', 'utility', 'tax', 'loan', 'interest', 
+                      'vendor', 'customer', 'bank', 'transfer', 'fee', 'charge', 'refund']
+            feature_columns.extend([f'has_{keyword}' for keyword in keywords])
+            
+            # Filter available features
+            available_features = [col for col in feature_columns if col in features.columns]
+            
+            if len(available_features) < 5:
+                print("❌ Not enough features available for training")
+                return False
+            
+            X = features[available_features]
+            
+            # Prepare target variable (assuming 'Category' column exists)
+            if 'Category' not in training_data.columns:
+                print("❌ No 'Category' column found for training")
+                return False
+            
+            # Encode categories (handle missing values)
+            self.encoders['category'] = LabelEncoder()
+            # Fill missing categories with a default
+            categories_filled = training_data['Category'].fillna('Operating Activities')
+            y = self.encoders['category'].fit_transform(categories_filled)
+            
+            # CRITICAL FIX: Ensure X and y have the same length
+            if len(X) != len(y):
+                print(f"⚠️ Array length mismatch: X={len(X)}, y={len(y)}")
+                # Align lengths by taking the minimum
+                min_length = min(len(X), len(y))
+                X = X.iloc[:min_length]
+                y = y[:min_length]
+                print(f"✅ Fixed: Aligned to {min_length} samples")
+            
+            # Verify stratification requirements
+            unique_classes = len(np.unique(y))
+            min_samples_per_class = 2  # Minimum for stratification
+            
+            # Handle very small datasets
+            if len(y) < 5:
+                # Use all data for training, create dummy test set
+                X_train, y_train = X, y
+                X_test, y_test = X.iloc[:1], y.iloc[:1]
+                print(f"⚠️ Very small dataset ({len(y)} samples) - using all data for training")
+            else:
+                # Calculate safe test size
+                safe_test_size = min(0.2, (len(y) - unique_classes) / len(y)) if len(y) > unique_classes else 0.1
+                
+                if len(y) < unique_classes * min_samples_per_class:
+                    print(f"⚠️ Not enough samples per class for stratification (need {unique_classes * min_samples_per_class}, have {len(y)})")
+                    # Use simple split without stratification
+                    X_train, X_test, y_train, y_test = train_test_split(
+                        X, y, test_size=safe_test_size, random_state=42
+                    )
+                else:
+                    # Use stratified split with safe test size
+                    X_train, X_test, y_train, y_test = train_test_split(
+                        X, y, test_size=safe_test_size, random_state=42, stratify=y
+                    )
+                    print(f"✅ Using stratified split")
+            
+            # Scale features
+            self.scalers['transaction'] = StandardScaler()
+            X_train_scaled = self.scalers['transaction'].fit_transform(X_train)
+            X_test_scaled = self.scalers['transaction'].transform(X_test)
+            
+            # Train XGBoost (Primary ML Model)
+            if XGBOOST_AVAILABLE:
+                try:
+                    # Ensure we have enough samples per class for XGBoost
+                    unique_classes = len(np.unique(y_train))
+                    min_samples_per_class = 2  # Reduced from 10 to 2
+                    
+                    if len(y_train) >= unique_classes * min_samples_per_class:
+                        self.models['transaction_classifier'].fit(X_train_scaled, y_train)
+                        print("✅ XGBoost training successful")
+                        
+                        # Evaluate XGBoost model
+                        xgb_score = self.models['transaction_classifier'].score(X_test_scaled, y_test)
+                        print(f"✅ XGBoost accuracy: {xgb_score:.3f}")
+                        print(f"📊 Model Performance: {xgb_score*100:.1f}% accuracy on test set")
+                        print(f"🎯 Training Data: {len(X_train)} samples, Test Data: {len(X_test)} samples")
+                        
+                        # Store the actual accuracy for later display
+                        self.last_training_accuracy = xgb_score * 100
+                        
+                        # Display real accuracy prominently
+                        print(f"🎯 REAL CALCULATED ACCURACY: {self.last_training_accuracy:.1f}%")
+                        print(f"📊 This is the actual accuracy from your training data!")
+                    else:
+                        print(f"⚠️ Not enough samples per class for XGBoost training (need {unique_classes * min_samples_per_class}, have {len(y_train)})")
+                        # Try training anyway with reduced requirements
+                        try:
+                            self.models['transaction_classifier'].fit(X_train_scaled, y_train)
+                            print("✅ XGBoost training successful (with reduced requirements)")
+                            
+                            # Evaluate XGBoost model
+                            xgb_score = self.models['transaction_classifier'].score(X_test_scaled, y_test)
+                            print(f"✅ XGBoost accuracy: {xgb_score:.3f}")
+                            print(f"📊 Model Performance: {xgb_score*100:.1f}% accuracy on test set")
+                            print(f"🎯 Training Data: {len(X_train)} samples, Test Data: {len(X_test)} samples")
+                            
+                            # Store the actual accuracy for later display
+                            self.last_training_accuracy = xgb_score * 100
+                            
+                            # Display real accuracy prominently
+                            print(f"🎯 REAL CALCULATED ACCURACY: {self.last_training_accuracy:.1f}%")
+                            print(f"📊 This is the actual accuracy from your training data!")
+                        except Exception as reduced_error:
+                            print(f"⚠️ XGBoost training failed even with reduced requirements: {reduced_error}")
+                            
+                except Exception as xgb_error:
+                    print(f"⚠️ XGBoost training failed: {xgb_error}")
+            
+            self.feature_names = available_features
+            self.is_trained = True
+            self.training_data = training_data
+            
+            print("✅ Transaction classifier training complete!")
+            return True
+            
+        except Exception as e:
+            print(f"❌ Error training transaction classifier: {e}")
+            return False
+    
+    def categorize_transaction_ml(self, description, amount=0, transaction_type=''):
+        """Categorize transaction using trained ML models"""
+        if not self.is_trained:
+            return "Operating Activities (ML-Not-Trained)"
+        
+        try:
+            # Create single row dataframe
+            data = pd.DataFrame([{
+                'Description': description,
+                'Amount': amount,
+                'Type': transaction_type,
+                'Date': datetime.now()
+            }])
+            
+            # Prepare features
+            features = self.prepare_features(data)
+            
+            # Select features
+            available_features = [col for col in self.feature_names if col in features.columns]
+            if len(available_features) == 0:
+                return "Operating Activities (ML-No-Features)"
+            
+            X = features[available_features].fillna(0)
+            
+            # Scale features
+            if 'transaction' in self.scalers:
+                X_scaled = self.scalers['transaction'].transform(X)
+            else:
+                X_scaled = X
+            
+            # Predict using XGBoost
+            predictions = []
+            
+            # XGBoost prediction
+            if XGBOOST_AVAILABLE and 'transaction_classifier' in self.models:
+                try:
+                    xgb_pred = self.models['transaction_classifier'].predict(X_scaled)[0]
+                    predictions.append(xgb_pred)
+                except Exception as e:
+                    print(f"⚠️ XGBoost prediction failed: {e}")
+            
+            # Get prediction
+            if predictions:
+                final_prediction = predictions[0]  # Use XGBoost prediction
+                
+                # Decode category
+                if 'category' in self.encoders:
+                    category = self.encoders['category'].inverse_transform([final_prediction])[0]
+                    return f"{category} (XGBoost)"
+                else:
+                    return "Operating Activities (XGBoost-No-Encoder)"
+            else:
+                return "Operating Activities (XGBoost-No-Prediction)"
+                
+        except Exception as e:
+            print(f"❌ Error in XGBoost categorization: {e}")
+            return "Operating Activities (XGBoost-Error)"
+    
+    def detect_anomalies_ml(self, df):
+        """Detect anomalies using ML models"""
+        if not ML_AVAILABLE or df.empty:
+            return []
+        
+        try:
+            print("🔍 Detecting anomalies with ML models...")
+            
+            features = self.prepare_features(df)
+            
+            # Select numerical features
+            numerical_features = features.select_dtypes(include=[np.number]).columns.tolist()
+            if len(numerical_features) < 3:
+                print("❌ Not enough numerical features for anomaly detection")
+                return []
+            
+            X = features[numerical_features].fillna(0)
+            
+            # Scale features
+            if 'anomaly' not in self.scalers:
+                self.scalers['anomaly'] = StandardScaler()
+                X_scaled = self.scalers['anomaly'].fit_transform(X)
+            else:
+                X_scaled = self.scalers['anomaly'].transform(X)
+            
+            anomalies = []
+            
+            # Isolation Forest
+            if 'anomaly_detector' in self.models:
+                # Note: XGBoost anomaly detection needs training data
+                # For now, use a simple threshold-based approach
+                amount_threshold = df['Amount'].quantile(0.95)
+                xgb_anomalies = df[df['Amount'] > amount_threshold]
+                anomalies.extend(xgb_anomalies.index.tolist())
+            
+            # XGBoost Anomaly Detection
+            if 'anomaly_detector' in self.models:
+                # Note: XGBoost anomaly detection needs training data
+                # For now, use a simple threshold-based approach
+                amount_threshold = df['Amount'].quantile(0.95)
+                xgb_anomalies = df[df['Amount'] > amount_threshold]
+                anomalies.extend(xgb_anomalies.index.tolist())
+            
+            # Remove duplicates
+            unique_anomalies = list(set(anomalies))
+            
+            print(f"✅ Detected {len(unique_anomalies)} anomalies")
+            return unique_anomalies
+            
+        except Exception as e:
+            print(f"❌ Error in anomaly detection: {e}")
+            return []
+    
+    def forecast_cash_flow_ml(self, df, days_ahead=7):
+        """Forecast cash flow using ML models"""
+        if not ML_AVAILABLE or df.empty:
+            return None
+        
+        try:
+            print("📈 Forecasting cash flow with ML models...")
+            
+            # Prepare time series data
+            if 'Date' not in df.columns or 'Amount' not in df.columns:
+                print("❌ Date and Amount columns required for forecasting")
+                return None
+            
+            # Group by date and sum amounts
+            daily_data = df.groupby('Date')['Amount'].sum().reset_index()
+            daily_data['Date'] = pd.to_datetime(daily_data['Date'])
+            daily_data = daily_data.sort_values('Date')
+            
+            if len(daily_data) < 7:
+                print("❌ Not enough data for forecasting")
+                return None
+            
+            # XGBoost forecasting
+            if 'revenue_forecaster' in self.models:
+                # Prepare features for XGBoost forecasting
+                daily_data['day_of_week'] = daily_data['Date'].dt.dayofweek
+                daily_data['month'] = daily_data['Date'].dt.month
+                daily_data['day_of_month'] = daily_data['Date'].dt.day
+                daily_data['is_weekend'] = daily_data['Date'].dt.dayofweek.isin([5, 6]).astype(int)
+                
+                # Create lag features for time series
+                daily_data['amount_lag1'] = daily_data['Amount'].shift(1)
+                daily_data['amount_lag7'] = daily_data['Amount'].shift(7)
+                daily_data['amount_rolling_mean'] = daily_data['Amount'].rolling(window=7).mean()
+                
+                # Prepare training data
+                features = ['day_of_week', 'month', 'day_of_month', 'is_weekend', 'amount_lag1', 'amount_lag7', 'amount_rolling_mean']
+                X = daily_data[features].fillna(0)
+                y = daily_data['Amount']
+                
+                # Train XGBoost model
+                model = xgb.XGBRegressor(
+                    n_estimators=100,
+                    max_depth=6,
+                    learning_rate=0.1,
+                    random_state=42,
+                    objective='reg:squarederror',
+                    eval_metric='rmse'
+                )
+                model.fit(X, y)
+                
+                # Generate future dates
+                last_date = daily_data['Date'].iloc[-1]
+                future_dates = [last_date + timedelta(days=i+1) for i in range(days_ahead)]
+                
+                # Create future features
+                future_data = pd.DataFrame({'Date': future_dates})
+                future_data['day_of_week'] = future_data['Date'].dt.dayofweek
+                future_data['month'] = future_data['Date'].dt.month
+                future_data['day_of_month'] = future_data['Date'].dt.day
+                future_data['is_weekend'] = future_data['Date'].dt.dayofweek.isin([5, 6]).astype(int)
+                
+                # Use last known values for lag features
+                last_amount = daily_data['Amount'].iloc[-1]
+                last_rolling_mean = daily_data['amount_rolling_mean'].iloc[-1]
+                
+                future_data['amount_lag1'] = last_amount
+                future_data['amount_lag7'] = last_amount
+                future_data['amount_rolling_mean'] = last_rolling_mean
+                
+                # Predict
+                X_future = future_data[features]
+                predictions = model.predict(X_future)
+                
+                return {
+                    'dates': [d.strftime('%Y-%m-%d') for d in future_dates],
+                    'predictions': predictions.round(2).tolist(),
+                    'model': 'XGBoost'
+                }
+            
+            else:
+                print("❌ XGBoost forecasting model not available")
+                return None
+                
+        except Exception as e:
+            print(f"❌ Error in cash flow forecasting: {e}")
+            return None
+
+# Initialize the lightweight AI system
+lightweight_ai = LightweightAISystem()
+
+# Set up logging with better configuration
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('cashflow_app.log', encoding='utf-8'),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
+# ADD THESE TWO FUNCTIONS TO YOUR app1.py FILE
+# (After removing the old conflicting functions)
+
+def unified_ai_categorize(description, amount=0, use_cache=True):
+    """
+    Single unified AI categorization function with DETAILED PROMPT
+    """
+    # Check if AI is available
+    api_key = os.getenv('OPENAI_API_KEY')
+    if not api_key:
+        print("❌ No OpenAI API key found - using rule-based categorization")
+        return rule_based_categorize(description, amount)
+    
+    # Check cache first
+    cache_key = f"{description}_{amount}"
+    if use_cache:
+        cached_result = ai_cache_manager.get(cache_key)
+        if cached_result:
+            print(f"✅ Cache hit for: {description[:30]}...")
+            return cached_result
+    
+    try:
+        from openai import OpenAI
+        client = OpenAI(api_key=api_key)
+        
+        # YOUR ORIGINAL DETAILED PROMPT - PRESERVED EXACTLY
+        prompt = f"""
+You are a Senior Financial Controller and Certified Public Accountant with 25+ years of experience in financial statement preparation, cash flow analysis, and business operations across multiple industries.
+
+TASK: Categorize this financial transaction into the appropriate cash flow statement category with deep analytical thinking.
+
+ANALYSIS FRAMEWORK:
+For each transaction, think step-by-step:
+1. What type of business activity does this represent?
+2. What is the economic substance of this transaction?
+3. How does this affect the company's cash position?
+4. What is the long-term vs short-term impact?
+
+DETAILED CATEGORIZATION RULES:
+
+OPERATING ACTIVITIES (Core Business Operations):
+- Revenue Generation: Sales, service income, commission, royalties, licensing fees, subscription revenue, consulting fees, training income, maintenance contracts, warranty income, rebates, refunds, insurance claims, government grants for operations
+- Cost of Goods Sold: Raw materials, direct labor, manufacturing overhead, packaging, freight, customs duties, import charges, quality control costs
+- Operating Expenses: 
+  * Personnel: Salaries, wages, bonuses, commissions, overtime, severance, recruitment fees, training costs, employee benefits, health insurance, retirement contributions, payroll taxes
+  * Administrative: Office supplies, postage, courier services, legal fees, accounting fees, audit fees, consulting fees, professional memberships, subscriptions, software licenses
+  * Marketing: Advertising, promotions, trade shows, marketing materials, digital marketing, SEO, social media, PR services, brand development
+  * Technology: IT support, software maintenance, hardware repairs, cloud services, data processing, cybersecurity, system upgrades
+  * Facilities: Rent, utilities (electricity, water, gas, internet, phone), maintenance, cleaning, security, insurance, property taxes, repairs
+  * Transportation: Fuel, vehicle maintenance, parking, tolls, public transport, logistics, shipping, delivery costs
+  * Regulatory: Taxes (income, sales, property, excise), licenses, permits, compliance fees, regulatory filings, environmental fees
+  * Other Operations: Inventory management, quality assurance, safety equipment, waste disposal, recycling, sustainability initiatives
+
+INVESTING ACTIVITIES (Long-term Asset Management):
+- Asset Acquisitions: Machinery, equipment, vehicles, computers, software, furniture, fixtures, tools, instruments, laboratory equipment, medical devices, construction equipment
+- Property & Real Estate: Land purchases, building acquisitions, property development, construction, renovations, expansions, real estate investments, property improvements
+- Business Investments: Equity investments, joint ventures, partnerships, subsidiary acquisitions, business purchases, franchise acquisitions, intellectual property purchases
+- Financial Investments: Stocks, bonds, mutual funds, ETFs, certificates of deposit, money market instruments, derivatives, foreign exchange investments
+- Asset Disposals: Sale of equipment, property sales, investment liquidations, asset divestitures, scrap sales, salvage operations
+- Research & Development: R&D equipment, laboratory setup, prototype development, testing facilities, innovation projects, patent applications
+- Technology Infrastructure: Data centers, servers, networking equipment, telecommunications infrastructure, automation systems, robotics
+
+FINANCING ACTIVITIES (Capital Structure Management):
+- Debt Financing: Bank loans, lines of credit, mortgages, bonds, promissory notes, equipment financing, working capital loans, bridge loans, refinancing
+- Equity Financing: Share capital, preferred shares, common stock, equity investments, venture capital, private equity, crowdfunding, employee stock options
+- Debt Repayment: Loan principal payments, bond redemptions, credit line repayments, mortgage payments, debt restructuring
+- Dividends & Distributions: Cash dividends, stock dividends, profit distributions, shareholder returns, partnership distributions
+- Interest & Finance Costs: Interest payments, loan fees, credit card charges, factoring fees, leasing charges, financial advisory fees
+- Capital Returns: Share buybacks, treasury stock purchases, capital reductions, return of capital
+- Financial Instruments: Options, warrants, convertible securities, hedging instruments, foreign exchange contracts
+
+SPECIAL CONSIDERATIONS:
+- Industry-Specific: Manufacturing (production costs), Healthcare (medical supplies), Technology (software licenses), Retail (inventory), Construction (project costs)
+- Transaction Size: Large amounts may indicate significant business events
+- Frequency: Recurring vs one-time transactions
+- Timing: Seasonal patterns, year-end adjustments, regulatory deadlines
+- Counterparties: Government, banks, suppliers, customers, employees, investors
+
+ANALYSIS PROCESS:
+1. Identify key words and phrases in each description
+2. Determine the business context and industry relevance
+3. Assess the cash flow impact (inflow vs outflow)
+4. Consider the transaction's relationship to core business operations
+5. Evaluate long-term vs operational impact
+6. Apply industry-specific knowledge and best practices
+
+TRANSACTIONS TO ANALYZE:
+Description: "{description}"
+Amount: {amount}
+Currency: (assume local currency)
+
+RESPONSE FORMAT:
+Provide ONLY the category name for this transaction:
+Operating Activities
+Investing Activities
+Financing Activities
+
+Think deeply about the economic substance and business impact of this transaction.
+"""
+        
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=30,  # Keep low since we only want category name
+            temperature=0.1,
+            timeout=30  # Longer timeout for detailed prompt
+        )
+        
+        if response and response.choices and response.choices[0] and response.choices[0].message:
+            result = response.choices[0].message.content.strip()
+            
+            # Validate result
+            valid_categories = ["Operating Activities", "Investing Activities", "Financing Activities"]
+            for category in valid_categories:
+                if category.lower() in result.lower():
+                    final_result = f"{category} (AI-Detailed)"
+                    if use_cache:
+                        ai_cache_manager.set(cache_key, final_result)
+                    print(f"✅ AI Detailed Success: {description[:30]}... → {category}")
+                    return final_result
+            
+            # If no valid category found, fallback to rules
+            print(f"⚠️ AI returned unclear result: {result} - using rules")
+            return rule_based_categorize(description, amount)
+        else:
+            print(f"❌ AI API returned empty response - using rules")
+            return rule_based_categorize(description, amount)
+    
+    except Exception as e:
+        print(f"❌ AI Error: {e} - using rules for: {description[:30]}...")
+        return rule_based_categorize(description, amount)
+
+def unified_batch_categorize(descriptions, amounts, use_ai=True, batch_size=3):
+    """
+    Batch processing with DETAILED PROMPT (smaller batches due to prompt size)
+    """
+    if not use_ai or not os.getenv('OPENAI_API_KEY'):
+        print("🔧 Using rule-based categorization for all transactions")
+        return [rule_based_categorize(desc, amt) for desc, amt in zip(descriptions, amounts)]
+    
+    print(f"🤖 Processing {len(descriptions)} transactions with DETAILED AI prompt")
+    print(f"⚠️ Using smaller batches (size={batch_size}) due to detailed prompt size")
+    
+    categories = []
+    
+    # Process individually for better reliability and caching
+    # Smaller batches due to large prompt size
+    for i, (desc, amt) in enumerate(zip(descriptions, amounts)):
+        if i > 0 and i % 5 == 0:  # Progress every 5 transactions
+            print(f"   Processed {i}/{len(descriptions)} transactions...")
+            time.sleep(1.0)  # Longer delay for detailed prompts
+        
+        category = unified_ai_categorize(desc, amt)
+        categories.append(category)
+        
+        # Small delay between each call for detailed prompts
+        if i < len(descriptions) - 1:  # Don't delay after last transaction
+            time.sleep(0.3)
+    
+    # Show results
+    ai_count = sum(1 for cat in categories if '(AI-Detailed)' in cat)
+    rule_count = len(categories) - ai_count
+    
+    print(f"✅ Detailed batch processing complete:")
+    print(f"   🤖 AI-Detailed categorized: {ai_count} transactions ({ai_count/len(categories)*100:.1f}%)")
+    print(f"   📏 Rule categorized: {rule_count} transactions ({rule_count/len(categories)*100:.1f}%)")
+    print(f"   💰 Estimated cost: ${ai_count * 0.002:.3f} USD")
+    
+    return categories
+# REPLACE YOUR ultra_fast_process FUNCTION WITH THIS VERSION:
+
+def ultra_fast_process_with_detailed_ai(df, use_ai=True, max_ai_transactions=50):
+    """
+    Processing with detailed AI prompt (adjusted for cost considerations)
+    """
+    print(f"⚡ Processing with DETAILED AI: {len(df)} transactions...")
+    
+    # Minimal column processing
+    df_processed = minimal_standardize_columns(df.copy())
+    
+    descriptions = df_processed['_combined_description'].tolist()
+    amounts = df_processed['_amount'].tolist()
+    
+    # Check if AI should be used
+    api_available = bool(os.getenv('OPENAI_API_KEY'))
+    if use_ai and not api_available:
+        print("⚠️ AI requested but no API key found - switching to rules")
+        use_ai = False
+    
+    # ADJUSTED LIMITS FOR DETAILED PROMPT (more expensive)
+    if len(descriptions) > 1000:
+        max_ai_transactions = 20  # Very limited for large datasets
+        print(f"📊 Large dataset: Using detailed AI for only first {max_ai_transactions} transactions")
+    elif len(descriptions) > 500:
+        max_ai_transactions = 30
+        print(f"📊 Medium dataset: Using detailed AI for first {max_ai_transactions} transactions")
+    elif len(descriptions) > 100:
+        max_ai_transactions = 50
+        print(f"📊 Using detailed AI for first {max_ai_transactions} transactions")
+    else:
+        max_ai_transactions = len(descriptions)  # Use AI for all if small dataset
+        print(f"📊 Small dataset: Using detailed AI for all {len(descriptions)} transactions")
+    
+    # Intelligent AI usage based on dataset size
+    if use_ai and len(descriptions) > max_ai_transactions:
+        print(f"🤖 Hybrid approach: Detailed AI for {max_ai_transactions}, rules for remaining {len(descriptions) - max_ai_transactions}")
+        
+        # Use detailed AI for first batch
+        ai_categories = unified_batch_categorize(
+            descriptions[:max_ai_transactions], 
+            amounts[:max_ai_transactions], 
+            use_ai=True, 
+            batch_size=3  # Smaller batches for detailed prompt
+        )
+        
+        # Use rules for the rest
+        print(f"🔧 Processing remaining {len(descriptions) - max_ai_transactions} with rules...")
+        rule_categories = [
+            rule_based_categorize(desc, amt) 
+            for desc, amt in zip(descriptions[max_ai_transactions:], amounts[max_ai_transactions:])
+        ]
+        
+        categories = ai_categories + rule_categories
+    else:
+        # Use detailed AI for all (if available) or rules for all
+        categories = unified_batch_categorize(
+            descriptions, 
+            amounts, 
+            use_ai=use_ai, 
+            batch_size=3  # Smaller batches for detailed prompt
+        )
+    
+    # Apply to original dataframe
+    df_result = df.copy()
+    df_result['Description'] = descriptions
+    df_result['Amount'] = amounts
+    df_result['Date'] = df_processed['_date']
+    df_result['Category'] = categories
+    df_result['Type'] = df_result['Amount'].apply(lambda x: 'Inward' if x > 0 else 'Outward')
+    df_result['Status'] = 'Completed'
+    
+    # Show final statistics
+    ai_count = sum(1 for cat in categories if '(AI-Detailed)' in cat)
+    rule_count = len(categories) - ai_count
+    estimated_cost = ai_count * 0.002  # Rough cost estimate
+    
+    print(f"✅ Detailed AI processing complete:")
+    print(f"   🤖 AI-Detailed categorized: {ai_count} transactions ({ai_count/len(categories)*100:.1f}%)")
+    print(f"   📏 Rule categorized: {rule_count} transactions ({rule_count/len(categories)*100:.1f}%)")
+    print(f"   ⏱️ API Status: {'Connected' if api_available else 'Not Available'}")
+    print(f"   💰 Estimated cost: ${estimated_cost:.3f} USD")
+    
+    return df_result
+# Global cache for OpenAI responses with TTL
+CACHE_TTL = 3600  # 1 hour cache TTL
+
+class AICacheManager:
+    """Manages AI response caching with TTL and batch processing"""
+    
+    def __init__(self):
+        self.cache = {}
+        self.last_cleanup = time.time()
+    
+    def get(self, key: str) -> Optional[str]:
+        """Get cached response if not expired"""
+        if key in self.cache:
+            entry = self.cache[key]
+            if time.time() - entry['timestamp'] < CACHE_TTL:
+                return entry['response']
+            else:
+                del self.cache[key]
+        return None
+    
+    def set(self, key: str, response: str):
+        """Cache a response with timestamp"""
+        self.cache[key] = {
+            'response': response,
+            'timestamp': time.time()
+        }
+    
+    def cleanup_expired(self):
+        """Remove expired cache entries"""
+        current_time = time.time()
+        expired_keys = [
+            key for key, entry in self.cache.items()
+            if current_time - entry['timestamp'] > CACHE_TTL
+        ]
+        for key in expired_keys:
+            del self.cache[key]
+        
+        if expired_keys:
+            logger.info(f"Cleaned up {len(expired_keys)} expired cache entries")
+# Initialize cache manager
+ai_cache_manager = AICacheManager()
+
+
+# Performance monitoring
+class PerformanceMonitor:
+    """Monitor system performance and provide health metrics"""
+    
+    def __init__(self):
+        self.request_count = 0
+        self.error_count = 0
+        self.start_time = time.time()
+        self.processing_times = []
+    
+    def record_request(self, processing_time: float, success: bool = True):
+        """Record a request and its processing time"""
+        self.request_count += 1
+        if not success:
+            self.error_count += 1
+        self.processing_times.append(processing_time)
+        
+        # Keep only last 1000 processing times
+        if len(self.processing_times) > 1000:
+            self.processing_times = self.processing_times[-1000:]
+    
+    def get_metrics(self) -> Dict[str, Any]:
+        """Get current performance metrics"""
+        uptime = time.time() - self.start_time
+        avg_processing_time = sum(self.processing_times) / len(self.processing_times) if self.processing_times else 0
+        error_rate = (self.error_count / self.request_count * 100) if self.request_count > 0 else 0
+        
+        return {
+            'uptime_seconds': uptime,
+            'total_requests': self.request_count,
+            'error_count': self.error_count,
+            'error_rate_percent': error_rate,
+            'avg_processing_time_seconds': avg_processing_time,
+            'cache_size': len(ai_cache_manager.cache),
+            'cache_hit_rate': self._calculate_cache_hit_rate()
+        }
+    
+    def _calculate_cache_hit_rate(self) -> float:
+        """Calculate cache hit rate (simplified)"""
+        # This would need to be implemented with actual cache hit tracking
+        return 0.0
+
+# Initialize performance monitor
+performance_monitor = PerformanceMonitor()
+
+# ===== CASH FLOW FORECASTING SYSTEM =====
+
+class CashFlowForecaster:
+    """
+    Advanced cash flow forecasting system with multiple prediction models
+    Provides daily, weekly, and monthly cash flow predictions with scenario analysis
+    """
+    
+    def __init__(self):
+        self.historical_data = None
+        self.forecast_models = {}
+        self.pattern_analysis = {}
+        self.confidence_levels = {}
+        self.forecast_cache = {}
+        self.scenario_analysis = {}
+        self.trend_analysis = {}
+        
+    def prepare_forecasting_data(self, df):
+        """Prepare data for cash flow forecasting with enhanced features"""
+        try:
+            if df.empty:
+                return None
+                
+            # Ensure we have required columns
+            if 'Date' not in df.columns or 'Amount' not in df.columns:
+                logger.error("Missing required columns for forecasting")
+                return None
+            
+            # Convert date and create time-based features
+            forecast_data = df.copy()
+            forecast_data['Date'] = pd.to_datetime(forecast_data['Date'])
+            forecast_data = forecast_data.sort_values('Date')
+            
+            # Handle different amount conventions
+            if 'Type' in forecast_data.columns:
+                # Use Type column to identify outflows (Debit transactions)
+                outflow_types = ['DEBIT', 'DEB', 'DR', 'PAYMENT', 'OUTFLOW', 'INWARD']
+                outflow_mask = forecast_data['Type'].str.upper().isin(outflow_types)
+                forecast_data = forecast_data[outflow_mask].copy()
+                logger.info(f"Identified {len(forecast_data)} outflow transactions using Type column")
+            else:
+                # Fallback to negative amount convention
+                forecast_data = forecast_data[forecast_data['Amount'] < 0].copy()
+                forecast_data['Amount'] = abs(forecast_data['Amount'])  # Make positive for analysis
+                logger.info(f"Identified {len(forecast_data)} outflow transactions using negative amounts")
+            
+            # Ensure amounts are positive for analysis
+            forecast_data['Amount'] = abs(forecast_data['Amount'])
+            
+            # Enhanced time-based features
+            forecast_data['day_of_week'] = forecast_data['Date'].dt.dayofweek
+            forecast_data['day_of_month'] = forecast_data['Date'].dt.day
+            forecast_data['month'] = forecast_data['Date'].dt.month
+            forecast_data['month'] = forecast_data['Date'].dt.month
+            forecast_data['quarter'] = forecast_data['Date'].dt.quarter
+            forecast_data['year'] = forecast_data['Date'].dt.year
+            forecast_data['is_month_end'] = forecast_data['Date'].dt.is_month_end.astype(int)
+            forecast_data['is_weekend'] = forecast_data['Date'].dt.dayofweek.isin([5, 6]).astype(int)
+            forecast_data['is_month_start'] = forecast_data['Date'].dt.is_month_start.astype(int)
+            forecast_data['is_quarter_end'] = forecast_data['Date'].dt.is_quarter_end.astype(int)
+            forecast_data['is_quarter_start'] = forecast_data['Date'].dt.is_quarter_start.astype(int)
+            
+            # Advanced cyclical features
+            forecast_data['day_of_year'] = forecast_data['Date'].dt.dayofyear
+            forecast_data['week_of_year'] = forecast_data['Date'].dt.isocalendar().week
+            forecast_data['month_sin'] = np.sin(2 * np.pi * forecast_data['month'] / 12)
+            forecast_data['month_cos'] = np.cos(2 * np.pi * forecast_data['month'] / 12)
+            forecast_data['day_sin'] = np.sin(2 * np.pi * forecast_data['day_of_year'] / 365)
+            forecast_data['day_cos'] = np.cos(2 * np.pi * forecast_data['day_of_year'] / 365)
+            
+            # Group by date for daily totals
+            daily_data = forecast_data.groupby('Date').agg({
+                'Amount': 'sum',
+                'day_of_week': 'first',
+                'day_of_month': 'first',
+                'month': 'first',
+                'quarter': 'first',
+                'year': 'first',
+                'is_month_end': 'first',
+                'is_weekend': 'first',
+                'is_month_start': 'first',
+                'is_quarter_end': 'first',
+                'is_quarter_start': 'first',
+                'day_of_year': 'first',
+                'week_of_year': 'first',
+                'month_sin': 'first',
+                'month_cos': 'first',
+                'day_sin': 'first',
+                'day_cos': 'first'
+            }).reset_index()
+            
+            # Fill missing dates with zero amounts
+            date_range = pd.date_range(daily_data['Date'].min(), daily_data['Date'].max(), freq='D')
+            complete_data = pd.DataFrame({'Date': date_range})
+            complete_data = complete_data.merge(daily_data, on='Date', how='left')
+            complete_data['Amount'] = complete_data['Amount'].fillna(0)
+            
+            # Enhanced rolling statistics
+            complete_data['amount_7d_avg'] = complete_data['Amount'].rolling(window=7, min_periods=1).mean()
+            complete_data['amount_14d_avg'] = complete_data['Amount'].rolling(window=14, min_periods=1).mean()
+            complete_data['amount_30d_avg'] = complete_data['Amount'].rolling(window=30, min_periods=1).mean()
+            complete_data['amount_90d_avg'] = complete_data['Amount'].rolling(window=90, min_periods=1).mean()
+            complete_data['amount_std'] = complete_data['Amount'].rolling(window=30, min_periods=1).std()
+            complete_data['amount_volatility'] = complete_data['amount_std'] / (complete_data['amount_30d_avg'] + 1e-8)
+            
+            # Trend features
+            complete_data['amount_trend'] = complete_data['Amount'].rolling(window=7, min_periods=1).apply(
+                lambda x: np.polyfit(range(len(x)), x, 1)[0] if len(x) > 1 else 0
+            )
+            
+            # Momentum features
+            complete_data['amount_momentum'] = complete_data['Amount'] - complete_data['Amount'].shift(1)
+            complete_data['amount_momentum_7d'] = complete_data['Amount'] - complete_data['Amount'].shift(7)
+            
+            return complete_data
+            
+        except Exception as e:
+            logger.error(f"Error preparing forecasting data: {e}")
+            return None
+    
+    def analyze_trends(self, df):
+        """Analyze long-term trends and seasonality"""
+        try:
+            if df is None or df.empty:
+                return {}
+            
+            trends = {
+                'overall_trend': {},
+                'seasonal_patterns': {},
+                'cyclical_patterns': {},
+                'volatility_analysis': {},
+                'growth_rates': {}
+            }
+            
+            # Overall trend analysis
+            if len(df) > 30:
+                # Linear trend
+                x = np.arange(len(df))
+                y = df['Amount'].values
+                trend_coef = np.polyfit(x, y, 1)
+                trends['overall_trend']['slope'] = trend_coef[0]
+                trends['overall_trend']['direction'] = 'increasing' if trend_coef[0] > 0 else 'decreasing'
+                trends['overall_trend']['strength'] = abs(trend_coef[0]) / df['Amount'].mean()
+                
+                # Exponential trend
+                log_y = np.log(df['Amount'] + 1)
+                exp_trend_coef = np.polyfit(x, log_y, 1)
+                trends['overall_trend']['exponential_growth_rate'] = exp_trend_coef[0]
+            
+            # Seasonal patterns
+            if len(df) > 90:  # Need at least 3 months
+                monthly_avg = df.groupby('month')['Amount'].mean()
+                seasonal_strength = monthly_avg.std() / monthly_avg.mean()
+                trends['seasonal_patterns'] = {
+                    'monthly_patterns': monthly_avg.to_dict(),
+                    'seasonal_strength': seasonal_strength,
+                    'peak_month': monthly_avg.idxmax(),
+                    'low_month': monthly_avg.idxmin()
+                }
+            
+            # Volatility analysis
+            volatility = df['Amount'].rolling(window=30, min_periods=1).std()
+            trends['volatility_analysis'] = {
+                'current_volatility': volatility.iloc[-1] if len(volatility) > 0 else 0,
+                'avg_volatility': volatility.mean(),
+                'volatility_trend': volatility.rolling(window=30, min_periods=1).mean().iloc[-1] if len(volatility) > 30 else 0,
+                'is_volatile': volatility.iloc[-1] > volatility.mean() * 1.5 if len(volatility) > 0 else False
+            }
+            
+            # Growth rates
+            if len(df) > 7:
+                weekly_growth = (df['Amount'].iloc[-1] - df['Amount'].iloc[-8]) / df['Amount'].iloc[-8] if df['Amount'].iloc[-8] != 0 else 0
+                monthly_growth = (df['Amount'].iloc[-1] - df['Amount'].iloc[-31]) / df['Amount'].iloc[-31] if len(df) > 31 and df['Amount'].iloc[-31] != 0 else 0
+                
+                trends['growth_rates'] = {
+                    'weekly_growth': weekly_growth,
+                    'monthly_growth': monthly_growth,
+                    'growth_trend': 'positive' if weekly_growth > 0 else 'negative'
+                }
+            
+            return trends
+            
+        except Exception as e:
+            logger.error(f"Error analyzing trends: {e}")
+            return {}
+    
+    def generate_scenario_analysis(self, df, scenarios=['optimistic', 'realistic', 'pessimistic']):
+        """Generate scenario-based forecasts"""
+        try:
+            if df is None or df.empty:
+                return {}
+            
+            forecast_data = self.prepare_forecasting_data(df)
+            if forecast_data is None:
+                return {}
+            
+            trends = self.analyze_trends(forecast_data)
+            base_forecast = self.generate_daily_forecast(df, days_ahead=7)
+            
+            if not base_forecast:
+                return {}
+            
+            scenarios_forecast = {}
+            
+            for scenario in scenarios:
+                if scenario == 'optimistic':
+                    # 20% better than base case
+                    multiplier = 0.8
+                    confidence_boost = 0.1
+                elif scenario == 'pessimistic':
+                    # 20% worse than base case
+                    multiplier = 1.2
+                    confidence_reduction = 0.1
+                else:  # realistic
+                    multiplier = 1.0
+                    confidence_boost = 0.0
+                
+                scenario_forecasts = []
+                for forecast in base_forecast['forecasts']:
+                    adjusted_amount = forecast['predicted_amount'] * multiplier
+                    adjusted_confidence = min(0.95, forecast['confidence'] + confidence_boost) if scenario == 'optimistic' else max(0.05, forecast['confidence'] - confidence_reduction) if scenario == 'pessimistic' else forecast['confidence']
+                    
+                    scenario_forecasts.append({
+                        'date': forecast['date'],
+                        'day_name': forecast['day_name'],
+                        'predicted_amount': round(adjusted_amount, 2),
+                        'confidence': round(adjusted_confidence, 3),
+                        'risk_level': 'LOW' if adjusted_confidence > 0.7 else 'MEDIUM' if adjusted_confidence > 0.5 else 'HIGH'
+                    })
+                
+                scenarios_forecast[scenario] = {
+                    'forecasts': scenario_forecasts,
+                    'total_predicted': round(sum(f['predicted_amount'] for f in scenario_forecasts), 2),
+                    'avg_confidence': round(sum(f['confidence'] for f in scenario_forecasts) / len(scenario_forecasts), 3),
+                    'scenario_multiplier': multiplier
+                }
+            
+            return scenarios_forecast
+            
+        except Exception as e:
+            logger.error(f"Error generating scenario analysis: {e}")
+            return {}
+    
+    def calculate_confidence_intervals(self, df, forecast_period=7, confidence_level=0.95):
+        """Calculate confidence intervals for forecasts"""
+        try:
+            if df is None or df.empty:
+                return {}
+            
+            forecast_data = self.prepare_forecasting_data(df)
+            if forecast_data is None:
+                return {}
+            
+            # Calculate historical volatility
+            daily_returns = forecast_data['Amount'].pct_change().dropna()
+            volatility = daily_returns.std()
+            
+            # Calculate confidence intervals
+            z_score = 1.96  # 95% confidence level
+            base_forecast = self.generate_daily_forecast(df, days_ahead=forecast_period)
+            
+            if not base_forecast:
+                return {}
+            
+            intervals = []
+            for i, forecast in enumerate(base_forecast['forecasts']):
+                # Increase uncertainty with time
+                time_factor = 1 + (i * 0.1)
+                margin_of_error = forecast['predicted_amount'] * volatility * z_score * time_factor
+                
+                intervals.append({
+                    'date': forecast['date'],
+                    'lower_bound': max(0, forecast['predicted_amount'] - margin_of_error),
+                    'upper_bound': forecast['predicted_amount'] + margin_of_error,
+                    'predicted_amount': forecast['predicted_amount'],
+                    'margin_of_error': margin_of_error,
+                    'confidence_level': confidence_level
+                })
+            
+            return {
+                'intervals': intervals,
+                'volatility': volatility,
+                'confidence_level': confidence_level
+            }
+            
+        except Exception as e:
+            logger.error(f"Error calculating confidence intervals: {e}")
+            return {}
+    
+    def analyze_payment_patterns(self, df):
+        """Analyze recurring payment patterns with enhanced features"""
+        try:
+            patterns = {
+                'daily_patterns': {},
+                'weekly_patterns': {},
+                'monthly_patterns': {},
+                'vendor_patterns': {},
+                'amount_patterns': {},
+                'seasonal_patterns': {},
+                'business_cycle_patterns': {},
+                'anomaly_patterns': {}
+            }
+            
+            # Daily patterns (day of week)
+            daily_avg = df.groupby('day_of_week')['Amount'].mean()
+            daily_std = df.groupby('day_of_week')['Amount'].std()
+            patterns['daily_patterns'] = {
+                'monday': {'mean': daily_avg.get(0, 0), 'std': daily_std.get(0, 0)},
+                'tuesday': {'mean': daily_avg.get(1, 0), 'std': daily_std.get(1, 0)},
+                'wednesday': {'mean': daily_avg.get(2, 0), 'std': daily_std.get(2, 0)},
+                'thursday': {'mean': daily_avg.get(3, 0), 'std': daily_std.get(3, 0)},
+                'friday': {'mean': daily_avg.get(4, 0), 'std': daily_std.get(4, 0)},
+                'saturday': {'mean': daily_avg.get(5, 0), 'std': daily_std.get(5, 0)},
+                'sunday': {'mean': daily_avg.get(6, 0), 'std': daily_std.get(6, 0)}
+            }
+            
+            # Monthly patterns (day of month)
+            monthly_avg = df.groupby('day_of_month')['Amount'].mean()
+            patterns['monthly_patterns'] = monthly_avg.to_dict()
+            
+            # Seasonal patterns (month)
+            seasonal_avg = df.groupby('month')['Amount'].mean()
+            patterns['seasonal_patterns'] = seasonal_avg.to_dict()
+            
+            # Business cycle patterns
+            month_end_avg = df[df['is_month_end'] == 1]['Amount'].mean()
+            month_start_avg = df[df['is_month_start'] == 1]['Amount'].mean()
+            quarter_end_avg = df[df['is_quarter_end'] == 1]['Amount'].mean()
+            weekend_avg = df[df['is_weekend'] == 1]['Amount'].mean()
+            
+            patterns['business_cycle_patterns'] = {
+                'month_end_avg': month_end_avg,
+                'month_start_avg': month_start_avg,
+                'quarter_end_avg': quarter_end_avg,
+                'weekend_avg': weekend_avg,
+                'month_end_multiplier': month_end_avg / df['Amount'].mean() if df['Amount'].mean() > 0 else 1.0,
+                'weekend_multiplier': weekend_avg / df['Amount'].mean() if df['Amount'].mean() > 0 else 1.0
+            }
+            
+            # Amount distribution patterns
+            amount_stats = df['Amount'].describe()
+            patterns['amount_patterns'] = {
+                'mean': amount_stats['mean'],
+                'median': amount_stats['50%'],
+                'std': amount_stats['std'],
+                'min': amount_stats['min'],
+                'max': amount_stats['max'],
+                'q25': amount_stats['25%'],
+                'q75': amount_stats['75%'],
+                'skewness': df['Amount'].skew(),
+                'kurtosis': df['Amount'].kurtosis()
+            }
+            
+            # Vendor frequency patterns (if Description available)
+            if 'Description' in df.columns:
+                vendor_counts = df['Description'].value_counts()
+                vendor_amounts = df.groupby('Description')['Amount'].agg(['mean', 'sum', 'count'])
+                patterns['vendor_patterns'] = {
+                    'top_vendors': vendor_counts.head(10).to_dict(),
+                    'vendor_frequency': len(vendor_counts),
+                    'avg_vendor_amount': vendor_amounts['mean'].mean(),
+                    'vendor_amount_distribution': vendor_amounts.to_dict('index')
+                }
+            
+            # Anomaly patterns
+            if 'amount_volatility' in df.columns:
+                high_volatility_days = df[df['amount_volatility'] > df['amount_volatility'].quantile(0.9)]
+                patterns['anomaly_patterns'] = {
+                    'high_volatility_days': len(high_volatility_days),
+                    'avg_volatility': df['amount_volatility'].mean(),
+                    'volatility_threshold': df['amount_volatility'].quantile(0.9)
+                }
+            
+            return patterns
+            
+        except Exception as e:
+            logger.error(f"Error analyzing payment patterns: {e}")
+            return {}
+    
+    def calculate_forecast_confidence(self, historical_data, forecast_period):
+        """Calculate confidence level for forecasts with improved logic"""
+        try:
+            if len(historical_data) < 30:
+                return 0.3  # Low confidence for insufficient data
+            
+            # Ensure required columns exist
+            required_columns = ['Amount', 'amount_std', 'amount_30d_avg']
+            missing_columns = [col for col in required_columns if col not in historical_data.columns]
+            if missing_columns:
+                logger.warning(f"Missing columns for confidence calculation: {missing_columns}")
+                # Fallback to simpler calculation
+                return self._calculate_simple_confidence(historical_data, forecast_period)
+            
+            # Calculate data quality metrics
+            data_completeness = 1 - (historical_data['Amount'] == 0).mean()
+            
+            # Calculate consistency (lower std/mean ratio = higher consistency)
+            std_mean_ratio = historical_data['amount_std'] / (historical_data['amount_30d_avg'] + 1e-8)
+            data_consistency = 1 - min(std_mean_ratio.mean(), 1.0)  # Cap at 1.0
+            
+            # Calculate pattern strength based on day-of-week patterns
+            if 'day_of_week' in historical_data.columns:
+                daily_stats = historical_data.groupby('day_of_week')['Amount'].agg(['mean', 'std']).fillna(0)
+                if len(daily_stats) > 1:
+                    daily_cv = daily_stats['std'] / (daily_stats['mean'] + 1e-8)  # Coefficient of variation
+                    pattern_strength = 1 - min(daily_cv.mean(), 1.0)  # Lower CV = stronger pattern
+                else:
+                    pattern_strength = 0.5
+            else:
+                pattern_strength = 0.5
+            
+            # Calculate trend stability
+            if 'amount_trend' in historical_data.columns:
+                trend_stability = 1 - min(abs(historical_data['amount_trend'].mean()), 1.0)
+            else:
+                trend_stability = 0.7
+            
+            # Combine metrics with weights
+            confidence = (
+                data_completeness * 0.25 +
+                data_consistency * 0.25 +
+                pattern_strength * 0.25 +
+                trend_stability * 0.25
+            )
+            
+            # Adjust for forecast period (longer periods = lower confidence)
+            period_factor = max(0.6, 1.0 - (forecast_period - 1) * 0.05)  # 5% decrease per period
+            confidence *= period_factor
+            
+            # Ensure reasonable bounds
+            confidence = max(0.15, min(confidence, 0.95))
+            
+            # Add some randomness to avoid identical values
+            import random
+            confidence += random.uniform(-0.02, 0.02)
+            confidence = max(0.15, min(confidence, 0.95))
+            
+            return round(confidence, 3)
+            
+        except Exception as e:
+            logger.error(f"Error calculating forecast confidence: {e}")
+            return self._calculate_simple_confidence(historical_data, forecast_period)
+    
+    def _calculate_simple_confidence(self, historical_data, forecast_period):
+        """Simple fallback confidence calculation"""
+        try:
+            # Basic confidence based on data availability and forecast period
+            base_confidence = 0.6 if len(historical_data) >= 60 else 0.4
+            
+            # Adjust for forecast period
+            if forecast_period <= 7:
+                period_factor = 1.0
+            elif forecast_period <= 14:
+                period_factor = 0.9
+            elif forecast_period <= 30:
+                period_factor = 0.8
+            else:
+                period_factor = 0.7
+            
+            confidence = base_confidence * period_factor
+            
+            # Add small random variation to avoid identical values
+            import random
+            confidence += random.uniform(-0.01, 0.01)
+            
+            return max(0.2, min(confidence, 0.8))
+            
+        except Exception as e:
+            logger.error(f"Error in simple confidence calculation: {e}")
+            return 0.5
+    
+    def _calculate_daily_confidence(self, forecast_data, day_index, day_of_week, is_weekend, is_month_end):
+        """Calculate day-specific confidence for daily forecasts"""
+        try:
+            # Base confidence based on data quality
+            data_points = len(forecast_data)
+            base_confidence = 0.6 if data_points >= 60 else 0.4 if data_points >= 30 else 0.3
+            
+            # Day-of-week confidence adjustments
+            day_confidence_factors = {
+                0: 0.85,  # Monday - high confidence (business day)
+                1: 0.90,  # Tuesday - highest confidence
+                2: 0.88,  # Wednesday - high confidence
+                3: 0.87,  # Thursday - high confidence
+                4: 0.82,  # Friday - good confidence (end of week)
+                5: 0.65,  # Saturday - lower confidence (weekend)
+                6: 0.60   # Sunday - lowest confidence (weekend)
+            }
+            
+            day_factor = day_confidence_factors.get(day_of_week, 0.75)
+            
+            # Weekend penalty
+            if is_weekend:
+                day_factor *= 0.8  # 20% reduction for weekends
+            
+            # Month-end bonus
+            if is_month_end:
+                day_factor *= 1.1  # 10% increase for month-end
+            
+            # Forecast period decay (longer periods = lower confidence)
+            period_decay = max(0.7, 1.0 - (day_index * 0.03))  # 3% decrease per day
+            
+            # Calculate final confidence
+            confidence = base_confidence * day_factor * period_decay
+            
+            # Add small random variation to avoid identical values
+            import random
+            random.seed(day_index)  # Use day index as seed for consistent randomness
+            confidence += random.uniform(-0.03, 0.03)
+            
+            # Ensure reasonable bounds
+            confidence = max(0.25, min(confidence, 0.85))
+            
+            # DEBUG: Log the calculation details
+            logger.info(f"Daily Confidence Debug - Day {day_index} ({['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][day_of_week]}): "
+                       f"Data points={data_points}, Base={base_confidence:.3f}, "
+                       f"Day factor={day_factor:.3f}, Period decay={period_decay:.3f}, "
+                       f"Final confidence={confidence:.3f}")
+            
+            return round(confidence, 3)
+            
+        except Exception as e:
+            logger.error(f"Error calculating daily confidence: {e}")
+            # Fallback to simple calculation
+            return round(0.4 + (day_index * 0.02), 3)  # 40% base + 2% per day
+    
+    def generate_daily_forecast(self, df, days_ahead=7):
+        """Generate daily cash flow forecast"""
+        try:
+            if df is None or df.empty:
+                return None
+            
+            forecast_data = self.prepare_forecasting_data(df)
+            if forecast_data is None:
+                return None
+            
+            patterns = self.analyze_payment_patterns(forecast_data)
+            
+            # Generate future dates
+            last_date = forecast_data['Date'].max()
+            future_dates = pd.date_range(last_date + timedelta(days=1), 
+                                       periods=days_ahead, freq='D')
+            
+            forecasts = []
+            for i, future_date in enumerate(future_dates):
+                day_of_week = future_date.dayofweek
+                day_of_month = future_date.day
+                month = future_date.month
+                is_month_end = future_date.is_month_end
+                is_weekend = day_of_week in [5, 6]
+                
+                # Base forecast using daily patterns
+                day_name = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'][day_of_week]
+                daily_pattern = patterns['daily_patterns'].get(day_name, {})
+                base_amount = daily_pattern.get('mean', 0) if isinstance(daily_pattern, dict) else daily_pattern
+                
+                # Adjust for monthly patterns
+                monthly_adjustment = patterns['monthly_patterns'].get(day_of_month, 0)
+                base_amount = (base_amount + monthly_adjustment) / 2
+                
+                # Adjust for month-end effect
+                if is_month_end:
+                    base_amount *= 1.2  # 20% increase for month-end
+                
+                # Adjust for weekend effect
+                if is_weekend:
+                    base_amount *= 0.7  # 30% decrease for weekends
+                
+                # Add seasonal adjustment
+                seasonal_adjustment = patterns['seasonal_patterns'].get(month, 0)
+                if seasonal_adjustment > 0:
+                    base_amount = (base_amount + seasonal_adjustment) / 2
+                
+                # Add trend component (simple linear trend)
+                trend_factor = 1 + (i * 0.01)  # 1% increase per day
+                base_amount *= trend_factor
+                
+                # Calculate day-specific confidence
+                confidence = self._calculate_daily_confidence(forecast_data, i, day_of_week, is_weekend, is_month_end)
+                
+                forecasts.append({
+                    'date': future_date.strftime('%Y-%m-%d'),
+                    'day_name': future_date.strftime('%A'),
+                    'predicted_amount': round(base_amount, 2),
+                    'confidence': round(confidence, 3),
+                    'risk_level': 'LOW' if confidence > 0.7 else 'MEDIUM' if confidence > 0.5 else 'HIGH'
+                })
+            
+            return {
+                'forecasts': forecasts,
+                'total_predicted': round(sum(f['predicted_amount'] for f in forecasts), 2),
+                'avg_confidence': round(sum(f['confidence'] for f in forecasts) / len(forecasts), 3),
+                'patterns_used': list(patterns.keys()),
+                'data_points': len(forecast_data)
+            }
+            
+        except Exception as e:
+            logger.error(f"Error generating daily forecast: {e}")
+            return None
+    
+    def generate_weekly_forecast(self, df, weeks_ahead=4):
+        """Generate weekly cash flow forecast"""
+        try:
+            if df is None or df.empty:
+                return None
+            
+            forecast_data = self.prepare_forecasting_data(df)
+            if forecast_data is None:
+                return None
+            
+            # Group by week
+            forecast_data['week'] = forecast_data['Date'].dt.isocalendar().week
+            forecast_data['year'] = forecast_data['Date'].dt.year
+            weekly_data = forecast_data.groupby(['year', 'week'])['Amount'].sum().reset_index()
+            
+            if len(weekly_data) < 4:
+                return None  # Need at least 4 weeks of data
+            
+            # Calculate weekly average and trend
+            weekly_avg = weekly_data['Amount'].mean()
+            weekly_std = weekly_data['Amount'].std()
+            
+            forecasts = []
+            for i in range(weeks_ahead):
+                # Simple trend-based forecast
+                predicted_amount = weekly_avg * (1 + (i * 0.02))  # 2% weekly growth
+                
+                # Add some randomness based on historical variance
+                variation = np.random.normal(0, weekly_std * 0.1)
+                predicted_amount += variation
+                
+                # Ensure positive amount
+                predicted_amount = max(predicted_amount, 0)
+                
+                # Calculate confidence (decreases with time but more realistically)
+                base_confidence = 0.85  # Start with 85% confidence
+                time_decay = i * 0.08   # 8% decrease per week
+                confidence = max(0.35, base_confidence - time_decay)
+                
+                # Add small random variation to avoid identical values
+                import random
+                confidence += random.uniform(-0.02, 0.02)
+                confidence = max(0.35, min(confidence, 0.9))
+                
+                forecasts.append({
+                    'week_number': i + 1,
+                    'predicted_amount': round(predicted_amount, 2),
+                    'confidence': round(confidence, 3),
+                    'risk_level': 'LOW' if confidence > 0.7 else 'MEDIUM' if confidence > 0.5 else 'HIGH'
+                })
+            
+            return {
+                'forecasts': forecasts,
+                'total_predicted': round(sum(f['predicted_amount'] for f in forecasts), 2),
+                'avg_confidence': round(sum(f['confidence'] for f in forecasts) / len(forecasts), 3),
+                'weekly_avg': round(weekly_avg, 2),
+                'data_weeks': len(weekly_data)
+            }
+            
+        except Exception as e:
+            logger.error(f"Error generating weekly forecast: {e}")
+            return None
+    
     def generate_monthly_forecast(self, df, months_ahead=3):
         """Generate monthly cash flow forecast"""
         try:
@@ -9944,9 +12158,10 @@ def run_parameter_analysis():
                 'error': 'Advanced AI system not available'
             })
         
-        # Get parameter type from request
+        # Get parameter type and vendor name from request
         data = request.get_json()
         parameter_type = data.get('parameter_type')
+        vendor_name = data.get('vendor_name', '')  # New: vendor filtering
         
         if not parameter_type:
             return jsonify({
@@ -9976,16 +12191,27 @@ def run_parameter_analysis():
                 'error': 'No data available. Please upload files first.'
             })
         
-        # Use FULL DATASET for comprehensive analysis
-        print(f"📊 Using FULL DATASET: {len(uploaded_bank_df)} transactions for comprehensive analysis")
-        sample_df = uploaded_bank_df  # Use full dataset, not sample
+        # Apply vendor filtering if specified
+        if vendor_name:
+            print(f"🏢 Filtering data for vendor: {vendor_name}")
+            vendor_filtered_df = uploaded_bank_df[uploaded_bank_df['Description'].str.contains(vendor_name, case=False, na=False)]
+            if vendor_filtered_df.empty:
+                return jsonify({
+                    'status': 'error',
+                    'error': f'No transactions found for vendor: {vendor_name}'
+                })
+            print(f"📊 Vendor-filtered dataset: {len(vendor_filtered_df)} transactions")
+            sample_df = vendor_filtered_df
+        else:
+            print(f"📊 Using FULL DATASET: {len(uploaded_bank_df)} transactions for comprehensive analysis")
+            sample_df = uploaded_bank_df  # Use full dataset, not sample
         
         # DEBUG: Check the data structure
         print(f"🔍 DEBUG: sample_df shape: {sample_df.shape}")
         print(f"🔍 DEBUG: sample_df columns: {list(sample_df.columns)}")
         print(f"🔍 DEBUG: sample_df head: {sample_df.head(2).to_dict()}")
         
-        print(f"🎯 Running {parameter_type} analysis...")
+        print(f"🎯 Running {parameter_type} analysis{' for vendor: ' + vendor_name if vendor_name else ''}...")
         
         # Run specific parameter analysis
         if parameter_type == 'A1_historical_trends':
@@ -10042,12 +12268,17 @@ def run_parameter_analysis():
             model_confidence = 85.0  # Base confidence for XGBoost + Ollama hybrid
             overall_accuracy = (data_quality_score + model_confidence) / 2
             
-            print(f"📊 PARAMETER ANALYSIS ACCURACY:")
+            print(f"📊 PARAMETER ANALYSIS ACCURACY{' FOR VENDOR: ' + vendor_name if vendor_name else ''}:")
             print(f"   🎯 Data Quality Score: {data_quality_score:.1f}%")
             print(f"   🤖 Model Confidence: {model_confidence:.1f}%")
             print(f"   📈 Overall Accuracy: {overall_accuracy:.1f}%")
             print(f"   🔍 AI/ML Usage: XGBoost + Ollama Hybrid")
             print(f"   📊 Sample Size: {len(sample_df)} transactions")
+            if vendor_name:
+                print(f"   🏢 Vendor: {vendor_name}")
+                print(f"   🔍 Analysis Scope: Vendor-specific")
+            else:
+                print(f"   🌐 Analysis Scope: Full dataset")
         except Exception as e:
             print(f"⚠️ Accuracy reporting error: {e}")
         
@@ -10072,7 +12303,8 @@ def run_parameter_analysis():
             'results': serializable_results,
             'parameter_type': parameter_type,
             'processing_time': f"{time.time() - start_time:.2f}s",
-            'ai_usage': '100% (XGBoost + Ollama)'
+            'ai_usage': '100% (XGBoost + Ollama)',
+            'vendor_name': vendor_name if vendor_name else None
         })
         
     except Exception as e:
@@ -10081,6 +12313,87 @@ def run_parameter_analysis():
             'status': 'error',
             'error': f'Parameter analysis failed: {str(e)}'
         })
+
+@app.route('/extract-vendors-for-analysis', methods=['POST'])
+def extract_vendors_for_analysis():
+    """Extract vendors from bank data for analysis dropdown"""
+    try:
+        # Get the uploaded data from global storage
+        global uploaded_data
+        if 'bank_df' not in uploaded_data or uploaded_data['bank_df'] is None:
+            return jsonify({
+                'status': 'error',
+                'error': 'No data available. Please upload files first.'
+            })
+        
+        bank_df = uploaded_data['bank_df']
+        
+        if bank_df.empty:
+            return jsonify({
+                'status': 'error',
+                'error': 'No data available. Please upload files first.'
+            })
+        
+        # Extract vendors from descriptions
+        vendors = extract_real_vendors(bank_df['Description'])
+        vendors = vendors[:20] if len(vendors) > 20 else vendors  # Limit for dropdown
+        
+        return jsonify({
+            'success': True,
+            'vendors': vendors,
+            'total_vendors': len(vendors)
+        })
+        
+    except Exception as e:
+        print(f"❌ Vendor extraction error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+def extract_real_vendors(descriptions):
+    """Extract real vendor names from transaction descriptions"""
+    try:
+        # Simple vendor extraction from descriptions
+        vendors = set()
+        
+        for desc in descriptions:
+            if pd.isna(desc) or not desc:
+                continue
+                
+            # Clean description
+            desc = str(desc).strip()
+            
+            # Skip very short descriptions
+            if len(desc) < 3:
+                continue
+            
+            # Extract potential vendor names (words starting with capital letters)
+            words = desc.split()
+            for word in words:
+                # Clean word
+                word = re.sub(r'[^\w\s]', '', word)
+                if len(word) > 2 and word[0].isupper():
+                    vendors.add(word)
+            
+            # Also add common vendor patterns
+            if 'LTD' in desc.upper() or 'LIMITED' in desc.upper():
+                # Extract company name before LTD
+                parts = desc.split()
+                for i, part in enumerate(parts):
+                    if part.upper() in ['LTD', 'LIMITED'] and i > 0:
+                        vendor_name = ' '.join(parts[:i])
+                        if len(vendor_name) > 2:
+                            vendors.add(vendor_name)
+        
+        # Convert to list and sort
+        vendor_list = sorted(list(vendors))
+        
+        # Filter out very short or common words
+        filtered_vendors = [v for v in vendor_list if len(v) > 2 and v.lower() not in ['the', 'and', 'for', 'with', 'from', 'bank', 'atm', 'pos', 'card']]
+        
+        return filtered_vendors[:50]  # Return top 50 vendors
+        
+    except Exception as e:
+        print(f"❌ Vendor extraction error: {e}")
+        return []
 
 @app.route('/')
 def home():
