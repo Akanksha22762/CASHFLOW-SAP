@@ -5122,6 +5122,34 @@
             box-shadow: var(--shadow-md);
         }
 
+        .button-container {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .btn-icon:hover {
+            color: var(--primary-dark);
+            transform: scale(1.1);
+        }
+
+        .btn-icon:disabled {
+            color: var(--text-light);
+            cursor: not-allowed;
+            transform: none;
+        }
+
 
 
         /* Enhanced File Info Display */
@@ -5525,10 +5553,18 @@
                             </div>
                         </div>
                         
-                        <!-- Clean Upload Button -->
-                        <button class="btn btn-primary upload-btn" onclick="document.getElementById('bankFile').click()">
-                            Upload Bank Statement
-                        </button>
+                                                <!-- Button Container for Side by Side Layout -->
+                        <div class="button-container">
+                            <!-- Clean Upload Button -->
+                            <button class="btn btn-primary upload-btn" onclick="document.getElementById('bankFile').click()">
+                                Upload Bank Statement
+                            </button>
+                            
+                            <!-- Upload Symbol Only -->
+                            <button class="btn-icon" id="uploadBtn" onclick="uploadFiles()" disabled>
+                                <i class="fas fa-upload"></i>
+                            </button>
+                        </div>
                         
                         <!-- Clean File Info Display -->
                         <div id="bankFileInfo" class="file-info">
@@ -5544,13 +5580,6 @@
                     </div>
                 </div>
 
-                <div class="text-center mt-4">
-                    <button class="btn btn-primary" id="uploadBtn" onclick="uploadFiles()" disabled>
-                        <i class="fas fa-upload"></i>
-                        Upload & Process Files
-                    </button>
-                </div>
-
                 <div class="progress-container" id="uploadProgress">
                     <div class="loading-state">
                         <div class="loading-spinner"></div>
@@ -5563,32 +5592,7 @@
             </div>
         </div>
 
-        <!-- Step 2: Reconciliation Process -->
-        <div class="section-card">
-            <div class="section-content">
-                <div class="btn-group text-center">
-                    <button class="btn btn-secondary" id="reconcileBtn" onclick="reconcileData()">
-                        <i class="fas fa-cogs"></i>
-                        Start Reconciliation
-                    </button>
-                </div>
 
-                <div class="loading" id="loadingIndicator" style="display: none;">
-                    <div class="spinner"></div>
-                    <p>Processing reconciliation with AI categorization...</p>
-                </div>
-
-                <!-- Summary Dashboard -->
-                <div id="summaryDashboard" class="hidden">
-                    <h3 class="mb-3">
-                        <i class="fas fa-chart-pie"></i>
-                        Bank Statement Analysis Summary
-                    </h3>
-                    <div class="stats-grid-horizontal" id="summaryStats"></div>
-                    <div id="validationStatus"></div>
-                </div>
-            </div>
-        </div>
 
         <!-- Step 3: AI/ML Analysis Dashboard -->
         <div class="section-card">
@@ -9973,7 +9977,7 @@
                     console.log('Files uploaded - window.uploadedFiles:', window.uploadedFiles);
                     
                     filesProcessed = false;
-                    document.getElementById('reconcileBtn').disabled = false;
+
                     enablePredictionButtons(); // Enable AI buttons immediately after upload
                     enableRevenueAnalysis(); // Enable revenue analysis button
                     
@@ -9991,31 +9995,7 @@
             }
         }
 
-        async function reconcileData() {
-            try {
-                showLoading(true);
-                
-                const response = await fetch('/reconcile', {
-                    method: 'POST'
-                });
 
-                const data = await response.json();
-
-                if (response.ok) {
-                    showAlert('Reconciliation completed successfully with AI categorization!', 'success');
-                    filesProcessed = true;
-                    displaySummaryDashboard(data.summary);
-                    updateSummaryCards(data.summary);
-                    enablePredictionButtons(); // Enable prediction buttons after reconciliation
-                } else {
-                    showAlert(`Reconciliation Error: ${data.error}`, 'error');
-                }
-            } catch (error) {
-                showAlert(`Reconciliation Error: ${error.message}`, 'error');
-            } finally {
-                showLoading(false);
-            }
-        }
 
         async function runAnomalyDetection() {
             try {
@@ -11116,67 +11096,7 @@ async function downloadOrphanedPaymentsEnhanced() {
             document.getElementById('usersTrend').textContent = '+2.7%';
         }
 
-        function displaySummaryDashboard(summary) {
-            const dashboard = document.getElementById('summaryDashboard');
-            const statsContainer = document.getElementById('summaryStats');
-            
-            // Safety check for required elements
-            if (!statsContainer) {
-                console.error('summaryStats element not found');
-                return;
-            }
-            
-            statsContainer.innerHTML = `
-
-                <div onclick="showBankDetails('Bank Transactions', ${summary.bank_transactions}, 'bank')" 
-                     class="stat-card" style="cursor: pointer; transition: all 0.3s ease;"
-                     onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.15)'"
-                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 15px rgba(0,0,0,0.1)'">
-                    <i class="fas fa-university stat-icon"></i>
-                    <span class="stat-number">${summary.bank_transactions}</span>
-                    <span class="stat-label">Bank Transactions</span>
-                    <div style="font-size: 10px; opacity: 0.8; margin-top: 5px;">👆 Click for details</div>
-                </div>
-                <div onclick="showMatchDetails('Exact Matches', ${summary.exact_matches}, 'exact')" 
-                     class="stat-card" style="cursor: pointer; transition: all 0.3s ease;"
-                     onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.15)'"
-                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 15px rgba(0,0,0,0.1)'">
-                    <i class="fas fa-check-double stat-icon"></i>
-                    <span class="stat-number">${summary.exact_matches}</span>
-                    <span class="stat-label">Exact Matches</span>
-                    <div style="font-size: 10px; opacity: 0.8; margin-top: 5px;">👆 Click for details</div>
-                </div>
-                <div onclick="showMatchDetails('Fuzzy Matches', ${summary.fuzzy_matches}, 'fuzzy')" 
-                     class="stat-card" style="cursor: pointer; transition: all 0.3s ease;"
-                     onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.15)'"
-                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 15px rgba(0,0,0,0.1)'">
-                    <i class="fas fa-search stat-icon"></i>
-                    <span class="stat-number">${summary.fuzzy_matches}</span>
-                    <span class="stat-label">Fuzzy Matches</span>
-                    <div style="font-size: 10px; opacity: 0.8; margin-top: 5px;">👆 Click for details</div>
-                </div>
-                <div onclick="showMatchRateDetails('Match Rate', ${summary.match_rate}, 'rate')" 
-                     class="stat-card" style="cursor: pointer; transition: all 0.3s ease;"
-                     onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.15)'"
-                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 15px rgba(0,0,0,0.1)'">
-                    <i class="fas fa-percentage stat-icon"></i>
-                    <span class="stat-number">${summary.match_rate}%</span>
-                    <span class="stat-label">Match Rate</span>
-                    <div style="font-size: 10px; opacity: 0.8; margin-top: 5px;">👆 Click for details</div>
-                </div>
-                <div onclick="showAICategorizedDetails('AI Categorized', ${summary.ai_usage_stats?.ai_categorized || 0}, 'ai')" 
-                     class="stat-card" style="cursor: pointer; transition: all 0.3s ease;"
-                     onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.15)'"
-                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 15px rgba(0,0,0,0.1)'">
-                    <i class="fas fa-robot stat-icon"></i>
-                    <span class="stat-number">${summary.ai_usage_stats?.ai_categorized || 0}</span>
-                    <span class="stat-label">AI Categorized</span>
-                    <div style="font-size: 10px; opacity: 0.8; margin-top: 5px;">👆 Click for details</div>
-                </div>
-            `;
-            
-            dashboard.classList.remove('hidden');
-}
+        
 
         // Utility Functions
         function showAlert(message, type) {
@@ -14772,19 +14692,7 @@ async function loadVendorList() {
             }
         }
         
-        async function reconcileWithProgress() {
-            startProgressTracking();
-            try {
-                const result = await reconcileData();
-                showAlert('✅ Reconciliation completed with batch processing!', 'success');
-                console.log('🚀 Reconciliation completed with optimized processing');
-            } catch (error) {
-                showAlert('❌ Reconciliation failed: ' + error.message, 'error');
-                console.error('❌ Reconciliation error:', error);
-            } finally {
-                stopProgressTracking();
-            }
-        }
+
         
         async function detectAnomaliesWithProgress() {
             startProgressTracking();
