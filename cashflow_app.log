@@ -27809,3 +27809,101 @@ A detailed migration guide is available here: https://github.com/openai/openai-p
 2025-07-30 15:07:34,142 - werkzeug - INFO - 127.0.0.1 - - [30/Jul/2025 15:07:34] "POST /upload HTTP/1.1" 200 -
 2025-07-30 15:07:38,278 - werkzeug - INFO - 127.0.0.1 - - [30/Jul/2025 15:07:38] "POST /run-revenue-analysis HTTP/1.1" 200 -
 2025-07-30 15:08:55,521 - werkzeug - INFO - 127.0.0.1 - - [30/Jul/2025 15:08:55] "POST /run-revenue-analysis HTTP/1.1" 200 -
+2025-08-11 15:30:09,867 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-08-11 15:30:09,867 - INFO - [33mPress CTRL+C to quit[0m
+2025-08-11 15:30:34,230 - INFO - 127.0.0.1 - - [11/Aug/2025 15:30:34] "GET / HTTP/1.1" 200 -
+2025-08-11 15:30:39,450 - INFO - [File Upload & AI Processing] Starting File Upload & AI Processing...
+2025-08-11 15:30:39,450 - INFO - [File Upload & AI Processing] Starting comprehensive AI analysis...
+2025-08-11 15:30:39,450 - INFO - [File Upload & AI Processing] OpenAI API Status: Available
+2025-08-11 15:30:39,451 - INFO - [File Upload & AI Processing] Reading bank file...
+2025-08-11 15:30:40,462 - INFO - [File Upload & AI Processing] Excel file read successfully
+2025-08-11 15:30:40,462 - INFO - [File Upload & AI Processing] Bank file loaded: 450 rows, 16 columns
+2025-08-11 15:30:40,462 - INFO - [File Upload & AI Processing] Configuring AI processing limits...
+2025-08-11 15:30:40,463 - INFO - [File Upload & AI Processing] Using detailed AI for up to 100 transactions
+2025-08-11 15:30:40,464 - INFO - [File Upload & AI Processing] Starting AI-enhanced processing...
+2025-08-11 15:30:40,464 - INFO - [File Upload & AI Processing] Processing 450 transactions with detailed AI...
+2025-08-11 15:30:40,465 - INFO - [File Upload & AI Processing] Standardizing column names...
+2025-08-11 15:30:40,486 - INFO - [File Upload & AI Processing] Calculating AI processing limits...
+2025-08-11 15:30:40,486 - INFO - [File Upload & AI Processing] Using detailed AI for first 50 transactions
+2025-08-11 15:30:40,487 - INFO - [File Upload & AI Processing] Hybrid approach: Detailed AI for 50, rules for remaining 400
+2025-08-11 15:30:40,487 - INFO - [File Upload & AI Processing] Processing first batch with AI...
+2025-08-11 15:30:40,488 - INFO - [File Upload & AI Processing] Processing 50 transactions with DETAILED AI prompt
+2025-08-11 15:30:40,489 - INFO - [File Upload & AI Processing] Using smaller batches (size=3) due to detailed prompt size
+2025-08-11 15:30:44,464 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:30:46,813 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:30:48,486 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:30:50,196 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:30:52,312 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:30:52,624 - INFO - [File Upload & AI Processing] Processed 5/50 transactions...
+2025-08-11 15:30:54,695 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:30:56,539 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:30:57,714 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:00,032 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:01,461 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:01,765 - INFO - [File Upload & AI Processing] Processed 10/50 transactions...
+2025-08-11 15:31:04,348 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:05,754 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:06,987 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:08,305 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:09,651 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:09,953 - INFO - [File Upload & AI Processing] Processed 15/50 transactions...
+2025-08-11 15:31:12,103 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:13,639 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:14,971 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:16,122 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:17,742 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:18,064 - INFO - [File Upload & AI Processing] Processed 20/50 transactions...
+2025-08-11 15:31:19,886 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:21,524 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:22,855 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:24,189 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:25,417 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:25,720 - INFO - [File Upload & AI Processing] Processed 25/50 transactions...
+2025-08-11 15:31:27,711 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:29,198 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:30,745 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:32,072 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:33,613 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:33,915 - INFO - [File Upload & AI Processing] Processed 30/50 transactions...
+2025-08-11 15:31:36,070 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:37,281 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:38,931 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:40,362 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:42,355 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:42,666 - INFO - [File Upload & AI Processing] Processed 35/50 transactions...
+2025-08-11 15:31:44,961 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:46,221 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:47,385 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:50,095 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:51,533 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:51,838 - INFO - [File Upload & AI Processing] Processed 40/50 transactions...
+2025-08-11 15:31:54,191 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:55,432 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:56,649 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:58,013 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:59,423 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:31:59,729 - INFO - [File Upload & AI Processing] Processed 45/50 transactions...
+2025-08-11 15:32:01,671 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:32:02,845 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:32:04,539 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:32:05,971 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:32:07,295 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-11 15:32:07,303 - INFO - [File Upload & AI Processing] Detailed batch processing complete!
+2025-08-11 15:32:07,303 - INFO - [File Upload & AI Processing] AI-Detailed categorized: 50 transactions (100.0%)
+2025-08-11 15:32:07,303 - INFO - [File Upload & AI Processing] Rule categorized: 0 transactions (0.0%)
+2025-08-11 15:32:07,303 - INFO - [File Upload & AI Processing] Estimated cost: $0.100 USD
+2025-08-11 15:32:07,304 - INFO - [File Upload & AI Processing] Processing remaining 400 with rules...
+2025-08-11 15:32:07,320 - INFO - [File Upload & AI Processing] Detailed AI processing complete!
+2025-08-11 15:32:07,320 - INFO - [File Upload & AI Processing] AI-Detailed categorized: 50 transactions (11.1%)
+2025-08-11 15:32:07,321 - INFO - [File Upload & AI Processing] Rule categorized: 400 transactions (88.9%)
+2025-08-11 15:32:07,322 - INFO - [File Upload & AI Processing] API Status: Connected
+2025-08-11 15:32:07,322 - INFO - [File Upload & AI Processing] Estimated cost: $0.100 USD
+2025-08-11 15:32:07,570 - INFO - [File Upload & AI Processing] Processing complete in 88.1 seconds!
+2025-08-11 15:32:07,571 - INFO - [File Upload & AI Processing] Total transactions processed: 450
+2025-08-11 15:32:07,571 - INFO - [File Upload & AI Processing] AI categorized: 50 (11.1%)
+2025-08-11 15:32:07,572 - INFO - [File Upload & AI Processing] Rule categorized: 400
+2025-08-11 15:32:07,572 - INFO - [File Upload & AI Processing] Estimated cost: $0.100 USD
+2025-08-11 15:32:07,572 - INFO - [File Upload & AI Processing] Completed File Upload & AI Processing
+2025-08-11 15:32:07,573 - INFO - 127.0.0.1 - - [11/Aug/2025 15:32:07] "POST /upload HTTP/1.1" 200 -
+2025-08-11 15:32:09,061 - INFO - 127.0.0.1 - - [11/Aug/2025 15:32:09] "[33mGET /get-dropdown-data HTTP/1.1[0m" 404 -

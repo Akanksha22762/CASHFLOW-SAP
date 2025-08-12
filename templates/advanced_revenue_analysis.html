@@ -183,6 +183,92 @@
                         // Revenue Analysis Results
                         formattedResults += '<h3><i class="fas fa-chart-line"></i> Revenue Analysis</h3>';
                         
+                        // Add AI/ML Reasoning Insights Section
+                        if (result.data.reasoning_explanations) {
+                            formattedResults += '<div style="margin: 20px 0; padding: 20px; background: #f8fafc; border-radius: 12px; border: 2px solid #e2e8f0;">';
+                            formattedResults += '<h4 style="margin: 0 0 20px 0; color: #1f2937; font-size: 18px; font-weight: 600;">🧠 AI/ML Reasoning Insights</h4>';
+                            
+                            // ML System Insights (XGBoost)
+                            if (result.data.reasoning_explanations.ml_analysis) {
+                                const mlReasoning = result.data.reasoning_explanations.ml_analysis;
+                                formattedResults += '<div style="margin-bottom: 20px; padding: 15px; background: #eff6ff; border-radius: 8px; border-left: 5px solid #3b82f6;">';
+                                formattedResults += '<h5 style="margin: 0 0 12px 0; color: #1d4ed8; font-size: 16px; font-weight: 600;">🤖 ML System Insights</h5>';
+                                
+                                if (mlReasoning.training_insights) {
+                                    formattedResults += `<div style="margin-bottom: 10px;"><strong>Learning Strategy:</strong> ${mlReasoning.training_insights.learning_strategy || 'N/A'}</div>`;
+                                    formattedResults += `<div style="margin-bottom: 10px;"><strong>Pattern Discovery:</strong> ${mlReasoning.training_insights.pattern_discovery || 'N/A'}</div>`;
+                                    formattedResults += `<div style="margin-bottom: 10px;"><strong>Training Behavior:</strong> ${mlReasoning.training_insights.training_behavior || 'N/A'}</div>`;
+                                }
+                                
+                                if (mlReasoning.pattern_analysis) {
+                                    formattedResults += `<div style="margin-bottom: 10px;"><strong>Forecast Trend:</strong> ${mlReasoning.pattern_analysis.forecast_trend || 'N/A'}</div>`;
+                                    formattedResults += `<div style="margin-bottom: 10px;"><strong>Pattern Strength:</strong> ${mlReasoning.pattern_analysis.pattern_strength || 'N/A'}</div>`;
+                                }
+                                
+                                if (mlReasoning.business_context) {
+                                    formattedResults += `<div style="margin-bottom: 10px;"><strong>Financial Logic:</strong> ${mlReasoning.business_context.financial_rationale || 'N/A'}</div>`;
+                                    formattedResults += `<div style="margin-bottom: 10px;"><strong>Operational Insight:</strong> ${mlReasoning.business_context.operational_insight || 'N/A'}</div>`;
+                                }
+                                
+                                if (mlReasoning.decision_logic) {
+                                    formattedResults += `<div style="margin-top: 15px; padding: 12px; background: #f1f5f9; border-radius: 6px;"><strong>Decision Logic:</strong> ${mlReasoning.decision_logic}</div>`;
+                                }
+                                
+                                formattedResults += '</div>';
+                            }
+                            
+                            // AI System Insights (Ollama)
+                            if (result.data.reasoning_explanations.ai_analysis) {
+                                const aiReasoning = result.data.reasoning_explanations.ai_analysis;
+                                formattedResults += '<div style="margin-bottom: 20px; padding: 15px; background: #f0fdf4; border-radius: 8px; border-left: 5px solid #059669;">';
+                                formattedResults += '<h5 style="margin: 0 0 12px 0; color: #047857; font-size: 16px; font-weight: 600;">🧠 AI System Insights</h5>';
+                                
+                                if (aiReasoning.semantic_understanding) {
+                                    formattedResults += `<div style="margin-bottom: 10px;"><strong>Context Understanding:</strong> ${aiReasoning.semantic_understanding.context_understanding || 'N/A'}</div>`;
+                                    formattedResults += `<div style="margin-bottom: 10px;"><strong>Semantic Accuracy:</strong> ${aiReasoning.semantic_understanding.semantic_accuracy || 'N/A'}</div>`;
+                                    formattedResults += `<div style="margin-bottom: 10px;"><strong>Business Vocabulary:</strong> ${aiReasoning.semantic_understanding.business_vocabulary || 'N/A'}</div>`;
+                                }
+                                
+                                if (aiReasoning.business_intelligence) {
+                                    formattedResults += `<div style="margin-bottom: 10px;"><strong>Financial Knowledge:</strong> ${aiReasoning.business_intelligence.financial_knowledge || 'N/A'}</div>`;
+                                    formattedResults += `<div style="margin-bottom: 10px;"><strong>Business Patterns:</strong> ${aiReasoning.business_intelligence.business_patterns || 'N/A'}</div>`;
+                                }
+                                
+                                if (aiReasoning.decision_logic) {
+                                    formattedResults += `<div style="margin-top: 15px; padding: 12px; background: #f1f5f9; border-radius: 6px;"><strong>Decision Logic:</strong> ${aiReasoning.decision_logic}</div>`;
+                                }
+                                
+                                formattedResults += '</div>';
+                            }
+                            
+                            // Hybrid Analysis Insights
+                            if (result.data.reasoning_explanations.hybrid_analysis) {
+                                const hybridReasoning = result.data.reasoning_explanations.hybrid_analysis;
+                                formattedResults += '<div style="margin-bottom: 20px; padding: 15px; background: #faf5ff; border-radius: 8px; border-left: 5px solid #8b5cf6;">';
+                                formattedResults += '<h5 style="margin: 0 0 12px 0; color: #7c3aed; font-size: 16px; font-weight: 600;">🔗 Hybrid Analysis Insights</h5>';
+                                
+                                if (hybridReasoning.combination_strategy) {
+                                    formattedResults += `<div style="margin-bottom: 10px;"><strong>Approach:</strong> ${hybridReasoning.combination_strategy.approach || 'N/A'}</div>`;
+                                    formattedResults += `<div style="margin-bottom: 10px;"><strong>Methodology:</strong> ${hybridReasoning.combination_strategy.methodology || 'N/A'}</div>`;
+                                    formattedResults += `<div style="margin-bottom: 10px;"><strong>Synergy Benefit:</strong> ${hybridReasoning.combination_strategy.synergy_benefit || 'N/A'}</div>`;
+                                }
+                                
+                                if (hybridReasoning.synergy_analysis) {
+                                    formattedResults += `<div style="margin-bottom: 10px;"><strong>ML Confidence:</strong> ${hybridReasoning.synergy_analysis.ml_confidence || 'N/A'}</div>`;
+                                    formattedResults += `<div style="margin-bottom: 10px;"><strong>AI Confidence:</strong> ${hybridReasoning.synergy_analysis.ai_confidence || 'N/A'}</div>`;
+                                    formattedResults += `<div style="margin-bottom: 10px;"><strong>Synergy Score:</strong> ${hybridReasoning.synergy_analysis.synergy_score || 'N/A'}</div>`;
+                                }
+                                
+                                if (hybridReasoning.decision_logic) {
+                                    formattedResults += `<div style="margin-top: 15px; padding: 12px; background: #f1f5f9; border-radius: 6px;"><strong>Decision Logic:</strong> ${hybridReasoning.decision_logic}</div>`;
+                                }
+                                
+                                formattedResults += '</div>';
+                            }
+                            
+                            formattedResults += '</div>';
+                        }
+                        
                         if (analysis.A1_historical_trends) {
                             formattedResults += `
                                 <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; margin: 10px 0;">
