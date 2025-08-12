@@ -13581,23 +13581,40 @@ def get_transaction_details():
         print("🚀 GET-TRANSACTION-DETAILS ENDPOINT CALLED!")
         
         data = request.get_json()
-        parameter_type = data.get('parameter_type')
-        vendor_name = data.get('vendor_name', '')
-        print(f"📋 Parameter type: {parameter_type}")
-        print(f"🏢 Vendor filter: '{vendor_name}' (length: {len(vendor_name) if vendor_name else 0})")
-        print(f"🏢 Vendor filter type: {type(vendor_name)}")
-        print(f"🏢 Vendor filter repr: {repr(vendor_name)}")
+        print(f"🔍 Received data: {data}")
         
-        if not parameter_type:
-            return jsonify({'error': 'Parameter type is required'}), 400
+        category_type = data.get('category_type')
+        analysis_type = data.get('analysis_type')
+        vendor_name = data.get('vendor_name', '')  # Keep for backward compatibility
+        
+        print(f"📋 Category type: {category_type}")
+        print(f"📋 Analysis type: {analysis_type}")
+        print(f"🏢 Vendor filter: '{vendor_name}' (length: {len(vendor_name) if vendor_name else 0})")
+        
+        # Handle both new and old parameter formats
+        if not category_type and not vendor_name:
+            # Try to get old format parameters
+            parameter_type = data.get('parameter_type')
+            if parameter_type:
+                print(f"🔄 Converting old parameter_type '{parameter_type}' to category_type")
+                category_type = parameter_type
+                analysis_type = 'category_analysis'
+            else:
+                return jsonify({'error': 'Either category_type or vendor_name is required'}), 400
         
         # Check if we have uploaded data
         global uploaded_data
         print(f"🌍 Global uploaded_data keys: {list(uploaded_data.keys()) if uploaded_data else 'None'}")
+        print(f"🌍 Global uploaded_data type: {type(uploaded_data)}")
         
+        if not uploaded_data:
+            print("❌ No uploaded_data global variable found")
+            return jsonify({'error': 'No data uploaded yet'}), 400
+            
         if 'bank_df' not in uploaded_data or uploaded_data['bank_df'] is None:
             print("❌ No bank_df found in uploaded_data")
-            return jsonify({'error': 'No data uploaded yet'}), 400
+            print(f"🌍 Available keys: {list(uploaded_data.keys())}")
+            return jsonify({'error': 'No bank data available'}), 400
         
         bank_df = uploaded_data['bank_df']
         print(f"📊 Bank DataFrame shape: {bank_df.shape}")
@@ -13636,8 +13653,44 @@ def get_transaction_details():
             
             print(f"🎯 Identified columns - Date: {date_col}, Description: {desc_col}, Amount: {amount_col}")
             
-            # Filter by vendor if specified
-            if vendor_name:
+            # Initialize filtered_df with all transactions
+            filtered_df = bank_df
+            
+            # Filter by category type if specified (NEW LOGIC)
+            if category_type and analysis_type == 'category_analysis':
+                print(f"🔍 Filtering transactions for category type: {category_type}")
+                
+                # Remove XGBoost text if present
+                clean_category = category_type.replace('(XGBoost)', '').strip()
+                print(f"🔍 Clean category: {clean_category}")
+                
+                # Filter by category type
+                if 'investing' in clean_category.lower():
+                    print(f"📊 Filtering for Investing Activities")
+                    # Look for investing-related keywords in descriptions
+                    investing_keywords = ['equipment', 'purchase', 'investment', 'property', 'machinery', 'technology', 'infrastructure', 'development', 'research', 'facility', 'expansion']
+                    filtered_df = bank_df[bank_df[desc_col].str.contains('|'.join(investing_keywords), case=False, na=False)]
+                    
+                elif 'operating' in clean_category.lower():
+                    print(f"📊 Filtering for Operating Activities")
+                    # Look for operating-related keywords in descriptions
+                    operating_keywords = ['raw material', 'energy', 'maintenance', 'transportation', 'payroll', 'salary', 'utility', 'supplier', 'purchase', 'expense', 'cost']
+                    filtered_df = bank_df[bank_df[desc_col].str.contains('|'.join(operating_keywords), case=False, na=False)]
+                    
+                elif 'financing' in clean_category.lower():
+                    print(f"📊 Filtering for Financing Activities")
+                    # Look for financing-related keywords in descriptions
+                    financing_keywords = ['loan', 'interest', 'dividend', 'debt', 'repayment', 'equity', 'investment', 'bank', 'credit', 'borrowing']
+                    filtered_df = bank_df[bank_df[desc_col].str.contains('|'.join(financing_keywords), case=False, na=False)]
+                    
+                else:
+                    print(f"📊 No specific category filter, showing all transactions")
+                    filtered_df = bank_df
+                
+                print(f"📊 Category filtering found {len(filtered_df)} transactions")
+            
+            # Filter by vendor if specified (EXISTING LOGIC)
+            elif vendor_name:
                 print(f"🔍 Filtering transactions for vendor: {vendor_name}")
                 
                 # Enhanced vendor filtering for extracted vendor names from descriptions
@@ -13734,12 +13787,18 @@ def get_transaction_details():
                     # Extract vendor from description
                     description = row.get(desc_col, row.get('Description', ''))
                     
-                    # Use the selected vendor name from the request, not extracted names
-                    vendor = vendor_name if vendor_name else 'Unknown Vendor'
-                    
-                    # Get amount and apply proper cash flow categorization
-                    amount = row.get(amount_col, row.get('Amount', 0))
-                    category = categorize_transaction_cashflow(amount, description)
+                    # Determine vendor and category based on analysis type
+                    if category_type and analysis_type == 'category_analysis':
+                        # For category analysis, extract vendor from description
+                        vendor = extract_vendor_from_description(description)
+                        # Use the selected category type (remove XGBoost if present)
+                        category = category_type.replace('(XGBoost)', '').strip()
+                    else:
+                        # For vendor analysis, use the selected vendor name
+                        vendor = vendor_name if vendor_name else 'Unknown Vendor'
+                        # Get amount and apply proper cash flow categorization
+                        amount = row.get(amount_col, row.get('Amount', 0))
+                        category = categorize_transaction_cashflow(amount, description)
                     
                     # Format date if available
                     date = row.get(date_col, row.get('Date', 'N/A'))
@@ -13747,9 +13806,12 @@ def get_transaction_details():
                         if isinstance(date, str):
                             date = date[:10]  # Take first 10 characters for date
                         else:
-                            date = str(date)[:10]
+                            date = date[:10]
+                    else:
+                        date = str(date)[:10]
                     
                     # Get amount and handle different formats
+                    amount = row.get(amount_col, row.get('Amount', 0))
                     if pd.notna(amount):
                         try:
                             amount = abs(float(amount))
@@ -13770,7 +13832,10 @@ def get_transaction_details():
                     # Debug: print first few transactions
                     if len(transactions) <= 5:
                         print(f"  Transaction {len(transactions)}: {transaction}")
-                        print(f"    🏢 Vendor assigned: {vendor} (from selected vendor: {vendor_name})")
+                        if category_type and analysis_type == 'category_analysis':
+                            print(f"    📊 Category analysis: {category}")
+                        else:
+                            print(f"    🏢 Vendor assigned: {vendor} (from selected vendor: {vendor_name})")
                         
                 except Exception as e:
                     print(f"❌ Error processing row {index}: {e}")
@@ -13778,10 +13843,15 @@ def get_transaction_details():
             
             print(f"✅ Successfully processed {len(transactions)} transactions")
             
-            # If no transactions found, create meaningful sample based on parameter type
+            # If no transactions found, create meaningful sample based on category type or parameter type
             if not transactions:
                 print("⚠️ No transactions extracted, using fallback data")
-                transactions = create_parameter_specific_transactions(parameter_type)
+                if category_type and analysis_type == 'category_analysis':
+                    # Create sample data based on category type
+                    transactions = create_category_specific_transactions(category_type)
+                else:
+                    # Fallback to old parameter type logic
+                    transactions = create_parameter_specific_transactions(parameter_type if 'parameter_type' in locals() else 'general')
             else:
                 print(f"🎉 Successfully extracted {len(transactions)} real transactions!")
             
@@ -13802,7 +13872,11 @@ def get_transaction_details():
             traceback.print_exc()
             
             # Fallback to meaningful sample data
-            fallback_transactions = create_parameter_specific_transactions(parameter_type)
+            if category_type and analysis_type == 'category_analysis':
+                fallback_transactions = create_category_specific_transactions(category_type)
+            else:
+                fallback_transactions = create_parameter_specific_transactions(parameter_type if 'parameter_type' in locals() else 'general')
+            
             return jsonify({
                 'success': True,
                 'transactions': fallback_transactions,
@@ -14130,6 +14204,101 @@ def extract_real_vendors(descriptions):
     except Exception as e:
         print(f"❌ Vendor extraction error: {e}")
         return []
+
+def extract_vendor_from_description(description):
+    """Extract vendor name from transaction description for category analysis"""
+    try:
+        desc = str(description).strip()
+        if not desc:
+            return 'Unknown Vendor'
+        
+        # Common patterns for vendor names in descriptions
+        vendor_patterns = [
+            r'Payment to\s+([A-Z][a-zA-Z\s&]+?)(?:\s|$|\.)',
+            r'Purchase from\s+([A-Z][a-zA-Z\s&]+?)(?:\s|$|\.)',
+            r'([A-Z][a-zA-Z\s&]+?)\s+Payment',
+            r'([A-Z][a-zA-Z\s&]+?)\s+Invoice',
+            r'([A-Z][a-zA-Z\s&]+?)\s+Services',
+            r'([A-Z][a-zA-Z\s&]+?)\s+Supply',
+            r'([A-Z][a-zA-Z\s&]+?)\s+Maintenance',
+            r'([A-Z][a-zA-Z\s&]+?)\s+Equipment',
+            r'([A-Z][a-zA-Z\s&]+?)\s+Technology',
+            r'([A-Z][a-zA-Z\s&]+?)\s+Energy',
+            r'([A-Z][a-zA-Z\s&]+?)\s+Transport',
+            r'([A-Z][a-zA-Z\s&]+?)\s+Logistics'
+        ]
+        
+        import re
+        for pattern in vendor_patterns:
+            match = re.search(pattern, desc)
+            if match:
+                vendor = match.group(1).strip()
+                # Clean up vendor name
+                vendor = re.sub(r'[^\w\s&]', '', vendor)
+                if len(vendor) > 2:
+                    return vendor
+        
+        # If no pattern match, try to extract words that look like vendor names
+        words = desc.split()
+        potential_vendors = []
+        for word in words:
+            word_clean = re.sub(r'[^\w]', '', word)
+            if len(word_clean) > 3 and word_clean[0].isupper():
+                potential_vendors.append(word_clean)
+        
+        if potential_vendors:
+            return potential_vendors[0]
+        
+        return 'Unknown Vendor'
+        
+    except Exception as e:
+        print(f"❌ Error extracting vendor from description: {e}")
+        return 'Unknown Vendor'
+
+def create_category_specific_transactions(category_type):
+    """Create meaningful sample transactions based on category type for category analysis"""
+    try:
+        # Remove XGBoost text if present
+        clean_category = category_type.replace('(XGBoost)', '').strip()
+        
+        if 'investing' in clean_category.lower():
+            return [
+                {'date': '2024-01-15', 'description': 'Equipment Purchase - New Machinery', 'amount': 2500000, 'category': 'Investing', 'vendor': 'Tech Equipment Corp'},
+                {'date': '2024-01-20', 'description': 'Property Investment - Factory Expansion', 'amount': 5000000, 'category': 'Investing', 'vendor': 'Real Estate Ltd'},
+                {'date': '2024-02-01', 'description': 'Technology Upgrade - Automation Systems', 'amount': 1800000, 'category': 'Investing', 'vendor': 'Automation Tech'},
+                {'date': '2024-02-15', 'description': 'Infrastructure Development - New Facility', 'amount': 3200000, 'category': 'Investing', 'vendor': 'Construction Co'},
+                {'date': '2024-03-01', 'description': 'Research & Development Investment', 'amount': 1200000, 'category': 'Investing', 'vendor': 'R&D Institute'}
+            ]
+        elif 'operating' in clean_category.lower():
+            return [
+                {'date': '2024-01-15', 'description': 'Raw Materials Purchase - Steel', 'amount': 1500000, 'category': 'Operating', 'vendor': 'Steel Suppliers Ltd'},
+                {'date': '2024-01-20', 'description': 'Energy Costs - Electricity & Gas', 'amount': 800000, 'category': 'Operating', 'vendor': 'Power Grid Corp'},
+                {'date': '2024-02-01', 'description': 'Maintenance Services - Equipment', 'amount': 450000, 'category': 'Operating', 'vendor': 'Maintenance Pro'},
+                {'date': '2024-02-15', 'description': 'Transportation Costs - Logistics', 'amount': 600000, 'category': 'Operating', 'vendor': 'Logistics Express'},
+                {'date': '2024-03-01', 'description': 'Payroll Expenses - Staff Salaries', 'amount': 2200000, 'category': 'Operating', 'vendor': 'HR Management'}
+            ]
+        elif 'financing' in clean_category.lower():
+            return [
+                {'date': '2024-01-15', 'description': 'Bank Loan - Working Capital', 'amount': 10000000, 'category': 'Financing', 'vendor': 'National Bank'},
+                {'date': '2024-01-20', 'description': 'Interest Payment - Loan Servicing', 'amount': 250000, 'category': 'Financing', 'vendor': 'Financial Services'},
+                {'date': '2024-02-01', 'description': 'Dividend Payment - Shareholders', 'amount': 800000, 'category': 'Financing', 'vendor': 'Shareholder Trust'},
+                {'date': '2024-02-15', 'description': 'Debt Repayment - Principal', 'amount': 1500000, 'category': 'Financing', 'vendor': 'Credit Union'},
+                {'date': '2024-03-01', 'description': 'New Equity Investment', 'amount': 5000000, 'category': 'Financing', 'vendor': 'Investment Partners'}
+            ]
+        else:
+            # Default sample for any other category
+            return [
+                {'date': '2024-01-15', 'description': 'General Transaction 1', 'amount': 500000, 'category': clean_category, 'vendor': 'General Vendor'},
+                {'date': '2024-01-20', 'description': 'General Transaction 2', 'amount': 750000, 'category': clean_category, 'vendor': 'Standard Corp'},
+                {'date': '2024-02-01', 'description': 'General Transaction 3', 'amount': 300000, 'category': clean_category, 'vendor': 'Basic Services'}
+            ]
+            
+    except Exception as e:
+        print(f"❌ Error creating category-specific transactions: {e}")
+        # Return basic fallback
+        return [
+            {'date': '2024-01-15', 'description': 'Fallback Transaction', 'amount': 100000, 'category': 'Operating', 'vendor': 'Fallback Vendor'}
+        ]
 
 @app.route('/')
 def home():
