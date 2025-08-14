@@ -173,6 +173,64 @@ class AdvancedRevenueAISystem:
         except Exception as e:
             logger.warning(f"⚠️ External data loading failed: {e}")
 
+    def _safe_data_conversion(self, data):
+        """Safely convert data types for JSON serialization and analysis"""
+        try:
+            if isinstance(data, np.ndarray):
+                return data.tolist()
+            elif isinstance(data, pd.DataFrame):
+                return data.to_dict('records')
+            elif isinstance(data, pd.Series):
+                return data.tolist()
+            elif isinstance(data, dict):
+                return {k: self._safe_data_conversion(v) for k, v in data.items()}
+            elif isinstance(data, list):
+                return [self._safe_data_conversion(item) for item in data]
+            elif isinstance(data, (np.integer, np.floating)):
+                return float(data)
+            elif isinstance(data, (np.bool_)):
+                return bool(data)
+            else:
+                return data
+        except Exception as e:
+            logger.warning(f"Data conversion failed: {e}")
+            return str(data) if data is not None else None
+
+    def _safe_extract_columns(self, data):
+        """Safely extract columns from various data types"""
+        try:
+            if hasattr(data, 'columns'):
+                return list(data.columns)
+            elif isinstance(data, dict) and data:
+                return list(data.keys())
+            elif isinstance(data, (list, tuple)) and data:
+                if isinstance(data[0], dict):
+                    return list(data[0].keys())
+                else:
+                    return [f"column_{i}" for i in range(len(data))]
+            else:
+                return []
+        except Exception as e:
+            logger.warning(f"Column extraction failed: {e}")
+            return []
+
+    def _safe_get_amount_column(self, data):
+        """Safely get the amount column from various data types"""
+        try:
+            if hasattr(data, 'columns'):
+                # DataFrame case
+                amount_columns = [col for col in data.columns if 'amount' in col.lower() or 'value' in col.lower()]
+                return amount_columns[0] if amount_columns else None
+            elif isinstance(data, dict) and data:
+                # Dict case
+                amount_keys = [key for key in data.keys() if 'amount' in key.lower() or 'value' in key.lower()]
+                return amount_keys[0] if amount_keys else None
+            else:
+                return None
+        except Exception as e:
+            logger.warning(f"Amount column detection failed: {e}")
+            return None
+
     def _load_interest_rates(self):
         """Load interest rate data"""
         try:
@@ -3862,6 +3920,9 @@ class AdvancedRevenueAISystem:
                 'decision_logic': ''
             }
             
+            # Safe data handling
+            safe_data_summary = self._safe_data_conversion(data_summary)
+            
             # Semantic understanding
             prompt_lower = prompt.lower()
             analysis_keywords = ['revenue', 'trends', 'patterns', 'seasonal', 'growth', 'risk', 'recommendations']
@@ -6001,15 +6062,44 @@ class AdvancedRevenueAISystem:
                             }
                         except Exception as inner_e:
                             logger.warning(f"CapEx forecasting calculation failed: {inner_e}")
-                            # Ultimate fallback
-                            if len(monthly_capex) > 0:
-                                avg_capex = float(monthly_capex.mean())
-                                forecast = [avg_capex] * 12
+                            # Ultimate fallback with safe data handling
+                            try:
+                                if isinstance(monthly_capex, (list, np.ndarray)) and len(monthly_capex) > 0:
+                                    # Safe conversion to list first
+                                    safe_monthly_capex = self._safe_data_conversion(monthly_capex)
+                                    if isinstance(safe_monthly_capex, list) and safe_monthly_capex:
+                                        avg_capex = float(sum(safe_monthly_capex) / len(safe_monthly_capex))
+                                        forecast = [avg_capex] * 12
+                                        advanced_features['capex_forecast'] = {
+                                            'next_12_months': forecast,
+                                            'forecast_total': float(sum(forecast)),
+                                            'is_estimated': True
+                                        }
+                                    else:
+                                        # Fallback to default values
+                                        advanced_features['capex_forecast'] = {
+                                            'next_12_months': [1000000.0] * 12,  # Default 1M per month
+                                            'forecast_total': 12000000.0,
+                                            'is_estimated': True,
+                                            'fallback_reason': 'Data conversion failed'
+                                        }
+                                else:
+                                    # No data available
+                                    advanced_features['capex_forecast'] = {
+                                        'next_12_months': [1000000.0] * 12,
+                                        'forecast_total': 12000000.0,
+                                        'is_estimated': True,
+                                        'fallback_reason': 'No monthly CapEx data'
+                                    }
+                            except Exception as fallback_error:
+                                logger.warning(f"CapEx fallback calculation also failed: {fallback_error}")
+                                # Final fallback
                                 advanced_features['capex_forecast'] = {
-                                    'next_12_months': forecast,
-                                    'forecast_total': float(sum(forecast)),
-                                    'is_estimated': True
-                            }
+                                    'next_12_months': [1000000.0] * 12,
+                                    'forecast_total': 12000000.0,
+                                    'is_estimated': True,
+                                    'fallback_reason': 'All calculations failed'
+                                }
                 except Exception as e:
                     logger.warning(f"CapEx forecasting failed: {e}")
                     # Add minimal forecast based on total CapEx
