@@ -1,6 +1,0 @@
-cd C:\Users\akank\Documents\CASHFLOW - Copy
-
-python app1.py
-
-set OPENAI_API_KEY=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
-

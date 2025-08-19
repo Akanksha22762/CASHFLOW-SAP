@@ -1098,37 +1098,80 @@ class AdvancedRevenueAISystem:
                 monthly_revenue = revenue_transactions.groupby('Month')[amount_column].sum()
                 quarterly_revenue = revenue_transactions.groupby('Quarter')[amount_column].sum()
                 
-                # Growth rate calculations
+                # Growth rate calculations - ENHANCED with mathematical safeguards
                 if len(monthly_revenue) > 1:
-                    monthly_growth_rate = ((monthly_revenue.iloc[-1] - monthly_revenue.iloc[-2]) / monthly_revenue.iloc[-2]) * 100
+                    # FIXED: Enhanced growth rate calculation with proper validation
+                    if monthly_revenue.iloc[-2] > 0:  # Prevent division by zero
+                        monthly_growth_rate = ((monthly_revenue.iloc[-1] - monthly_revenue.iloc[-2]) / monthly_revenue.iloc[-2]) * 100
+                        # Validate growth rate is reasonable (not infinite or NaN)
+                        if not (np.isfinite(monthly_growth_rate) and abs(monthly_growth_rate) < 10000):
+                            monthly_growth_rate = 0
+                    else:
+                        monthly_growth_rate = 0
+                    
                     trend_direction = 'increasing' if monthly_growth_rate > 0 else 'decreasing' if monthly_growth_rate < 0 else 'stable'
                 else:
                     monthly_growth_rate = 0
                     trend_direction = 'stable'
                 
-                # Quarterly analysis
+                # Quarterly analysis - ENHANCED with mathematical safeguards
                 if len(quarterly_revenue) > 1:
-                    quarterly_growth_rate = ((quarterly_revenue.iloc[-1] - quarterly_revenue.iloc[-2]) / quarterly_revenue.iloc[-2]) * 100
+                    # FIXED: Enhanced quarterly growth rate calculation with proper validation
+                    if quarterly_revenue.iloc[-2] > 0:  # Prevent division by zero
+                        quarterly_growth_rate = ((quarterly_revenue.iloc[-1] - quarterly_revenue.iloc[-2]) / quarterly_revenue.iloc[-2]) * 100
+                        # Validate growth rate is reasonable (not infinite or NaN)
+                        if not (np.isfinite(quarterly_growth_rate) and abs(quarterly_growth_rate) < 10000):
+                            quarterly_growth_rate = 0
+                    else:
+                        quarterly_growth_rate = 0
                 else:
                     quarterly_growth_rate = 0
                 
-                # Seasonality analysis
+                # Seasonality analysis - ENHANCED with mathematical safeguards
                 seasonal_pattern = monthly_revenue.groupby(monthly_revenue.index.month).mean()
-                seasonality_strength = seasonal_pattern.std() / seasonal_pattern.mean() if seasonal_pattern.mean() > 0 else 0
-                peak_month = seasonal_pattern.idxmax() if len(seasonal_pattern) > 0 else 0
-                low_month = seasonal_pattern.idxmin() if len(seasonal_pattern) > 0 else 0
+                # FIXED: Enhanced seasonality strength calculation with proper validation
+                if seasonal_pattern.mean() > 0 and len(seasonal_pattern) > 1:
+                    seasonality_strength = min(1, seasonal_pattern.std() / seasonal_pattern.mean())  # Cap at 100%
+                else:
+                    seasonality_strength = 0
+                
+                # FIXED: Enhanced peak/low month detection with validation
+                if len(seasonal_pattern) > 0:
+                    peak_month = seasonal_pattern.idxmax() if seasonal_pattern.max() > 0 else 0
+                    low_month = seasonal_pattern.idxmin() if seasonal_pattern.min() > 0 else 0
+                else:
+                    peak_month = 0
+                    low_month = 0
                 
                 # Volatility analysis
                 revenue_volatility = monthly_revenue.std() if len(monthly_revenue) > 1 else 0
-                revenue_stability_score = min(100, max(0, 100 - (revenue_volatility / total_revenue * 100)))
+                # FIXED: Improved revenue stability score calculation with proper scaling
+                if total_revenue > 0:
+                    volatility_ratio = min(1, revenue_volatility / total_revenue)
+                    revenue_stability_score = max(0, 100 - (volatility_ratio * 100))
+                else:
+                    revenue_stability_score = 100
                 
-                # Rolling averages
-                rolling_3m = monthly_revenue.rolling(window=3).mean()
-                rolling_6m = monthly_revenue.rolling(window=6).mean()
+                # Rolling averages - ENHANCED with validation
+                # FIXED: Enhanced rolling averages with proper window validation
+                if len(monthly_revenue) >= 3:
+                    rolling_3m = monthly_revenue.rolling(window=3, min_periods=1).mean()
+                else:
+                    rolling_3m = monthly_revenue
+                
+                if len(monthly_revenue) >= 6:
+                    rolling_6m = monthly_revenue.rolling(window=6, min_periods=1).mean()
+                else:
+                    rolling_6m = monthly_revenue
                 
                 # Trend analysis
                 trend_strength = abs(monthly_growth_rate) / 100
-                trend_consistency = 1 - (monthly_revenue.std() / monthly_revenue.mean()) if monthly_revenue.mean() > 0 else 0
+                # FIXED: Improved trend consistency calculation to prevent negative values
+                if monthly_revenue.mean() > 0:
+                    consistency_ratio = monthly_revenue.std() / monthly_revenue.mean()
+                    trend_consistency = max(0, 1 - consistency_ratio)
+                else:
+                    trend_consistency = 0
                 
             else:
                 monthly_growth_rate = 0
@@ -1160,12 +1203,15 @@ class AdvancedRevenueAISystem:
                 }
             }
             
-            # Revenue forecasting metrics
+            # Revenue forecasting metrics - ENHANCED with validation
             forecast_metrics = {
-                'next_month_forecast': total_revenue * (1 + monthly_growth_rate/100),
-                'next_quarter_forecast': total_revenue * (1 + quarterly_growth_rate/100),
-                'annual_growth_rate': monthly_growth_rate * 12,
-                'seasonal_adjustment_factor': 1 + (seasonality_strength * 0.1)
+                # FIXED: Enhanced forecast calculations with proper validation
+                'next_month_forecast': max(0, total_revenue * (1 + monthly_growth_rate/100)) if abs(monthly_growth_rate) < 1000 else total_revenue,
+                'next_quarter_forecast': max(0, total_revenue * (1 + quarterly_growth_rate/100)) if abs(quarterly_growth_rate) < 1000 else total_revenue,
+                # FIXED: Correct annual growth rate calculation using compound growth
+                'annual_growth_rate': ((1 + monthly_growth_rate/100) ** 12 - 1) * 100 if monthly_growth_rate != 0 and abs(monthly_growth_rate) < 1000 else 0,
+                # FIXED: Enhanced seasonal adjustment factor with bounds
+                'seasonal_adjustment_factor': max(0.5, min(2.0, 1 + (seasonality_strength * 0.1)))
             }
             
             return {
