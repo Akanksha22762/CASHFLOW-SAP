@@ -221,19 +221,28 @@
         
         // Function to synchronize transaction count across the entire dashboard
         function synchronizeTransactionCount(actualCount, isFilteredAnalysis = false) {
-            console.log('🔄 Synchronizing transaction count across dashboard:', actualCount, 'isFilteredAnalysis:', isFilteredAnalysis);
+            // Reduce logging frequency - only log if it's a significant change
+            const shouldLog = !window.lastSyncLog || 
+                             (Date.now() - window.lastSyncLog) > 1000 || 
+                             window.lastSyncCount !== actualCount;
+            
+            if (shouldLog) {
+                console.log('🔄 Synchronizing transaction count across dashboard:', actualCount, 'isFilteredAnalysis:', isFilteredAnalysis);
+                window.lastSyncLog = Date.now();
+                window.lastSyncCount = actualCount;
+            }
             
             // Get the upload data to use as the source of truth
             const uploadCount = getUploadData();
             
             // CRITICAL FIX: Don't override filtered analysis counts with total upload count
             if (uploadCount && uploadCount !== actualCount && !isFilteredAnalysis) {
-                console.log(`⚠️ Backend sent ${actualCount} but upload data shows ${uploadCount} - using upload data (not filtered analysis)`);
+                if (shouldLog) console.log(`⚠️ Backend sent ${actualCount} but upload data shows ${uploadCount} - using upload data (not filtered analysis)`);
                 actualCount = uploadCount;
             } else if (uploadCount && uploadCount !== actualCount && isFilteredAnalysis) {
-                console.log(`✅ Keeping filtered analysis count: ${actualCount} (upload total: ${uploadCount}) - this is correct for filtered views`);
+                if (shouldLog) console.log(`✅ Keeping filtered analysis count: ${actualCount} (upload total: ${uploadCount}) - this is correct for filtered views`);
             } else if (uploadCount && uploadCount === actualCount) {
-                console.log(`✅ Counts match: ${actualCount} (both backend and upload)`);
+                if (shouldLog) console.log(`✅ Counts match: ${actualCount} (both backend and upload)`);
             }
             
             // Update the main dashboard transaction count display
@@ -248,9 +257,9 @@
                         // CRITICAL FIX: Mark as filtered analysis if this is a filtered result
                         if (isFilteredAnalysis) {
                             markAsFilteredAnalysis(mainTransactionCard, 'filtered_analysis', actualCount);
-                            console.log(`✅ Updated and marked main transaction card as filtered analysis: ${currentCount} → ${actualCount}`);
+                            if (shouldLog) console.log(`✅ Updated and marked main transaction card as filtered analysis: ${currentCount} → ${actualCount}`);
                         } else {
-                            console.log(`✅ Updated main transaction card from ${currentCount} to: ${actualCount}`);
+                            if (shouldLog) console.log(`✅ Updated main transaction card from ${currentCount} to: ${actualCount}`);
                         }
                     }
                 }
@@ -268,9 +277,9 @@
                         // CRITICAL FIX: Mark as filtered analysis if this is a filtered result
                         if (isFilteredAnalysis) {
                             markAsFilteredAnalysis(card, 'filtered_analysis', actualCount);
-                            console.log(`✅ Updated and marked summary card ${index} as filtered analysis: ${currentCount} → ${actualCount}`);
+                            if (shouldLog) console.log(`✅ Updated and marked summary card ${index} as filtered analysis: ${currentCount} → ${actualCount}`);
                         } else {
-                            console.log(`✅ Updated summary card ${index} from ${currentCount} to: ${actualCount}`);
+                            if (shouldLog) console.log(`✅ Updated summary card ${index} from ${currentCount} to: ${actualCount}`);
                         }
                     }
                 }
@@ -286,7 +295,7 @@
                         const currentCount = parseInt(currentText.match(/\d+/)[0]);
                         if (currentCount !== actualCount) {
                             element.textContent = actualCount;
-                            console.log(`✅ Updated modal count element ${index} from ${currentCount} to: ${actualCount}`);
+                            if (shouldLog) console.log(`✅ Updated modal count element ${index} from ${currentCount} to: ${actualCount}`);
                         }
                     }
                 });
@@ -301,7 +310,7 @@
                     if (onclickCount !== actualCount) {
                         const newOnclick = onclick.replace(new RegExp(onclickCount.toString(), 'g'), actualCount.toString());
                         element.setAttribute('onclick', newOnclick);
-                        console.log(`✅ Updated onclick attribute ${index} from ${onclickCount} to ${actualCount}`);
+                        if (shouldLog) console.log(`✅ Updated onclick attribute ${index} from ${onclickCount} to ${actualCount}`);
                     }
                 }
             });
@@ -309,14 +318,14 @@
             // Update global variables
             if (window.currentTransactionData) {
                 window.currentTransactionData.transaction_count = actualCount;
-                console.log('✅ Updated global transaction data count to:', actualCount);
+                if (shouldLog) console.log('✅ Updated global transaction data count to:', actualCount);
             }
             
             // Store the current count in session storage for persistence
             sessionStorage.setItem('currentTransactionCount', actualCount);
-            console.log('✅ Stored transaction count in session storage:', actualCount);
+            if (shouldLog) console.log('✅ Stored transaction count in session storage:', actualCount);
             
-            console.log('🔄 Transaction count synchronization completed');
+            if (shouldLog) console.log('🔄 Transaction count synchronization completed');
         }
         
         // Function to get upload data (NO DETECTION, NO OVERRIDE)
@@ -331,13 +340,18 @@
         
         // Function to ensure upload data is respected (SMART OVERRIDE)
         function ensureUploadDataRespected() {
+            // Reduce logging frequency - only log if it's a significant change
+            const shouldLog = !window.lastUploadLog || 
+                             (Date.now() - window.lastUploadLog) > 2000 || 
+                             window.lastUploadCount !== (window.uploadedFileData?.bank_transactions || 0);
+            
             if (window.uploadedFileData && window.uploadedFileData.bank_transactions) {
                 const actualCount = window.uploadedFileData.bank_transactions;
-                console.log(`📊 Respecting your actual upload: ${actualCount} transactions`);
+                if (shouldLog) console.log(`📊 Respecting your actual upload: ${actualCount} transactions`);
                 
                 // SMART OVERRIDE: Only override if not showing filtered analysis
                 if (shouldShowFilteredCount()) {
-                    console.log(`✅ Currently showing filtered analysis (${getDisplayCount()} transactions) - not overriding with upload total`);
+                    if (shouldLog) console.log(`✅ Currently showing filtered analysis (${getDisplayCount()} transactions) - not overriding with upload total`);
                     return; // Don't override filtered analysis results
                 }
                 
@@ -349,7 +363,7 @@
                         const currentCount = parseInt(currentText.match(/\d+/)[0]);
                         
                         if (currentCount !== actualCount && currentCount > 0) {
-                            console.log(`🛡️ IMMEDIATE OVERRIDE: ${currentCount} → ${actualCount} in element:`, element.textContent);
+                            if (shouldLog) console.log(`🛡️ IMMEDIATE OVERRIDE: ${currentCount} → ${actualCount} in element:`, element.textContent);
                             element.textContent = element.textContent.replace(currentCount.toString(), actualCount.toString());
                         }
                     }
@@ -368,9 +382,13 @@
                 sessionStorage.setItem('currentTransactionCount', actualCount);
                 sessionStorage.setItem('correctDatasetSize', actualCount);
                 
-                console.log(`✅ Upload data respected. System shows: ${actualCount} transactions`);
+                if (shouldLog) {
+                    console.log(`✅ Upload data respected. System shows: ${actualCount} transactions`);
+                    window.lastUploadLog = Date.now();
+                    window.lastUploadCount = actualCount;
+                }
             } else {
-                console.log(`📊 No upload data found - system will use default values`);
+                if (shouldLog) console.log(`📊 No upload data found - system will use default values`);
             }
         }
         
@@ -656,6 +674,18 @@
 
         
 
+        
+        // Logging control - set to false to reduce console output
+        window.enableVerboseLogging = false;
+        
+        // Function to control logging level
+        function setLoggingLevel(verbose = false) {
+            window.enableVerboseLogging = verbose;
+            console.log(`🔧 Logging level set to: ${verbose ? 'VERBOSE' : 'REDUCED'}`);
+        }
+        
+        // Set initial logging level
+        setLoggingLevel(false);
         
         // Override the console.log to capture transaction count updates
         const originalConsoleLog = console.log;
@@ -6556,6 +6586,8 @@
                             </div>
                             
 
+                            
+
                 </div>
 
                         <!-- Vendor Analysis Section -->
@@ -10585,10 +10617,8 @@
                     enablePredictionButtons(); // Enable AI buttons immediately after upload
                     enableRevenueAnalysis(); // Enable revenue analysis button
                     
-                    // Populate dropdowns with real data after successful upload
-                    setTimeout(async () => {
-                        await populateDropdownsWithRealData();
-                    }, 1000);
+                    // Dropdowns will be populated manually via "Extract Data" button
+                    // No automatic vendor extraction - user controls when to start
                 } else {
                     showAlert(`Upload Error: ${data.error}`, 'error');
                 }
@@ -19052,13 +19082,25 @@ async function loadVendorList() {
             addNotification('🧹 Vendor analysis results cleared', 'info');
         }
         
-        // Simplified Transaction Analysis Functions
+        // Simplified Transaction Analysis Functions - Works with stored data instantly
         async function processTransactionSelection() {
             const transactionType = document.getElementById('transactionTypeDropdown').value;
             if (!transactionType) return;
             
             console.log('📊 Categories dropdown changed:', transactionType);
             addNotification(`📊 Transaction type selected: ${transactionType}`, 'info');
+            
+            // This function now works instantly with stored categorized data
+            // No AI/ML processing needed - just display stored results
+            if (transactionType === 'all') {
+                addNotification('📊 Showing all categories and transactions', 'info');
+            } else if (transactionType === 'operating') {
+                addNotification('📊 Showing Operating Activities data', 'info');
+            } else if (transactionType === 'investing') {
+                addNotification('📊 Showing Investing Activities data', 'info');
+            } else if (transactionType === 'financing') {
+                addNotification('📊 Showing Financing Activities data', 'info');
+            }
         }
         
         // Function to ensure dropdown options are visible
@@ -19098,10 +19140,12 @@ async function loadVendorList() {
             }
         }
         
+
+        
         async function runTransactionAnalysis() {
             const transactionType = document.getElementById('transactionTypeDropdown').value;
             const runBtn = document.getElementById('transactionRunBtn');
-            console.log('🚀 Running Categories analysis for:', transactionType);
+            console.log('📊 Running Categories analysis for:', transactionType);
             
             if (!transactionType) {
                 showAlert('❌ Please select a transaction type first', 'error');
@@ -19114,92 +19158,70 @@ async function loadVendorList() {
             runBtn.disabled = true;
             
             try {
-                // Try to call the backend API
-                const response = await fetch('/transaction-analysis', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        transaction_type: transactionType,
-                        analysis_type: 'cash_flow',
-                        ai_model: 'hybrid'
-                    })
-                });
+                // Use stored categorized data instead of calling backend API
+                // This prevents redundant AI/ML processing
+                console.log('📊 Using stored categorized data for instant analysis');
                 
-                const result = await response.json();
-                console.log('📊 Transaction analysis result:', result);
-                                    if (result.success) {
-                        console.log('📊 Transaction Analysis successful, updating dashboard...');
+                if (window.uploadedData && window.uploadedData.bank_df) {
+                    const bankData = window.uploadedData.bank_df;
+                    
+                    // Filter transactions by the selected category using stored data
+                    let filteredTransactions = [];
+                    if (transactionType === 'operating') {
+                        filteredTransactions = bankData[bankData['Category'].str.contains('Operating', na=False)];
+                    } else if (transactionType === 'investing') {
+                        filteredTransactions = bankData[bankData['Category'].str.contains('Investing', na=False)];
+                    } else if (transactionType === 'financing') {
+                        filteredTransactions = bankData[bankData['Category'].str.contains('Financing', na=False)];
+                    } else if (transactionType === 'all') {
+                        filteredTransactions = bankData;
+                    }
+                    
+                    if (filteredTransactions.length > 0) {
+                        console.log(`✅ Found ${filteredTransactions.length} transactions for ${transactionType} from stored data`);
                         
-                        // Update dashboard with transaction analysis data
-                        if (result.data) {
-                            if (typeof updateDashboardWithTransactionData === 'function') {
-                            updateDashboardWithTransactionData(result.data);
-                            console.log('✅ Dashboard updated with Transaction Analysis data');
+                        // Create analysis result from stored data
+                        const analysisResult = {
+                            success: true,
+                            data: {
+                                transactions: filteredTransactions.to_dict('records'),
+                                total_count: len(filteredTransactions),
+                                transaction_type: transactionType,
+                                analysis_type: 'cash_flow'
                             }
-                            
-                            // Update global transaction data for dynamic cash flow analysis
-                            window.currentTransactionData = {
-                                ...window.currentTransactionData,
-                                transaction_analysis: result.data,
-                                selected_transaction_type: transactionType,
-                                analysis_timestamp: new Date().toISOString()
-                            };
-                            console.log('💰 Updated global transaction data with transaction analysis:', window.currentTransactionData);
-                            
-                            // CRITICAL: Set window.currentResponse to enable comprehensive reasoning access for categories
-                            // This makes categories analysis work like vendors and trends with full reasoning data
-                            if (result.reasoning_explanations) {
-                                window.currentResponse = {
-                                    status: 'success',
-                                    reasoning_explanations: result.reasoning_explanations,
-                                    results: result.data
-                                };
-                                console.log('🧠 CRITICAL: Set window.currentResponse for categories comprehensive reasoning access:', window.currentResponse);
-                                console.log('🧠 Available reasoning keys:', Object.keys(window.currentResponse.reasoning_explanations || {}));
-                                console.log('🧠 Full reasoning data structure:', window.currentResponse.reasoning_explanations);
-                            } else {
-                                console.log('⚠️ No reasoning_explanations found in categories result - will use fallback');
-                                console.log('🔍 Backend data structure analysis:');
-                                console.log('   - result.reasoning_explanations:', result.reasoning_explanations);
-                                console.log('   - result.keys:', Object.keys(result));
-                            }
+                        };
+                        
+                        // Update dashboard with stored data
+                        if (typeof updateDashboardWithTransactionData === 'function') {
+                            updateDashboardWithTransactionData(analysisResult.data);
+                            console.log('✅ Dashboard updated with stored data');
                         }
                         
-                        showTransactionAnalysisResults(result.data);
-                        addNotification(`✅ Cash flow analysis completed with Hybrid (Ollama + XGBoost)`, 'success');
+                        // Update global transaction data
+                        window.currentTransactionData = {
+                            ...window.currentTransactionData,
+                            transaction_analysis: analysisResult.data,
+                            selected_transaction_type: transactionType,
+                            analysis_timestamp: new Date().toISOString()
+                        };
+                        console.log('💰 Updated global transaction data with stored analysis:', window.currentTransactionData);
                         
-
+                        // Show results instantly
+                        showTransactionAnalysisResults(analysisResult.data);
+                        addNotification(`✅ ${transactionType} analysis completed using stored data`, 'success');
+                        
                     } else {
-                        showAlert('❌ Cash flow analysis failed: ' + result.error, 'error');
+                        console.log('⚠️ No transactions found for selected category');
+                        showAlert('⚠️ No transactions found for selected category', 'warning');
                     }
+                } else {
+                    console.log('❌ No stored data available');
+                    showAlert('❌ No data available. Please upload a file first.', 'error');
+                }
+                
             } catch (error) {
                 console.error('❌ Transaction analysis error:', error);
-                
-                // If backend API fails, show demo data for transaction analysis
-                console.log('📊 Showing demo transaction analysis data due to API error');
-                const demoData = {
-                    transaction_count: 150,
-                    net_cash_flow: 2500000,
-                    total_inflow: 5000000,
-                    total_outflow: 2500000,
-                    transaction_type: transactionType
-                };
-                
-                // Update global transaction data with demo data for dynamic cash flow analysis
-                window.currentTransactionData = {
-                    ...window.currentTransactionData,
-                    transaction_analysis: demoData,
-                    selected_transaction_type: transactionType,
-                    analysis_timestamp: new Date().toISOString(),
-                    total_inflow: demoData.total_inflow,
-                    total_outflow: demoData.total_outflow,
-                    net_cash_flow: demoData.net_cash_flow,
-                    transaction_count: demoData.transaction_count
-                };
-                console.log('💰 Updated global transaction data with demo data:', window.currentTransactionData);
-                
-                showTransactionAnalysisResults(demoData);
-                addNotification(`⚠️ Using demo data for ${transactionType} analysis (API unavailable)`, 'warning');
+                showAlert('❌ Error analyzing transactions: ' + error.message, 'error');
             } finally {
                 // Hide loading state
                 runBtn.classList.remove('loading');
@@ -22226,80 +22248,48 @@ async function loadVendorList() {
             const container = document.getElementById('transactionTableContainer');
             if (!container) return;
             
-            // Show loading state
-            container.innerHTML = `
-                <div style="text-align: center; padding: 40px;">
-                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #6c757d;"></i>
-                    <p style="margin-top: 10px; color: #6b7280;">Loading transaction data for ${analysisType === 'vendor' ? 'vendor' : 'category'}: ${selectionType}...</p>
-                </div>
-            `;
+            console.log('📊 Loading transaction details for:', analysisType, selectionType);
             
-            console.log('🔄 Fetching transaction details for:', analysisType, selectionType);
-            
-            // Add timeout to prevent infinite loading
-            const timeoutId = setTimeout(() => {
-                console.log('⏰ API timeout - showing sample data for:', analysisType, selectionType);
-                if (analysisType === 'vendor') {
-                    displaySampleTransactionsByVendor(container, selectionType);
-                } else {
-                    displaySampleTransactionsByCategory(container, selectionType);
-                }
-            }, 5000); // 5 second timeout
-            
-            // Fetch actual transaction data from the backend
-            fetch('/get-transaction-details', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    category_type: analysisType === 'vendor' ? undefined : selectionType,
-                    vendor_name: analysisType === 'vendor' ? selectionType : undefined,
-                    analysis_type: analysisType === 'vendor' ? 'vendor_analysis' : 'category_analysis'
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                clearTimeout(timeoutId); // Clear timeout on success
-                console.log('📊 Received transaction data:', data);
+            // Use stored categorized data instead of calling API again
+            // This prevents redundant AI/ML processing
+            if (analysisType === 'category' && window.uploadedData && window.uploadedData.bank_df) {
+                const bankData = window.uploadedData.bank_df;
                 
-                if (data.success && data.transactions && data.transactions.length > 0) {
-                    console.log(`✅ Displaying ${data.transactions.length} real transactions for ${analysisType}: ${selectionType}`);
-                    
-                    // Update the transaction count in the summary to match the actual filtered data
-                    const actualCount = data.total_count || data.transactions.length;
-                    updateTransactionSummaryCount(actualCount);
-                    
-                    // CRITICAL FIX: Update ALL dashboard elements with the same filtered count
-                    // This ensures consistency between transaction analysis and transaction details
-                    console.log(`🔍 Transaction Details: Backend sent ${actualCount} transactions, ensuring dashboard consistency`);
-                    updateAllDashboardElementsWithFilteredCount(actualCount, 'category_analysis');
-                    
-                    // Synchronize the count across the entire dashboard
-                    // CRITICAL FIX: This is filtered data, so don't override with total upload count
-                    synchronizeTransactionCount(actualCount, true);
-                    
-                    displayRealTransactions(data.transactions, container, analysisType, selectionType);
-                } else {
-                    console.log('⚠️ No real transactions found, using fallback for:', analysisType, selectionType);
-                    // Fallback to sample data if API fails
-                    if (analysisType === 'vendor') {
-                        displaySampleTransactionsByVendor(container, selectionType);
-                    } else {
-                        displaySampleTransactionsByCategory(container, selectionType);
-                    }
+                // Filter transactions by the selected category using stored data
+                let filteredTransactions = [];
+                if (selectionType === 'operating') {
+                    filteredTransactions = bankData[bankData['Category'].str.contains('Operating', na=False)];
+                } else if (selectionType === 'investing') {
+                    filteredTransactions = bankData[bankData['Category'].str.contains('Investing', na=False)];
+                } else if (selectionType === 'financing') {
+                    filteredTransactions = bankData[bankData['Category'].str.contains('Financing', na=False)];
+                } else if (selectionType === 'all') {
+                    filteredTransactions = bankData;
                 }
-            })
-            .catch(error => {
-                clearTimeout(timeoutId); // Clear timeout on error
-                console.error('❌ Error fetching transaction details:', error);
-                // Fallback to sample data based on analysis type
-                if (analysisType === 'vendor') {
-                    displaySampleTransactionsByVendor(container, selectionType);
-                } else {
-                    displaySampleTransactionsByCategory(container, selectionType);
+                
+                if (filteredTransactions.length > 0) {
+                    console.log(`✅ Displaying ${filteredTransactions.length} transactions from stored data for ${selectionType}`);
+                    
+                    // Convert to the format expected by displayRealTransactions
+                    const transactions = filteredTransactions.to_dict('records');
+                    
+                    // Update transaction count
+                    updateTransactionSummaryCount(transactions.length);
+                    updateAllDashboardElementsWithFilteredCount(transactions.length, 'category_analysis');
+                    synchronizeTransactionCount(transactions.length, true);
+                    
+                    displayRealTransactions(transactions, container, analysisType, selectionType);
+                    return;
                 }
-            });
+            }
+            
+            // Fallback to sample data if stored data not available
+            console.log('⚠️ Using sample data for transaction details');
+            if (analysisType === 'vendor') {
+                displaySampleTransactionsByVendor(container, selectionType);
+            } else {
+                displaySampleTransactionsByCategory(container, selectionType);
+            }
         }
 
         function displayRealTransactions(transactions, container, analysisType = 'category', selectionType = '') {
@@ -22730,7 +22720,7 @@ Debug Results:
 
 Category Type: ${selectedCategory}
 Analysis Type: Category Analysis
-API Endpoint: /get-transaction-details
+                API Endpoint: /transaction-analysis (Unified)
 Request Body: {
   "category_type": "${selectedCategory}",
   "analysis_type": "category_analysis"
@@ -22744,7 +22734,7 @@ Check console for full details.
             console.log('🔍 Category filter debug info:', {
                 selectedCategory,
                 analysisType: 'category_analysis',
-                apiEndpoint: '/get-transaction-details'
+                apiEndpoint: '/transaction-analysis'
             });
         }
         
@@ -23555,7 +23545,7 @@ Check console for full details.
                                                     TRANSACTION OVERVIEW:
                                                 </h5>
                                                 <ul style="margin: 0; padding-left: 20px; color: #475569; line-height: 1.8;">
-                                                    <li style="margin-bottom: 8px;"><strong>Total Transactions:</strong> ${getDisplayCount() || data.transaction_count || data.total_count || 'N/A'} transactions analyzed</li>
+                                                    <li style="margin-bottom: 8px;"><strong>Total Transactions:</strong> ${data.filtered_transaction_count || data.transaction_count || getDisplayCount() || 'N/A'} transactions analyzed</li>
                                                     <li style="margin-bottom: 8px;"><strong>Financial Volume:</strong> ₹${data.total_inflow ? (data.total_inflow + data.total_outflow).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : 'N/A'} total amount processed</li>
                                                     <li style="margin-bottom: 8px;"><strong>Average Transaction:</strong> ₹${data.transaction_count && data.total_inflow ? ((data.total_inflow + data.total_outflow) / data.transaction_count).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : 'N/A'} per transaction</li>
                                                     <li style="margin-bottom: 8px;"><strong>Amount Range:</strong> ${data.min_amount && data.max_amount ? `₹${data.min_amount.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})} to ₹${data.max_amount.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : 'N/A'}</li>

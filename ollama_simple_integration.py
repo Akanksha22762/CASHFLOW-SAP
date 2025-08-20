@@ -2,6 +2,7 @@ import requests
 import json
 import time
 import logging
+import os
 from typing import Dict, List, Optional, Any
 import warnings
 warnings.filterwarnings('ignore')
@@ -10,17 +11,50 @@ warnings.filterwarnings('ignore')
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Environment-based configuration
+def get_ollama_url():
+    """Get Ollama URL based on environment"""
+    # Check if we're running locally or on EC2
+    if os.getenv('ENVIRONMENT') == 'EC2':
+        return "http://13.204.84.17:11434"
+    elif os.getenv('ENVIRONMENT') == 'LOCAL':
+        return "http://127.0.0.1:11434"
+    else:
+        # Auto-detect: try local first, then EC2
+        try:
+            # Test local connection
+            response = requests.get("http://127.0.0.1:11434/api/tags", timeout=2)
+            if response.status_code == 200:
+                logger.info("✅ Auto-detected: Using localhost Ollama")
+                return "http://127.0.0.1:11434"
+        except:
+            pass
+        
+        try:
+            # Test EC2 connection
+            response = requests.get("http://13.204.84.17:11434/api/tags", timeout=2)
+            if response.status_code == 200:
+                logger.info("✅ Auto-detected: Using EC2 Ollama")
+                return "http://13.204.84.17:11434"
+        except:
+            pass
+        
+        # Default to localhost if neither works
+        logger.warning("⚠️ Could not auto-detect Ollama, defaulting to localhost")
+        return "http://127.0.0.1:11434"
+
 class OllamaSimpleIntegration:
     """
     Simple Ollama Integration for AI Enhancement
     Provides basic Ollama API integration for text processing and analysis
     """
     
-    def __init__(self, base_url: str = "http://localhost:11434"):
+    def __init__(self, base_url: str = None):
         """Initialize Ollama integration"""
-        self.base_url = base_url
+        self.base_url = base_url or get_ollama_url()
         self.available_models = []
         self.is_available = False
+        logger.info(f"🔧 Ollama configured for: {self.base_url}")
         self._check_availability()
         
     def _check_availability(self):
@@ -67,10 +101,14 @@ class OllamaSimpleIntegration:
                 }
             }
             
+            # Adaptive timeout based on request size
+            base_timeout = 120  # Base timeout for small requests (increased from 60)
+            adaptive_timeout = min(600, base_timeout + (len(prompt) // 50))  # Max 10 minutes (increased from 5)
+            
             response = requests.post(
                 f"{self.base_url}/api/generate",
                 json=payload,
-                timeout=30
+                timeout=adaptive_timeout
             )
             
             if response.status_code == 200:
@@ -281,8 +319,10 @@ def analyze_patterns_with_ollama(data: List[Dict[str, Any]]) -> Dict[str, Any]:
 def check_ollama_availability():
     """Check if Ollama is available and working"""
     try:
-        import httpx
-        response = httpx.get("http://127.0.0.1:11434/api/tags", timeout=5)
+        import requests
+        # Use the same auto-detection logic as the main class
+        ollama_url = get_ollama_url()
+        response = requests.get(f"{ollama_url}/api/tags", timeout=5)
         if response.status_code == 200:
             return True
         else:

@@ -32,16 +32,16 @@ class UniversalDataAdapter:
     # Common column name patterns for detection
     COLUMN_PATTERNS = {
         'date': [
-            r'(?i)date|dt|day|transaction.*date|posting.*date|value.*date|settlement.*date|entry.*date'
+            r'date|dt|day|transaction.*date|posting.*date|value.*date|settlement.*date|entry.*date'
         ],
         'description': [
-            r'(?i)desc|description|narration|particulars|details|text|transaction.*detail|memo|note'
+            r'desc|description|narration|particulars|details|text|transaction.*detail|memo|note'
         ],
         'amount': [
-            r'(?i)amount|amt|value|sum|total|debit|credit|dr|cr|transaction.*amount|payment'
+            r'amount|amt|value|sum|total|debit|credit|dr|cr|transaction.*amount|payment'
         ],
         'type': [
-            r'(?i)type|transaction.*type|entry.*type|category|classification|nature'
+            r'type|transaction.*type|entry.*type|category|classification|nature'
         ]
     }
     
@@ -155,7 +155,7 @@ class UniversalDataAdapter:
             if std_key not in self.column_mapping:
                 for col in data.columns:
                     for pattern in self.COLUMN_PATTERNS[std_key]:
-                        if re.search(pattern, col):
+                        if re.search(pattern, col, re.IGNORECASE):
                             self.column_mapping[std_key] = col
                             break
                     if std_key in self.column_mapping:
