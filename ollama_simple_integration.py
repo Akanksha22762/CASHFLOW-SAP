@@ -6,6 +6,8 @@ import os
 from typing import Dict, List, Optional, Any
 import warnings
 warnings.filterwarnings('ignore')
+import asyncio
+import aiohttp
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -73,9 +75,9 @@ class OllamaSimpleIntegration:
             logger.warning(f"⚠️ Ollama not available: {e}")
             self.is_available = False
     
-    def simple_ollama(self, prompt: str, model: str = "llama2", max_tokens: int = 100) -> Optional[str]:
+    def simple_ollama(self, prompt: str, model: str = "llama3.2:3b", max_tokens: int = 100) -> Optional[str]:
         """
-        Simple Ollama API call for text processing
+        Simple Ollama API call for text processing - OPTIMIZED FOR SPEED
         
         Args:
             prompt: Input prompt for the model
@@ -89,40 +91,61 @@ class OllamaSimpleIntegration:
             logger.warning("Ollama not available, skipping request")
             return None
             
-        try:
-            payload = {
-                "model": model,
-                "prompt": prompt,
-                "stream": False,
-                "options": {
-                    "num_predict": max_tokens,
-                    "temperature": 0.7,
-                    "top_p": 0.9
+        # Retry logic with exponential backoff - OPTIMIZED FOR SPEED
+        max_retries = 2  # Reduced from 3 to 2 for speed
+        
+        for attempt in range(max_retries):
+            try:
+                payload = {
+                    "model": model,
+                    "prompt": prompt,
+                    "stream": False,
+                    "options": {
+                        "num_predict": max_tokens,
+                        "temperature": 0.7,
+                        "top_p": 0.9
+                    }
                 }
-            }
-            
-            # Adaptive timeout based on request size
-            base_timeout = 120  # Base timeout for small requests (increased from 60)
-            adaptive_timeout = min(600, base_timeout + (len(prompt) // 50))  # Max 10 minutes (increased from 5)
-            
-            response = requests.post(
-                f"{self.base_url}/api/generate",
-                json=payload,
-                timeout=adaptive_timeout
-            )
-            
-            if response.status_code == 200:
-                result = response.json()
-                return result.get('response', '').strip()
-            else:
-                logger.error(f"Ollama API error: {response.status_code}")
-                return None
                 
-        except Exception as e:
-            logger.error(f"Error calling Ollama: {e}")
-            return None
+                # OPTIMIZED timeout for vendor extraction
+                base_timeout = 30  # Increased to 30 seconds for reliable processing
+                adaptive_timeout = min(60, base_timeout + (len(prompt) // 200))  # Max 60 seconds for complex operations like vendor extraction
+                
+                logger.info(f"Attempt {attempt + 1}/{max_retries} with {adaptive_timeout}s timeout")
+                
+                response = requests.post(
+                    f"{self.base_url}/api/generate",
+                    json=payload,
+                    timeout=adaptive_timeout
+                )
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    return result.get('response', '').strip()
+                else:
+                    logger.error(f"Ollama API error: {response.status_code}")
+                    if attempt < max_retries - 1:
+                        time.sleep(1)  # Reduced wait time from 2^attempt to 1 second
+                        continue
+                    return None
+                    
+            except requests.exceptions.Timeout:
+                logger.error(f"Ollama API timeout (attempt {attempt + 1})")
+                if attempt < max_retries - 1:
+                    time.sleep(1)  # Reduced wait time
+                    continue
+                return None
+            except Exception as e:
+                logger.error(f"Error calling Ollama (attempt {attempt + 1}): {e}")
+                if attempt < max_retries - 1:
+                    time.sleep(1)  # Reduced wait time
+                    continue
+                return None
+        
+        logger.error("All retry attempts failed")
+        return None
     
-    def enhance_descriptions(self, descriptions: List[str], model: str = "llama2") -> List[str]:
+    def enhance_descriptions(self, descriptions: List[str], model: str = "llama3.2:3b") -> List[str]:
         """
         Enhance transaction descriptions using Ollama
         
@@ -160,7 +183,7 @@ class OllamaSimpleIntegration:
         
         return enhanced_descriptions
     
-    def categorize_transactions(self, descriptions: List[str], model: str = "llama2") -> List[str]:
+    def categorize_transactions(self, descriptions: List[str], model: str = "llama3.2:3b") -> List[str]:
         """
         Categorize transactions using Ollama
         
@@ -205,7 +228,7 @@ class OllamaSimpleIntegration:
         
         return categories
     
-    def analyze_patterns(self, data: List[Dict[str, Any]], model: str = "llama2") -> Dict[str, Any]:
+    def analyze_patterns(self, data: List[Dict[str, Any]], model: str = "llama3.2:3b") -> Dict[str, Any]:
         """
         Analyze patterns in transaction data using Ollama
         
@@ -266,7 +289,59 @@ class OllamaSimpleIntegration:
 # Global instance for easy access
 ollama_integration = OllamaSimpleIntegration()
 
-def simple_ollama(prompt: str, model: str = "llama2", max_tokens: int = 100) -> Optional[str]:
+class AsyncOllamaClient:
+    """Async Ollama client for concurrent processing"""
+    
+    def __init__(self, base_url: str = "http://localhost:11434"):
+        self.base_url = base_url
+        self.session = None
+        self.semaphore = asyncio.Semaphore(5)  # Limit concurrent requests
+        
+    async def __aenter__(self):
+        self.session = aiohttp.ClientSession()
+        return self
+        
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        if self.session:
+            await self.session.close()
+    
+    async def async_generate(self, prompt: str, model: str = "llama3.2:3b", max_tokens: int = 200) -> Optional[str]:
+        """Async version of Ollama generation"""
+        async with self.semaphore:  # Limit concurrent requests
+            try:
+                payload = {
+                    "model": model,
+                    "prompt": prompt,
+                    "stream": False,
+                    "options": {
+                        "num_predict": max_tokens,
+                        "temperature": 0.7,
+                        "top_p": 0.9
+                    }
+                }
+                
+                timeout = aiohttp.ClientTimeout(total=60)  # 1 minute timeout for faster processing
+                
+                async with self.session.post(
+                    f"{self.base_url}/api/generate",
+                    json=payload,
+                    timeout=timeout
+                ) as response:
+                    if response.status == 200:
+                        result = await response.json()
+                        return result.get('response', '').strip()
+                    else:
+                        logger.error(f"Ollama API error: {response.status}")
+                        return None
+                        
+            except asyncio.TimeoutError:
+                logger.error("Ollama API timeout")
+                return None
+            except Exception as e:
+                logger.error(f"Error calling Ollama: {e}")
+                return None
+
+def simple_ollama(prompt: str, model: str = "llama3.2:3b", max_tokens: int = 100) -> Optional[str]:
     """
     Simple function to call Ollama
     
