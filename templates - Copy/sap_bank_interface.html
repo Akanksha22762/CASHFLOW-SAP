@@ -306,92 +306,9 @@
             
             // Handle vendor changes only if we're in the Vendors section
             if (isVendorsSection && selectedVendor && selectedVendor !== '') {
-                console.log('🏢 Vendor selected:', selectedVendor, '- showing modal results');
-                console.log('🏢 About to call getVendorAnalysisAndShowModal');
-                // Get vendor analysis data first, then show modal
-                getVendorAnalysisAndShowModal(selectedVendor);
-                console.log('🏢 Called getVendorAnalysisAndShowModal');
-            }
-        }
-        
-        // Function to get vendor analysis data and show modal
-        async function getVendorAnalysisAndShowModal(vendorName) {
-            console.log('🏢 Getting vendor analysis data for modal:', vendorName);
-            console.log('🏢 This function should call showVendorAnalysisModal');
-            console.log('🏢 Function getVendorAnalysisAndShowModal STARTED');
-            
-            try {
-                // Show loading state
-                const resultsContainer = document.getElementById('vendorAnalysisResults');
-                if (resultsContainer) {
-                    resultsContainer.style.display = 'block';
-                    resultsContainer.innerHTML = `
-                        <div style="text-align: center; padding: 40px;">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="sr-only">Loading...</span>
-                            </div>
-                            <p style="margin-top: 15px; color: #6c757d;">Analyzing vendor: ${vendorName}...</p>
-                        </div>
-                    `;
-                }
-                
-                // Call the backend vendor analysis endpoint
-                console.log('🏢 About to call backend /vendor-analysis endpoint');
-                const response = await fetch('/vendor-analysis', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        vendor: vendorName,
-                        analysis_type: 'single_vendor'
-                    })
-                });
-                console.log('🏢 Backend response received:', response.status);
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const result = await response.json();
-                console.log('✅ Vendor analysis completed for modal:', result);
-                console.log('🏢 Result status:', result.status);
-                console.log('🏢 Result data:', result.data);
-                console.log('🏢 Result keys:', Object.keys(result));
-
-                // Check multiple possible response formats
-                if (result.status === 'success' && result.data) {
-                    // Standard success format
-                    console.log('🏢 Standard success format detected');
-                    console.log('🏢 About to call showSimpleVendorAnalysisModal with result:', result);
-                    showSimpleVendorAnalysisModal(result);
-                    console.log('🏢 Called showSimpleVendorAnalysisModal');
-                } else if (result.vendor_results || result.data) {
-                    // Alternative success format - has vendor data
-                    console.log('🏢 Alternative success format detected (has vendor data)');
-                    console.log('🏢 About to call showSimpleVendorAnalysisModal with result:', result);
-                    showSimpleVendorAnalysisModal(result);
-                    console.log('🏢 Called showSimpleVendorAnalysisModal');
-                } else {
-                    console.log('🏢 Backend response not successful:');
-                    console.log('🏢 Status:', result.status);
-                    console.log('🏢 Data:', result.data);
-                    console.log('🏢 Message:', result.message);
-                    console.log('🏢 Vendor results:', result.vendor_results);
-                    throw new Error(result.message || 'Vendor analysis failed');
-                }
-
-            } catch (error) {
-                console.error('❌ Vendor analysis failed for modal:', error);
-                const resultsContainer = document.getElementById('vendorAnalysisResults');
-                if (resultsContainer) {
-                    resultsContainer.innerHTML = `
-                        <div style="text-align: center; padding: 40px; color: #dc3545;">
-                            <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 15px;"></i>
-                            <p>Failed to analyze vendor: ${error.message}</p>
-                        </div>
-                    `;
-                }
+                console.log('🏢 Vendor selected:', selectedVendor, '- showing inline results (same as categories)');
+                // Show vendor results inline - same behavior as categories
+                showVendorResultsInline(selectedVendor);
             }
         }
         
@@ -421,7 +338,7 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        vendor: vendorName,
+                        vendor_name: vendorName,
                         analysis_type: 'single_vendor'
                     })
                 });
@@ -15152,14 +15069,14 @@ async function runVendorAnalysis() {
                                     <i class="fas fa-building" style="color: #fbbf24; font-size: 18px;"></i>
                                     ${vendorName}
                                     <span style="background: rgba(255,255,255,0.25); padding: 4px 12px; border-radius: 8px; font-size: 12px; margin-left: auto; font-weight: 600;">Vendor Analysis</span>
-                                    </h5>
-                                </div>
-                                <div style="padding: 25px;">
+                                </h5>
+                            </div>
+                            <div style="padding: 25px;">
                                 ${generateVendorInsights(vendorData, vendorName)}
                                 ${generateVendorStrategicRecommendations(vendorData, vendorName)}
-                    </div>
-                    </div>
-                `;
+                            </div>
+                        </div>
+                    `;
                 }
             }
             
@@ -15175,8 +15092,8 @@ async function runVendorAnalysis() {
                     <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #667eea;">
                         <h6 style="margin: 0 0 15px 0; color: #2c3e50; font-size: 16px; font-weight: 600;">AI-Powered Insights & Analysis</h6>
                         <div style="color: #2c3e50; line-height: 1.6;">${vendorData.simple_reasoning}</div>
-                </div>
-            `;
+                    </div>
+                `;
             }
             
             return insightsHTML;
@@ -15211,26 +15128,919 @@ async function runVendorAnalysis() {
                             <h5 style="margin: 0; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 12px; letter-spacing: 0.5px;">
                                 <div style="background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); border-radius: 12px; padding: 10px; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);">
                                     <i class="fas fa-bullseye" style="color: #8b4513; font-size: 18px;"></i>
-                            </div>
+                                </div>
                                 Strategic Recommendations & Action Items
                                 <span style="background: rgba(255,255,255,0.25); padding: 4px 12px; border-radius: 16px; font-size: 12px; margin-left: auto; font-weight: 600; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);">AI Generated</span>
                             </h5>
-                            </div>
+                        </div>
                         <div style="padding: 25px; background: white; position: relative;">
                             <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #f093fb 0%, #f5576c 100%);"></div>
                             <div style="white-space: pre-wrap; word-wrap: break-word; max-height: 400px; overflow-y: auto; font-size: 15px; line-height: 1.8; color: #2c3e50; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 25px; border-radius: 12px; border-left: 6px solid #f093fb; box-shadow: inset 0 4px 8px rgba(0,0,0,0.08); position: relative;">
                                 <div style="position: absolute; top: 15px; right: 15px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 4px 8px; border-radius: 8px; font-size: 11px; font-weight: 600;">Strategic</div>
                                 ${recommendationText}
+                            </div>
                         </div>
                     </div>
-                </div>
-            `;
+                `;
             }
             
             return recommendationsHTML;
         }
         
         // Simple Vendor Analysis Modal - Clean structure like categories
+        function showVendorAnalysisModal(data) {
+            console.log('🏢 Showing vendor analysis modal:', data);
+            console.log('🔍 DEBUG: Vendor data keys:', Object.keys(data));
+            console.log('🔍 DEBUG: Vendor reasoning_explanations:', data.reasoning_explanations);
+            console.log('🔍 DEBUG: Vendor results.reasoning_explanations:', data.results?.reasoning_explanations);
+            
+            // Store vendor analysis data for reasoning modal
+            if (!window.currentTransactionData) {
+                window.currentTransactionData = {};
+            }
+            window.currentTransactionData.vendor_analysis = data;
+            console.log('💰 Stored vendor analysis data for reasoning:', window.currentTransactionData.vendor_analysis);
+            
+            // CRITICAL: Set window.currentResponse to enable comprehensive reasoning access
+            // This makes vendor analysis work like trends section with full reasoning data
+            if (data.reasoning_explanations || data.results?.reasoning_explanations) {
+                window.currentResponse = {
+                    status: 'success',
+                    reasoning_explanations: data.reasoning_explanations || data.results?.reasoning_explanations,
+                    results: data
+                };
+                console.log('🧠 CRITICAL: Set window.currentResponse for comprehensive reasoning access:', window.currentResponse);
+                console.log('🧠 Available reasoning keys:', Object.keys(window.currentResponse.reasoning_explanations || {}));
+                console.log('🧠 Full reasoning data structure:', window.currentResponse.reasoning_explanations);
+                
+                // 🔧 NEW: Preserve reasoning data for future access
+                preserveReasoningData('vendor_analysis', data);
+            } else {
+                console.log('⚠️ No reasoning_explanations found in vendor data - will use fallback');
+                console.log('🔍 Backend data structure analysis:');
+                console.log('   - data.reasoning_explanations:', data.reasoning_explanations);
+                console.log('   - data.results?.reasoning_explanations:', data.results?.reasoning_explanations);
+                console.log('   - data.keys:', Object.keys(data));
+                console.log('   - data.results?.keys:', data.results ? Object.keys(data.results) : 'No results');
+            }
+            
+            const summary = data.summary_stats;
+            
+            // Create beautiful Vendor Analysis UI
+            const modalHTML = `
+                <div id="vendorAnalysisModal" class="modal">
+                    <div class="modal-content" style="background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); border: 1px solid #e1e8ed; max-width: 1600px; width: 95%; max-height: 95vh;">
+                        <div class="modal-header" style="background: #f8f9fa; color: #2c3e50; padding: 25px 30px; border-radius: 12px 12px 0 0; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e1e8ed;">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div style="background: #2c3e50; border-radius: 8px; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-users" style="font-size: 20px; color: white;"></i>
+                </div>
+                                <h3 style="margin: 0; font-size: 1.5rem; font-weight: 600; color: #2c3e50;">Vendor Analysis Results</h3>
+                </div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <!-- View AI/ML Reasoning Button - Now at the top level -->
+                                <button onclick="showVendorReasoningModal();" style="
+                                    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border: none; color: white; font-size: 1rem; padding: 12px 20px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.3s ease; font-weight: 600; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3); margin-right: 15px;
+                                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(139, 92, 246, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(139, 92, 246, 0.3)'">
+                                    <i class="fas fa-brain" style="color: #fbbf24; font-size: 16px;"></i>
+                                    View AI/ML Reasoning
+                                </button>
+                                <!-- Export Buttons -->
+
+                                <button onclick="downloadVendorAnalysis('Vendor Analysis Results', 'excel')" style="
+                                    background: #10b981; border: none; color: white; font-size: 0.9rem; padding: 8px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease; font-weight: 500;
+                                " onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'">
+                                    <i class="fas fa-file-excel"></i> Excel
+                                </button>
+                                <button onclick="downloadVendorAnalysis('Vendor Analysis Results', 'csv')" style="
+                                    background: #3b82f6; border: none; color: white; font-size: 0.9rem; padding: 8px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease; font-weight: 500;
+                                " onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
+                                    <i class="fas fa-file-csv"></i> CSV
+                                </button>
+                                <button onclick="downloadVendorAnalysis('Vendor Analysis Results', 'pdf')" style="
+                                    background: #ef4444; border: none; color: white; font-size: 0.9rem; padding: 8px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease; font-weight: 500;
+                                " onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">
+                                    <i class="fas fa-file-pdf"></i> PDF
+                                </button>
+                                <span class="close" onclick="closeVendorAnalysisModal()" style="color: #6c757d; font-size: 1.5rem; font-weight: bold; cursor: pointer; background: #f8f9fa; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; border: 1px solid #e1e8ed;">&times;</span>
+                            </div>
+                </div>
+                        <div class="modal-body" style="background: white; padding: 50px; border-radius: 0 0 16px 16px; max-height: 90vh; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none;">
+                            
+                            <!-- Vendor Analysis Summary -->
+                            <div style="background: #f8f9fa; border-radius: 8px; padding: 25px; margin-bottom: 30px; border: 1px solid #e1e8ed;">
+                                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+                                    <div style="background: #2c3e50; border-radius: 6px; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-chart-bar" style="font-size: 20px; color: white;"></i>
+                                    </div>
+                                    <div>
+                                        <h4 style="margin: 0; font-size: 1.3rem; font-weight: 600; color: #2c3e50;">Vendor Analysis Summary</h4>
+                                        <p style="margin: 5px 0 0 0; color: #6b7280; font-size: 0.9rem;">Comprehensive vendor relationship analysis</p>
+                                    </div>
+                                </div>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                                    <div style="background: white; border-radius: 6px; padding: 20px; border: 1px solid #e1e8ed; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer;" onclick="showVendorDetails('Total Vendors', ${summary.total_vendors_matched}, 'vendors')" title="Click to view detailed vendor list">
+                                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                            <i class="fas fa-users" style="color: #3b82f6; font-size: 14px;"></i>
+                                            <strong style="font-size: 0.8rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px;">Total Vendors</strong>
+                                            <i class="fas fa-external-link-alt" style="color: #3b82f6; font-size: 10px; margin-left: auto;"></i>
+                                        </div>
+                                        <div style="font-size: 1.1rem; font-weight: 600; color: #2c3e50; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${summary.total_vendors_matched}</div>
+                                        <div style="font-size: 0.7rem; color: #6b7280; margin-top: 5px;">Click to view details</div>
+                                    </div>
+                                                                            <div style="background: white; border-radius: 6px; padding: 20px; border: 1px solid #e1e8ed; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer;" id="vendorTransactionsCard" data-vendor-transactions="true" title="Click to view vendor transactions">
+                                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                                <i class="fas fa-exchange-alt" style="color: #10b981; font-size: 14px;"></i>
+                                                <strong style="font-size: 0.8rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px;">Total Transactions</strong>
+                                                <i class="fas fa-external-link-alt" style="color: #10b981; font-size: 10px; margin-left: auto;"></i>
+                                            </div>
+                                            <div style="font-size: 1.1rem; font-weight: 600; color: #2c3e50; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${summary.total_transactions_analyzed}</div>
+                                            <div style="font-size: 0.7rem; color: #6b7280; margin-top: 5px;">Click to view transactions</div>
+                                        </div>
+                                    <div style="background: white; border-radius: 6px; padding: 20px; border: 1px solid #e1e8ed; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer;" onclick="showAmountDetails('Total Amount', ${summary.total_amount_all_vendors}, 'amount')" title="Click to view detailed amount breakdown">
+                                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                            <i class="fas fa-dollar-sign" style="color: #f59e0b; font-size: 14px;"></i>
+                                            <strong style="font-size: 0.8rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px;">Total Amount</strong>
+                                            <i class="fas fa-external-link-alt" style="color: #f59e0b; font-size: 10px; margin-left: auto;"></i>
+                                        </div>
+                                        <div style="font-size: 1.1rem; font-weight: 600; color: #2c3e50; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${formatAmount(summary.total_amount_all_vendors)}</div>
+                                        <div style="font-size: 0.7rem; color: #6b7280; margin-top: 5px;">Click to view breakdown</div>
+                                    </div>
+                                    <div style="background: white; border-radius: 6px; padding: 20px; border: 1px solid #e1e8ed; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer;" onclick="showAIDetails('AI Status', '${summary.ai_enabled ? 'Enabled' : 'Disabled'}', 'ai')" title="Click to view AI analysis details">
+                                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                            <i class="fas fa-robot" style="color: #8b5cf6; font-size: 14px;"></i>
+                                            <strong style="font-size: 0.8rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px;">AI Status</strong>
+                                            <i class="fas fa-external-link-alt" style="color: #8b5cf6; font-size: 10px; margin-left: auto;"></i>
+                                        </div>
+                                        <div style="font-size: 1.1rem; font-weight: 600; color: #2c3e50; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${summary.ai_enabled ? '✅ Enabled' : '❌ Disabled'}</div>
+                                        <div style="font-size: 0.7rem; color: #6b7280; margin-top: 5px;">Click to view details</div>
+                                    </div>
+                                    <div style="background: white; border-radius: 6px; padding: 20px; border: 1px solid #e1e8ed; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                            <i class="fas fa-calendar-alt" style="color: #ef4444; font-size: 14px;"></i>
+                                            <strong style="font-size: 0.8rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px;">Analysis Date</strong>
+                                        </div>
+                                        <div style="font-size: 1.1rem; font-weight: 600; color: #2c3e50; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${new Date().toLocaleDateString()}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Individual Vendor Analysis with Strategic Recommendations -->
+                            ${generateIndividualVendorAnalysis(data)}
+                            
+                            <!-- AI/ML Vendor Patterns Section -->
+                            <div style="background: white; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e1e8ed; overflow: hidden;">
+                                <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 20px 25px; border-bottom: 1px solid #e1e8ed;">
+                                    <h5 style="margin: 0; font-size: 18px; font-weight: 700; color: #2c3e50; display: flex; align-items: center; gap: 12px;">
+                                        <i class="fas fa-chart-line" style="color: #3b82f6; font-size: 20px;"></i> 
+                                        Advanced ML Vendor Pattern Analysis
+                                        <span style="background: #3b82f6; color: white; padding: 4px 12px; border-radius: 8px; font-size: 12px; margin-left: auto; font-weight: 600;">AI Patterns</span>
+                                    </h5>
+                                </div>
+                                <div style="padding: 25px;">
+                                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; grid-auto-rows: 1fr;">
+                                        <div style="
+                                            background: white; 
+                                            border-radius: 12px; 
+                                            padding: 25px; 
+                                            border: 1px solid #e5e7eb; 
+                                            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); 
+                                            height: 140px; 
+                                            display: flex; 
+                                            flex-direction: column; 
+                                            justify-content: space-between; 
+                                            cursor: pointer;
+                                            transition: all 0.3s ease;
+                                            position: relative;
+                                        " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'" onclick="showVendorPatternDetails('vendor_count', '${summary.total_vendors_matched}', '#3b82f6')">
+                                            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                                                <i class="fas fa-users" style="color: #3b82f6; font-size: 18px;"></i>
+                                                <strong style="color: #374151; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Vendor Count</strong>
+                                                <i class="fas fa-external-link-alt" style="color: #3b82f6; font-size: 12px; margin-left: auto;"></i>
+                                            </div>
+                                            <div style="font-size: 24px; font-weight: 700; color: #111827; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin-bottom: 8px;">${summary.total_vendors_matched}</div>
+                                            <div style="color: #6b7280; font-size: 12px; font-weight: 500;">Click to view details</div>
+                                        </div>
+                                        <div style="
+                                            background: white; 
+                                            border-radius: 12px; 
+                                            padding: 25px; 
+                                            border: 1px solid #e5e7eb; 
+                                            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); 
+                                            height: 140px; 
+                                            display: flex; 
+                                            flex-direction: column; 
+                                            justify-content: space-between; 
+                                            cursor: pointer;
+                                            transition: all 0.3s ease;
+                                            position: relative;
+                                        " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'" onclick="showVendorPatternDetails('transaction_volume', '${summary.total_transactions_analyzed}', '#10b981')">
+                                            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                                                <div style="background: #10b981; border-radius: 6px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
+                                                    <i class="fas fa-chart-bar" style="color: white; font-size: 14px;"></i>
+                                                </div>
+                                                <strong style="color: #374151; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Transaction Volume</strong>
+                                                <i class="fas fa-external-link-alt" style="color: #10b981; font-size: 12px; margin-left: auto;"></i>
+                                            </div>
+                                            <div style="font-size: 24px; font-weight: 700; color: #111827; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin-bottom: 8px;">${summary.total_transactions_analyzed}</div>
+                                            <div style="color: #6b7280; font-size: 12px; font-weight: 500;">Click to view details</div>
+                                        </div>
+                                        <div style="
+                                            background: white; 
+                                            border-radius: 12px; 
+                                            padding: 25px; 
+                                            border: 1px solid #e5e7eb; 
+                                            box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px 0 rgba(0,0,0,0.06); 
+                                            height: 140px; 
+                                            display: flex; 
+                                            flex-direction: column; 
+                                            justify-content: space-between; 
+                                            cursor: pointer;
+                                            transition: all 0.3s ease;
+                                            position: relative;
+                                        " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px 0 rgba(0,0,0,0.06)'" onclick="showVendorPatternDetails('financial_impact', '${formatAmount(summary.total_amount_all_vendors)}', '#f59e0b')">
+                                            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                                                <i class="fas fa-dollar-sign" style="color: #f59e0b; font-size: 18px;"></i>
+                                                <strong style="color: #374151; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Financial Impact</strong>
+                                                <i class="fas fa-external-link-alt" style="color: #f59e0b; font-size: 12px; margin-left: auto;"></i>
+                                            </div>
+                                            <div style="font-size: 24px; font-weight: 700; color: #111827; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin-bottom: 8px;">${formatAmount(summary.total_amount_all_vendors)}</div>
+                                            <div style="color: #6b7280; font-size: 12px; font-weight: 500;">Click to view details</div>
+                                        </div>
+                                        <div style="
+                                            background: white; 
+                                            border-radius: 12px; 
+                                            padding: 25px; 
+                                            border: 1px solid #e5e7eb; 
+                                            box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px 0 rgba(0,0,0,0.06); 
+                                            height: 140px; 
+                                            display: flex; 
+                                            flex-direction: column; 
+                                            justify-content: space-between; 
+                                            cursor: pointer;
+                                            transition: all 0.3s ease;
+                                            position: relative;
+                                        " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px 0 rgba(0,0,0,0.06)'" onclick="showVendorPatternDetails('ai_analysis', '${summary.ai_enabled ? 'Active' : 'Inactive'}', '#8b5cf6')">
+                                            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                                                <i class="fas fa-robot" style="color: #8b5cf6; font-size: 18px;"></i>
+                                                <strong style="color: #374151; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">AI Analysis</strong>
+                                                <i class="fas fa-external-link-alt" style="color: #8b5cf6; font-size: 12px; margin-left: auto;"></i>
+                                            </div>
+                                            <div style="font-size: 24px; font-weight: 700; color: #111827; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin-bottom: 8px;">${summary.ai_enabled ? '🤖 Active' : '❌ Inactive'}</div>
+                                            <div style="color: #6b7280; font-size: 12px; font-weight: 500;">Click to view details</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- AI Insights Section -->
+                            <div style="background: white; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e1e8ed; overflow: hidden;">
+                                <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 20px 25px; border-bottom: 1px solid #e1e8ed;">
+                                    <h5 style="margin: 0; font-size: 18px; font-weight: 700; color: #2c3e50;">
+                                        Vendor Insights
+                                    </h5>
+                                </div>
+                                <div style="padding: 30px;">
+                                    <div style="
+                                        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+                                        padding: 30px;
+                                        border-radius: 16px;
+                                        border: 1px solid #e2e8f0;
+                                        font-size: 16px;
+                                        line-height: 1.8;
+                                        color: #1e293b;
+                                        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                                        min-height: 250px;
+                                        text-align: left;
+                                        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+                                    ">
+                                        <div style="
+                                            background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+                                            color: white;
+                                            padding: 20px 25px;
+                                            border-radius: 12px;
+                                            margin-bottom: 25px;
+                                            display: flex;
+                                            align-items: center;
+                                            gap: 15px;
+                                        ">
+                                            <i class="fas fa-brain" style="font-size: 24px; opacity: 0.9;"></i>
+                                            <div>
+                                                <h4 style="margin: 0 0 5px 0; font-size: 18px; font-weight: 700;">Advanced ML Analysis</h4>
+                                                <p style="margin: 0; opacity: 0.9; font-size: 14px;">Machine learning insights</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div style="margin-bottom: 25px;">
+                                            <h5 style="
+                                                color: #1e293b;
+                                                font-size: 18px;
+                                                font-weight: 700;
+                                                margin: 0 0 15px 0;
+                                                display: flex;
+                                                align-items: center;
+                                                gap: 10px;
+                                            ">
+                                                <i class="fas fa-chart-line" style="color: #8b5cf6; font-size: 16px;"></i>
+                                                VENDOR OVERVIEW:
+                                            </h5>
+                                            <ul style="
+                                                margin: 0;
+                                                padding-left: 20px;
+                                                color: #475569;
+                                                line-height: 1.8;
+                                            ">
+                                                <li><strong>Total Vendors:</strong> ${summary.total_vendors_matched} vendors analyzed</li>
+                                                <li><strong>Financial Volume:</strong> ${formatAmount(summary.total_amount_all_vendors)} total amount processed</li>
+                                                <li><strong>Transaction Count:</strong> ${summary.total_transactions_analyzed} transactions analyzed</li>
+                                                <li><strong>AI Analysis:</strong> ${summary.ai_enabled ? 'Enabled with advanced pattern recognition' : 'Basic analysis mode'}</li>
+                                            </ul>
+                                        </div>
+                                        
+                                        <div style="
+                                            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+                                            padding: 20px;
+                                            border-radius: 12px;
+                                            border-left: 4px solid #0ea5e9;
+                                        ">
+                                            <h6 style="margin: 0 0 10px 0; color: #0c4a6e; font-size: 16px; font-weight: 600;">
+                                                💡 Key Insights:
+                                            </h6>
+                                            <p style="margin: 0; color: #0c4a6e; line-height: 1.6;">
+                                                The ML system employs deep ensemble learning with many trees for robust vendor pattern recognition and discovered ${summary.total_vendors_matched > 10 ? 'strong' : summary.total_vendors_matched > 5 ? 'moderate' : 'developing'} vendor patterns through complex decision boundaries for intricate patterns, revealing business rules: vendor analysis with ${summary.total_vendors_matched > 10 ? 'high' : summary.total_vendors_matched > 5 ? 'medium' : 'low'} pattern strength based on analysis of vendor relationships and transaction amounts is the key driver, suggesting financial magnitude determines vendor importance classification.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- AI Model Reasoning & Explanations Section -->
+                            ${data.simple_reasoning || data.reasoning_explanations || (data.results && data.results.reasoning_explanations) ? 
+                              generateVendorReasoningHTML({
+                                  simple_reasoning: data.simple_reasoning,
+                                  ...data.reasoning_explanations,
+                                  ...data.results?.reasoning_explanations
+                              }) : ''}
+                        </div>
+                    </div>
+                    </div>
+                `;
+            
+            // Add modal to page
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            
+            // Add event listener for vendor transactions card
+            console.log('🔍 DEBUG: Adding event listener for vendor transactions card...');
+            setTimeout(() => {
+                const vendorTransactionsCard = document.getElementById('vendorTransactionsCard');
+                if (vendorTransactionsCard) {
+                    vendorTransactionsCard.addEventListener('click', function(e) {
+                        console.log('🔍 DEBUG: Vendor transactions card clicked!');
+                        console.log('🔍 DEBUG: This should call showVendorTransactionsModal, NOT showTransactionDetails');
+                        e.preventDefault();
+                        e.stopPropagation();
+                        showVendorTransactionsModal();
+                    });
+                    console.log('✅ Event listener added to vendor transactions card');
+                } else {
+                    console.log('❌ Vendor transactions card not found!');
+                }
+            }, 100);
+            
+            // Show modal
+            const modal = document.getElementById('vendorAnalysisModal');
+            modal.style.display = 'block';
+            
+            // Add modal styles
+            if (!document.getElementById('vendorModalStyles')) {
+                const styles = document.createElement('style');
+                styles.id = 'vendorModalStyles';
+                styles.textContent = `
+                    .modal {
+                        display: none;
+                        position: fixed;
+                        z-index: 1000;
+                        left: 0;
+                        top: 0;
+                        width: 100%;
+                        height: 100%;
+                        background-color: rgba(0,0,0,0.5);
+                        backdrop-filter: blur(5px);
+                    }
+                    .modal-content {
+                        position: relative;
+                        margin: 2% auto;
+                        animation: modalSlideIn 0.3s ease-out;
+                    }
+                    @keyframes modalSlideIn {
+                        from { transform: translateY(-50px); opacity: 0; }
+                        to { transform: translateY(0); opacity: 1; }
+                    }
+                `;
+                document.head.appendChild(styles);
+            }
+        }
+        
+        // Show vendor transactions modal
+        async function showVendorTransactionsModal() {
+            try {
+                console.log('🏢 showVendorTransactionsModal called!');
+                console.log('🔍 DEBUG: This should NOT trigger createFilteredTransactionsFromUpload');
+                
+                // Get the current vendor from the vendor analysis data
+                const vendorData = window.currentTransactionData?.vendor_analysis;
+                console.log('🔍 vendorData:', vendorData);
+                
+                if (!vendorData || !vendorData.vendor_name) {
+                    console.log('❌ No vendor data found, checking alternatives...');
+                    
+                    // Try to get vendor name from other sources
+                    const vendorName = vendorData?.vendor_name || 
+                                     vendorData?.vendor || 
+                                     window.currentVendorName ||
+                                     'Unknown Vendor';
+                    
+                    console.log('🔍 Using vendor name:', vendorName);
+                    
+                    if (vendorName === 'Unknown Vendor') {
+                        showAlert('❌ No vendor selected. Please run vendor analysis first.', 'error');
+                        return;
+                    }
+                } else {
+                    const vendorName = vendorData.vendor_name;
+                    console.log('🏢 Showing transactions for vendor:', vendorName);
+                    
+                    // Call the vendor transactions endpoint
+                    console.log('🔍 Calling /view_vendor_transactions endpoint...');
+                    const response = await fetch(`/view_vendor_transactions/${encodeURIComponent(vendorName)}`);
+                    console.log('🔍 Response status:', response.status);
+                    
+                    const data = await response.json();
+                    console.log('🔍 Response data:', data);
+                    
+                    if (!response.ok) {
+                        throw new Error(data.error || 'Failed to fetch vendor transactions');
+                    }
+                    
+                    if (!data.success) {
+                        throw new Error(data.error || 'No transaction data available');
+                    }
+                    
+                    console.log('✅ Vendor transaction data received, displaying modal...');
+                    console.log('🔍 DEBUG: About to call displayVendorTransactionsModal - this should NOT trigger old transaction system');
+                    // Display the vendor transactions modal
+                    displayVendorTransactionsModal(data);
+                    return;
+                }
+                
+                showAlert('❌ Could not determine vendor name for transaction display', 'error');
+                
+            } catch (error) {
+                console.error('❌ Error showing vendor transactions:', error);
+                showAlert(`❌ Failed to load vendor transactions: ${error.message}`, 'error');
+            }
+        }
+        
+        // Display vendor transactions modal
+        function displayVendorTransactionsModal(data) {
+            console.log('🔍 DEBUG: displayVendorTransactionsModal called with data:', data);
+            console.log('🔍 DEBUG: This function should NOT trigger createFilteredTransactionsFromUpload');
+            
+            const modalHTML = `
+                <div id="vendorTransactionsModal" class="modal" style="display: flex; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 3000;">
+                    <div class="modal-content" style="background: white; border-radius: 24px; padding: 0; max-width: 1400px; width: 95%; max-height: 90vh; overflow: hidden; position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.1);">
+                        <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px 40px; color: white; border-radius: 24px 24px 0 0;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <h2 style="color: white; margin: 0; font-size: 28px; font-weight: 800; letter-spacing: 0.5px; display: flex; align-items: center; gap: 15px;">
+                                        <div style="background: rgba(255,255,255,0.2); border-radius: 12px; padding: 12px; backdrop-filter: blur(10px);">
+                                            <i class="fas fa-exchange-alt" style="color: #fbbf24; font-size: 24px;"></i>
+                                        </div>
+                                        Vendor Transactions
+                                    </h2>
+                                    <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0 0; font-size: 16px; font-weight: 500;">${data.vendor_name} - Complete Transaction Details</p>
+                                </div>
+                                <button onclick="closeVendorTransactionsModal()" style="background: rgba(255,255,255,0.1); border: none; font-size: 24px; cursor: pointer; color: white; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; backdrop-filter: blur(10px);" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">&times;</button>
+                            </div>
+                        </div>
+                        
+                        <div style="padding: 40px; max-height: calc(90vh - 120px); overflow-y: auto;">
+                            <!-- Summary Cards -->
+                            <div id="vendorSummaryCards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                            </div>
+                            
+                            <!-- Insights and Recommendations -->
+                            <div id="vendorInsightsRecommendations" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+                            </div>
+                            
+                            <!-- Transactions Table -->
+                            <div style="background: white; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden;">
+                                <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 20px 25px; border-bottom: 1px solid #e5e7eb;">
+                                    <h3 style="margin: 0; font-size: 18px; font-weight: 600; color: #111827; display: flex; align-items: center; gap: 10px;">
+                                        <i class="fas fa-list"></i> Transaction Details (<span id="vendorTransactionCount">0</span> transactions)
+                                    </h3>
+                                </div>
+                                <div style="overflow-x: auto;">
+                                    <table style="width: 100%; border-collapse: collapse;">
+                                        <thead>
+                                            <tr style="background: #f9fafb;">
+                                                <th style="padding: 15px; text-align: left; border-bottom: 1px solid #e5e7eb; font-weight: 600; color: #374151; font-size: 14px;">Date</th>
+                                                <th style="padding: 15px; text-align: left; border-bottom: 1px solid #e5e7eb; font-weight: 600; color: #374151; font-size: 14px;">Description</th>
+                                                <th style="padding: 15px; text-align: right; border-bottom: 1px solid #e5e7eb; font-weight: 600; color: #374151; font-size: 14px;">Amount</th>
+                                                <th style="padding: 15px; text-align: center; border-bottom: 1px solid #e5e7eb; font-weight: 600; color: #374151; font-size: 14px;">Type</th>
+                                                <th style="padding: 15px; text-align: left; border-bottom: 1px solid #e5e7eb; font-weight: 600; color: #374151; font-size: 14px;">Category</th>
+                                                <th style="padding: 15px; text-align: right; border-bottom: 1px solid #e5e7eb; font-weight: 600; color: #374151; font-size: 14px;">Balance</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="vendorTransactionsTableBody">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            
+            // Populate all sections
+            console.log('🔍 DEBUG: About to populate vendor summary cards...');
+            populateVendorSummaryCards(data.summary_cards);
+            console.log('🔍 DEBUG: About to populate vendor insights...');
+            populateVendorInsightsRecommendations(data.insights, data.recommendations);
+            console.log('🔍 DEBUG: About to populate vendor transactions table...');
+            populateVendorTransactionsTable(data.transactions);
+            
+
+        }
+        
+        // Populate vendor insights and recommendations
+        function populateVendorInsightsRecommendations(insights, recommendations) {
+            const container = document.getElementById('vendorInsightsRecommendations');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            // Insights card
+            const insightsDiv = document.createElement('div');
+            insightsDiv.style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+            insightsDiv.style.color = 'white';
+            insightsDiv.style.borderRadius = '12px';
+            insightsDiv.style.padding = '25px';
+            
+            const insightsHeader = document.createElement('h3');
+            insightsHeader.style.margin = '0 0 15px 0';
+            insightsHeader.style.fontSize = '18px';
+            insightsHeader.style.fontWeight = '600';
+            insightsHeader.style.display = 'flex';
+            insightsHeader.style.alignItems = 'center';
+            insightsHeader.style.gap = '10px';
+            insightsHeader.innerHTML = '<i class="fas fa-lightbulb"></i> Insights';
+            insightsDiv.appendChild(insightsHeader);
+            
+            const insightsText = document.createElement('p');
+            insightsText.style.margin = '0';
+            insightsText.style.fontSize = '14px';
+            insightsText.style.lineHeight = '1.6';
+            insightsText.style.opacity = '0.9';
+            insightsText.textContent = insights;
+            insightsDiv.appendChild(insightsText);
+            
+            container.appendChild(insightsDiv);
+            
+            // Recommendations card
+            const recDiv = document.createElement('div');
+            recDiv.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+            recDiv.style.color = 'white';
+            recDiv.style.borderRadius = '12px';
+            recDiv.style.padding = '25px';
+            
+            const recHeader = document.createElement('h3');
+            recHeader.style.margin = '0 0 15px 0';
+            recHeader.style.fontSize = '18px';
+            recHeader.style.fontWeight = '600';
+            recHeader.style.display = 'flex';
+            recHeader.style.alignItems = 'center';
+            recHeader.style.gap = '10px';
+            recHeader.innerHTML = '<i class="fas fa-chart-line"></i> Recommendations';
+            recDiv.appendChild(recHeader);
+            
+            const recText = document.createElement('p');
+            recText.style.margin = '0';
+            recText.style.fontSize = '14px';
+            recText.style.lineHeight = '1.6';
+            recText.style.opacity = '0.9';
+            recText.textContent = recommendations;
+            recDiv.appendChild(recText);
+            
+            container.appendChild(recDiv);
+        }
+        
+        // Populate vendor summary cards
+        function populateVendorSummaryCards(summaryCards) {
+            const container = document.getElementById('vendorSummaryCards');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            Object.entries(summaryCards).forEach(([key, card]) => {
+                const cardDiv = document.createElement('div');
+                cardDiv.style.background = 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)';
+                cardDiv.style.borderRadius = '12px';
+                cardDiv.style.padding = '25px';
+                cardDiv.style.border = '1px solid #e5e7eb';
+                cardDiv.style.textAlign = 'center';
+                
+                const valueDiv = document.createElement('div');
+                valueDiv.style.fontSize = '24px';
+                valueDiv.style.fontWeight = '700';
+                valueDiv.style.color = '#111827';
+                valueDiv.style.marginBottom = '8px';
+                valueDiv.textContent = card.value;
+                cardDiv.appendChild(valueDiv);
+                
+                const labelDiv = document.createElement('div');
+                labelDiv.style.fontSize = '14px';
+                labelDiv.style.fontWeight = '600';
+                labelDiv.style.color = '#6b7280';
+                labelDiv.style.textTransform = 'uppercase';
+                labelDiv.style.letterSpacing = '0.5px';
+                labelDiv.style.marginBottom = '5px';
+                labelDiv.textContent = card.label;
+                cardDiv.appendChild(labelDiv);
+                
+                const descDiv = document.createElement('div');
+                descDiv.style.fontSize = '12px';
+                descDiv.style.color = '#9ca3af';
+                descDiv.textContent = card.description;
+                cardDiv.appendChild(descDiv);
+                
+                container.appendChild(cardDiv);
+            });
+        }
+        
+        // Populate vendor transactions table
+        function populateVendorTransactionsTable(transactions) {
+            console.log('🔍 DEBUG: populateVendorTransactionsTable called with transactions:', transactions);
+            console.log('🔍 DEBUG: This function should NOT trigger createFilteredTransactionsFromUpload');
+            
+            const tbody = document.getElementById('vendorTransactionsTableBody');
+            if (!tbody) return;
+            
+            // Update transaction count
+            const countSpan = document.getElementById('vendorTransactionCount');
+            if (countSpan) {
+                countSpan.textContent = transactions.length;
+            }
+            
+            tbody.innerHTML = '';
+            
+            transactions.forEach(transaction => {
+                const row = document.createElement('tr');
+                row.style.borderBottom = '1px solid #f3f4f6';
+                
+                // Date
+                const dateCell = document.createElement('td');
+                dateCell.style.padding = '15px';
+                dateCell.style.color = '#374151';
+                dateCell.style.fontSize = '14px';
+                dateCell.textContent = transaction.date;
+                row.appendChild(dateCell);
+                
+                // Description
+                const descCell = document.createElement('td');
+                descCell.style.padding = '15px';
+                descCell.style.color = '#374151';
+                descCell.style.fontSize = '14px';
+                descCell.style.maxWidth = '300px';
+                descCell.style.wordWrap = 'break-word';
+                descCell.textContent = transaction.description;
+                row.appendChild(descCell);
+                
+                // Amount
+                const amountCell = document.createElement('td');
+                amountCell.style.padding = '15px';
+                amountCell.style.textAlign = 'right';
+                amountCell.style.color = transaction.amount >= 0 ? '#10b981' : '#ef4444';
+                amountCell.style.fontSize = '14px';
+                amountCell.style.fontWeight = '600';
+                amountCell.textContent = '₹' + Math.abs(transaction.amount).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                row.appendChild(amountCell);
+                
+                // Type
+                const typeCell = document.createElement('td');
+                typeCell.style.padding = '15px';
+                typeCell.style.textAlign = 'center';
+                
+                const typeSpan = document.createElement('span');
+                typeSpan.style.background = transaction.type === 'Inward' ? '#10b981' : '#ef4444';
+                typeSpan.style.color = 'white';
+                typeSpan.style.padding = '4px 8px';
+                typeSpan.style.borderRadius = '6px';
+                typeSpan.style.fontSize = '12px';
+                typeSpan.style.fontWeight = '500';
+                typeSpan.textContent = transaction.type;
+                typeCell.appendChild(typeSpan);
+                row.appendChild(typeCell);
+                
+                // Category
+                const categoryCell = document.createElement('td');
+                categoryCell.style.padding = '15px';
+                categoryCell.style.color = '#374151';
+                categoryCell.style.fontSize = '14px';
+                categoryCell.textContent = transaction.category;
+                row.appendChild(categoryCell);
+                
+                // Balance
+                const balanceCell = document.createElement('td');
+                balanceCell.style.padding = '15px';
+                balanceCell.style.textAlign = 'right';
+                balanceCell.style.color = '#374151';
+                balanceCell.style.fontSize = '14px';
+                balanceCell.textContent = '₹' + transaction.balance.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                row.appendChild(balanceCell);
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        // Close vendor transactions modal
+        function closeVendorTransactionsModal() {
+            const modal = document.getElementById('vendorTransactionsModal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        // Close vendor analysis modal
+        function closeVendorAnalysisModal() {
+            const modal = document.getElementById('vendorAnalysisModal');
+            if (modal) {
+                modal.remove();
+                
+                // CRITICAL FIX: Keep showing filtered count after closing vendor modal
+                console.log('✅ Vendor modal closed, keeping filtered count displayed:', getDisplayCount());
+            }
+        }
+        
+        // Show vendor reasoning modal - ENHANCED VERSION
+        function showVendorReasoningModal() {
+            console.log('🧠 Showing vendor reasoning modal...');
+            
+            try {
+                // 🔧 ENHANCED DATA RETRIEVAL: Try multiple sources with fallback
+            let reasoningData = null;
+                let dataSource = 'none';
+            
+                // Source 1: Check currentResponse (most recent analysis)
+                if (window.currentResponse?.reasoning_explanations) {
+                reasoningData = window.currentResponse.reasoning_explanations;
+                    dataSource = 'currentResponse';
+                    console.log('✅ Using reasoning data from window.currentResponse');
+                }
+                // Source 2: Check uploadResponse (original upload data)
+                else if (window.uploadResponse?.reasoning_explanations) {
+                    reasoningData = window.uploadResponse.reasoning_explanations;
+                    dataSource = 'uploadResponse';
+                    console.log('✅ Using reasoning data from window.uploadResponse');
+                }
+                // Source 3: Check currentTransactionData vendor analysis
+                else if (window.currentTransactionData?.vendor_analysis?.reasoning_explanations) {
+                reasoningData = window.currentTransactionData.vendor_analysis.reasoning_explanations;
+                    dataSource = 'currentTransactionData.vendor_analysis';
+                    console.log('✅ Using reasoning data from currentTransactionData.vendor_analysis');
+                }
+                // Source 4: Check preserved reasoning data archive
+                else if (window.reasoningDataArchive) {
+                    console.log('🔍 Checking preserved reasoning data archive...');
+                    const preservedData = getPreservedReasoningData('vendor_analysis') || 
+                                       getPreservedReasoningData('upload_analysis');
+                    if (preservedData) {
+                        reasoningData = preservedData;
+                        dataSource = 'preserved_archive';
+                        console.log('✅ Using preserved reasoning data from archive');
+                    }
+                }
+                // Source 5: Try to reconstruct from any available analysis data
+                else if (window.currentTransactionData) {
+                    console.log('🔍 Attempting to reconstruct reasoning data from available analysis...');
+                    reasoningData = reconstructReasoningData();
+                    if (reasoningData) {
+                        dataSource = 'reconstructed';
+                        console.log('✅ Successfully reconstructed reasoning data');
+                    }
+                }
+                
+                console.log('🔍 Data source used:', dataSource);
+                console.log('🔍 Reasoning data keys:', reasoningData ? Object.keys(reasoningData) : 'None');
+                
+                // Check if generateReasoningModalContent function exists
+                if (typeof generateReasoningModalContent !== 'function') {
+                    console.error('❌ generateReasoningModalContent function not found!');
+                    showAlert('Error: Required function not found. Please refresh the page.', 'error');
+                    return;
+                }
+                
+                // Generate modal content
+                let modalContent;
+                if (reasoningData && Object.keys(reasoningData).length > 0) {
+                    modalContent = generateReasoningModalContent(reasoningData, 'vendor_analysis');
+                } else {
+                    // Enhanced fallback with actionable information
+                    modalContent = generateVendorFallbackContent();
+                }
+                
+                // Create and show the modal
+            const modalHTML = `
+                    <div id="vendorReasoningModal" class="modal">
+                        <div class="modal-content" style="background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); border: 1px solid #e1e8ed; max-width: 1600px; width: 95%; max-height: 95vh;">
+                            <div class="modal-header" style="background: #f8f9fa; color: #2c3e50; padding: 25px 30px; border-radius: 12px 12px 0 0; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e1e8ed;">
+                                <div style="display: flex; align-items: center; gap: 15px;">
+                                    <div style="background: #8b5cf6; border-radius: 8px; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-brain" style="font-size: 20px; color: white;"></i>
+                            </div>
+                                    <h3 style="margin: 0; font-size: 1.5rem; font-weight: 600; color: #2c3e50;">Vendor AI/ML Reasoning</h3>
+                            </div>
+                                <span class="close" onclick="closeVendorReasoningModal()" style="color: #6c757d; font-size: 1.5rem; font-weight: bold; cursor: pointer; background: #f8f9fa; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; border: 1px solid #e1e8ed;">&times;</span>
+                        </div>
+                            <div class="modal-body" style="background: white; padding: 50px; border-radius: 0 0 16px 16px; max-height: 90vh; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none;">
+                                ${modalContent}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+                // Remove existing modal if any
+                const existingModal = document.getElementById('vendorReasoningModal');
+                if (existingModal) {
+                    existingModal.remove();
+                }
+                
+                // Add modal to page
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+                
+                // Show modal
+                const modal = document.getElementById('vendorReasoningModal');
+                modal.style.display = 'block';
+                
+                console.log('✅ Vendor reasoning modal displayed successfully');
+                
+            } catch (error) {
+                console.error('❌ Error in showVendorReasoningModal:', error);
+                showAlert('Error displaying vendor reasoning modal. Please try again.', 'error');
+            }
+        }
+        
+        // Close vendor reasoning modal
+        function closeVendorReasoningModal() {
+            const modal = document.getElementById('vendorReasoningModal');
+            if (modal) {
+                modal.remove();
+                console.log('✅ Vendor reasoning modal closed');
+            }
+        }
+        
+        // 🔧 NEW: Function to generate vendor fallback content
+        function generateVendorFallbackContent() {
+            const uploadCount = window.uploadedBankTransactions?.length || 0;
+            const vendorData = window.currentTransactionData?.vendor_analysis;
+            const uploadKeys = Object.keys(window.uploadResponse || {});
+            const currentKeys = Object.keys(window.currentTransactionData || {});
+            
+            return `
+                <div style="text-align: center; padding: 50px;">
+                    <div style="background: #fef3c7; border-radius: 12px; padding: 30px; border: 1px solid #f59e0b; margin-bottom: 20px;">
+                        <h3 style="color: #92400e; margin-bottom: 15px;">🧠 Vendor AI/ML Reasoning Data</h3>
+                        <p style="color: #92400e; margin-bottom: 20px;">The AI/ML reasoning data for vendor analysis is not currently accessible.</p>
+                        <p style="color: #92400e; font-size: 14px;">This usually happens when:</p>
+                        <ul style="color: #92400e; text-align: left; display: inline-block; margin: 20px 0;">
+                            <li>• The reasoning data wasn't generated during vendor analysis</li>
+                            <li>• The data was cleared during analysis switching</li>
+                            <li>• There was an error in data storage</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="background: #eff6ff; border-radius: 12px; padding: 30px; border: 1px solid #3b82f6; margin-bottom: 20px;">
+                        <h4 style="color: #1d4ed8; margin-bottom: 15px;">📊 Available Data Summary</h4>
+                        <p style="color: #1e40af;">• Uploaded Transactions: ${uploadCount}</p>
+                        <p style="color: #1e40af;">• Vendor Analysis: ${vendorData ? 'Available' : 'Not Available'}</p>
+                        <p style="color: #1e40af;">• Upload Response Keys: ${uploadKeys.join(', ') || 'None'}</p>
+                        <p style="color: #1e40af;">• Current Data Keys: ${currentKeys.join(', ') || 'None'}</p>
+                    </div>
+                    
+                    <div style="background: #f0fdf4; border-radius: 12px; padding: 30px; border: 1px solid #059669;">
+                        <h4 style="color: #047857; margin-bottom: 15px;">🔧 Troubleshooting Steps</h4>
+                        <ol style="color: #065f46; text-align: left; display: inline-block; margin: 20px 0;">
+                            <li>Try running a fresh vendor analysis</li>
+                            <li>Check if the vendor analysis completed successfully</li>
+                            <li>Refresh the page and re-upload your data</li>
+                            <li>Ensure you have sufficient vendor data for analysis</li>
+                        </ol>
+                    </div>
+                </div>
+            `;
+        }
         
         // Show vendor pattern details
         function showVendorPatternDetails(patternType, value, color) {
@@ -20916,28 +21726,28 @@ async function loadVendorList() {
                     recommendationText = cleanAndFormatAIAnalysis(recommendationText);
                 }
                 
-                    modalHTML += `
-                        <div class="analysis-section" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 16px; margin-bottom: 24px; overflow: hidden; box-shadow: 0 8px 25px rgba(240, 147, 251, 0.15); border: 1px solid rgba(255,255,255,0.1);">
-                            <div style="background: rgba(255,255,255,0.15); padding: 20px 25px; color: white; backdrop-filter: blur(10px);">
-                                <h5 style="margin: 0; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 12px; letter-spacing: 0.5px;">
-                                    <div style="background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); border-radius: 12px; padding: 10px; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);">
-                                        <i class="fas fa-bullseye" style="color: #8b4513; font-size: 18px;"></i>
-                                    </div>
-                                    Strategic Recommendations & Action Items
-                                    <span style="background: rgba(255,255,255,0.25); padding: 4px 12px; border-radius: 16px; font-size: 12px; margin-left: auto; font-weight: 600; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);">AI Generated</span>
-                                </h5>
+                modalHTML += `
+                    <div class="analysis-section" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 16px; margin-bottom: 24px; overflow: hidden; box-shadow: 0 8px 25px rgba(240, 147, 251, 0.15); border: 1px solid rgba(255,255,255,0.1);">
+                        <div style="background: rgba(255,255,255,0.15); padding: 20px 25px; color: white; backdrop-filter: blur(10px);">
+                            <h5 style="margin: 0; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 12px; letter-spacing: 0.5px;">
+                                <div style="background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); border-radius: 12px; padding: 10px; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);">
+                                    <i class="fas fa-bullseye" style="color: #8b4513; font-size: 18px;"></i>
                                 </div>
-                            <div style="padding: 25px; background: white; position: relative;">
-                                <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #f093fb 0%, #f5576c 100%);"></div>
-                                <div style="white-space: pre-wrap; word-wrap: break-word; max-height: 400px; overflow-y: auto; font-size: 15px; line-height: 1.8; color: #2c3e50; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 25px; border-radius: 12px; border-left: 6px solid #f093fb; box-shadow: inset 0 4px 8px rgba(0,0,0,0.08); position: relative;">
-                                    <div style="position: absolute; top: 15px; right: 15px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 4px 8px; border-radius: 8px; font-size: 11px; font-weight: 600;">Strategic</div>
-                                    ${recommendationText}
-                                </div>
+                                Strategic Recommendations & Action Items
+                                <span style="background: rgba(255,255,255,0.25); padding: 4px 12px; border-radius: 16px; font-size: 12px; margin-left: auto; font-weight: 600; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);">AI Generated</span>
+                            </h5>
+                            </div>
+                        <div style="padding: 25px; background: white; position: relative;">
+                            <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #f093fb 0%, #f5576c 100%);"></div>
+                            <div style="white-space: pre-wrap; word-wrap: break-word; max-height: 400px; overflow-y: auto; font-size: 15px; line-height: 1.8; color: #2c3e50; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 25px; border-radius: 12px; border-left: 6px solid #f093fb; box-shadow: inset 0 4px 8px rgba(0,0,0,0.08); position: relative;">
+                                <div style="position: absolute; top: 15px; right: 15px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 4px 8px; border-radius: 8px; font-size: 11px; font-weight: 600;">Strategic</div>
+                                ${recommendationText}
                             </div>
                         </div>
-                    `;
+                    </div>
+                `;
                 console.log('✅ Strategic Recommendations section displayed successfully');
-                } else {
+            } else {
                 console.log('⚠️ No recommendations available to display');
             }
             
@@ -26199,197 +27009,6 @@ Check console for detailed information.
                 console.log('✅ Categories reasoning modal closed');
             }
         }
-        
-        // 🔧 NEW: Simple Vendor Analysis Modal - Clean structure like categories
-        function showSimpleVendorAnalysisModal(data) {
-            console.log('🏢 Showing SIMPLE vendor analysis modal:', data);
-            console.log('🏢 This is the NEW modal function being called!');
-            console.log('🏢 Modal function STARTED - about to create modal HTML');
-            
-            // Store vendor analysis data for reasoning modal
-            if (!window.currentTransactionData) {
-                window.currentTransactionData = {};
-            }
-            window.currentTransactionData.vendor_analysis = data;
-            
-            // Set window.currentResponse for reasoning access
-            if (data.reasoning_explanations || data.results?.reasoning_explanations) {
-                window.currentResponse = {
-                    status: 'success',
-                    reasoning_explanations: data.reasoning_explanations || data.results?.reasoning_explanations,
-                    results: data
-                };
-                preserveReasoningData('vendor_analysis', data);
-            }
-            
-            // Get vendor results
-            const vendorResults = data.vendor_results || data.data || {};
-            const vendorNames = Object.keys(vendorResults).filter(name => name !== 'error' && vendorResults[name] && typeof vendorResults[name] === 'object');
-            
-            // Create simple, clean modal like categories
-            const modalHTML = `
-                <div id="vendorAnalysisModal" class="modal">
-                    <div class="modal-content" style="background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); border: 1px solid #e1e8ed; max-width: 1600px; width: 95%; max-height: 95vh;">
-                        <div class="modal-header" style="background: #f8f9fa; color: #2c3e50; padding: 25px 30px; border-radius: 12px 12px 0 0; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e1e8ed;">
-                            <div style="display: flex; align-items: center; gap: 15px;">
-                                <div style="background: #2c3e50; border-radius: 8px; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
-                                    <i class="fas fa-users" style="font-size: 20px; color: white;"></i>
-                                </div>
-                                <h3 style="margin: 0; font-size: 1.5rem; font-weight: 600; color: #2c3e50;">Vendor Analysis Results</h3>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <!-- View AI/ML Reasoning Button - At the top level -->
-                                <button onclick="showVendorReasoningModal();" style="
-                                    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border: none; color: white; font-size: 1rem; padding: 12px 20px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.3s ease; font-weight: 600; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3); margin-right: 15px;
-                                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(139, 92, 246, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(139, 92, 246, 0.3)'">
-                                    <i class="fas fa-brain" style="color: #fbbf24; font-size: 16px;"></i>
-                                    View AI/ML Reasoning
-                                </button>
-                                
-                                <!-- Export Buttons -->
-                                <button onclick="downloadVendorAnalysis('Vendor Analysis Results', 'excel')" style="
-                                    background: #10b981; border: none; color: white; font-size: 0.9rem; padding: 8px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease; font-weight: 500;
-                                " onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'">
-                                    <i class="fas fa-file-excel"></i> Excel
-                                </button>
-                                <button onclick="downloadVendorAnalysis('Vendor Analysis Results', 'csv')" style="
-                                    background: #3b82f6; border: none; color: white; font-size: 0.9rem; padding: 8px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease; font-weight: 500;
-                                " onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#2563eb'">
-                                    <i class="fas fa-file-csv"></i> CSV
-                                </button>
-                                <button onclick="downloadVendorAnalysis('Vendor Analysis Results', 'pdf')" style="
-                                    background: #ef4444; border: none; color: white; font-size: 0.9rem; padding: 8px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease; font-weight: 500;
-                                " onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#dc2626'">
-                                    <i class="fas fa-file-pdf"></i> PDF
-                                </button>
-                                
-                                <span class="close" onclick="closeSimpleVendorAnalysisModal()" style="color: #6c757d; font-size: 1.5rem; font-weight: bold; cursor: pointer; background: #f8f9fa; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; border: 1px solid #e1e8ed;">&times;</span>
-                            </div>
-                        </div>
-                        
-                        <div class="modal-body" style="background: white; padding: 50px; border-radius: 0 0 16px 16px; max-height: 90vh; overflow-y: auto;">
-                            ${generateSimpleVendorContent(vendorResults, vendorNames)}
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            // Remove existing modal if any
-            const existingModal = document.getElementById('vendorAnalysisModal');
-            if (existingModal) {
-                existingModal.remove();
-            }
-            
-            // Add modal to page
-            console.log('🏢 About to add modal HTML to page');
-            document.body.insertAdjacentHTML('beforeend', modalHTML);
-            console.log('🏢 Modal HTML added to page');
-            
-            // Show modal
-            const modal = document.getElementById('vendorAnalysisModal');
-            console.log('🏢 Found modal element:', modal);
-            modal.style.display = 'block';
-            console.log('🏢 Modal display set to block');
-        }
-        
-        // Function to close vendor analysis modal
-        function closeSimpleVendorAnalysisModal() {
-            const modal = document.getElementById('vendorAnalysisModal');
-            if (modal) {
-                modal.remove();
-            }
-        }
-        
-        // Function to show vendor reasoning modal
-        function showVendorReasoningModal() {
-            console.log('🧠 Showing vendor reasoning modal...');
-            
-            if (window.currentResponse && window.currentResponse.reasoning_explanations) {
-                console.log('✅ Using reasoning data from window.currentResponse');
-                showReasoningModal('vendor_analysis', window.currentResponse.reasoning_explanations);
-            } else {
-                console.error('❌ No reasoning data available for vendor');
-                alert('No AI/ML reasoning data available for this vendor analysis.');
-            }
-        }
-        
-        // Generate simple vendor content - Clean structure like categories
-        function generateSimpleVendorContent(vendorResults, vendorNames) {
-            let content = '';
-            
-            if (vendorNames.length > 0) {
-                // Show each vendor with simple structure
-                for (const vendorName of vendorNames) {
-                    const vendorData = vendorResults[vendorName];
-                    if (!vendorData) continue;
-                    
-                    content += `
-                        <div style="margin-bottom: 30px;">
-                            <h4 style="color: #2c3e50; margin-bottom: 20px; border-bottom: 2px solid #e1e8ed; padding-bottom: 10px;">
-                                <i class="fas fa-building" style="color: #8b5cf6; margin-right: 10px;"></i>
-                                ${vendorName}
-                            </h4>
-                            
-                            <!-- Insights Section -->
-                            ${vendorData.simple_reasoning ? `
-                                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; margin-bottom: 20px; overflow: hidden; box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);">
-                                    <div style="background: rgba(255,255,255,0.15); padding: 20px 25px; color: white; backdrop-filter: blur(10px);">
-                                        <h5 style="margin: 0; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 12px;">
-                                            <i class="fas fa-chart-line" style="color: #fbbf24; font-size: 18px;"></i>
-                                            AI-Powered Insights & Analysis
-                                        </h5>
-                                    </div>
-                                    <div style="padding: 25px; background: white; color: #2c3e50; line-height: 1.6;">
-                                        ${vendorData.simple_reasoning}
-                                    </div>
-                                </div>
-                            ` : ''}
-                            
-                            <!-- Strategic Recommendations Section -->
-                            ${vendorData.recommendations || vendorData.hybrid_analysis?.recommendations ? `
-                                <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 16px; margin-bottom: 20px; overflow: hidden; box-shadow: 0 8px 25px rgba(240, 147, 251, 0.15);">
-                                    <div style="background: rgba(255,255,255,0.15); padding: 20px 25px; color: white; backdrop-filter: blur(10px);">
-                                        <h5 style="margin: 0; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 12px;">
-                                            <i class="fas fa-lightbulb" style="color: #fbbf24; font-size: 18px;"></i>
-                                            Strategic Recommendations
-                                        </h5>
-                                    </div>
-                                    <div style="padding: 25px; background: white; color: #2c3e50; line-height: 1.6;">
-                                        ${vendorData.recommendations || vendorData.hybrid_analysis?.recommendations || 'No strategic recommendations available for this vendor.'}
-                                    </div>
-                                </div>
-                            ` : ''}
-                            
-                            <!-- Cash Flow Summary -->
-                            ${vendorData.cash_flow_summary ? `
-                                <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); border-radius: 16px; margin-bottom: 20px; overflow: hidden; box-shadow: 0 8px 25px rgba(79, 172, 254, 0.15);">
-                                    <div style="background: rgba(255,255,255,0.15); padding: 20px 25px; color: white; backdrop-filter: blur(10px);">
-                                        <h5 style="margin: 0; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 12px;">
-                                            <i class="fas fa-coins" style="color: #fbbf24; font-size: 18px;"></i>
-                                            Cash Flow Summary
-                                        </h5>
-                                    </div>
-                                    <div style="padding: 25px; background: white; color: #2c3e50; line-height: 1.6;">
-                                        ${vendorData.cash_flow_summary}
-                                    </div>
-                                </div>
-                            ` : ''}
-                        </div>
-                    `;
-                }
-            } else {
-                content = `
-                    <div style="text-align: center; padding: 40px; color: #6c757d;">
-                        <i class="fas fa-info-circle" style="font-size: 3rem; margin-bottom: 20px; color: #8b5cf6;"></i>
-                        <h4>No Vendor Data Available</h4>
-                        <p>No vendor analysis data found. Please try selecting a different vendor or re-run the analysis.</p>
-                    </div>
-                `;
-            }
-            
-            return content;
-        }
-
     </script>
 
 
